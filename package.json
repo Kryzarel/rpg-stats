@@ -1,0 +1,14 @@
+{
+  "name": "com.kryzarel.rpg-stats",
+  "version": "0.0.1",
+  "displayName": "Kryz - RPG Stats",
+  "description": "A framework for rpg-like stats and stat modifiers.",
+  "license": "MIT",
+  "author": {
+    "name": "Kryzarel"
+  },
+  "dependencies": {
+    "com.unity.burst": "1.0.0",
+    "com.unity.collections": "1.0.0"
+  }
+}
