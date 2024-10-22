@@ -1,28 +1,28 @@
 using System;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats2
 {
-	public readonly struct SimpleStatModifier : IStatModifier, IEquatable<SimpleStatModifier>
+	public readonly struct StatModifier : IStatModifier, IEquatable<StatModifier>
 	{
 		public readonly float Value;
 		public readonly object? Source;
 
 		object? IStatModifier.Source => Source;
 
-		public SimpleStatModifier(float value, object? source = null)
+		public StatModifier(float value, object? source = null)
 		{
 			Value = value;
 			Source = source;
 		}
 
-		public bool Equals(SimpleStatModifier other)
+		public bool Equals(StatModifier other)
 		{
 			return this == other;
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is SimpleStatModifier other && Equals(other);
+			return obj is StatModifier other && Equals(other);
 		}
 
 		public override int GetHashCode()
@@ -30,12 +30,12 @@ namespace Kryz.RPG.Stats
 			return HashCode.Combine(Value, Source);
 		}
 
-		public static bool operator ==(SimpleStatModifier a, SimpleStatModifier b)
+		public static bool operator ==(StatModifier a, StatModifier b)
 		{
 			return a.Value == b.Value && a.Source == b.Source;
 		}
 
-		public static bool operator !=(SimpleStatModifier a, SimpleStatModifier b)
+		public static bool operator !=(StatModifier a, StatModifier b)
 		{
 			return !(a == b);
 		}

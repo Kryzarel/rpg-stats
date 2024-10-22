@@ -1,9 +1,11 @@
 using System.Runtime.CompilerServices;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats2
 {
-	public sealed class StatModifierListAdd : StatModifierList<SimpleStatModifier>
+	public sealed class StatModifierListAdd : StatModifierList<StatModifier>
 	{
+		public StatModifierListAdd() : base(defaultValue: 0) { }
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override float Calculate(float value)
 		{
@@ -11,13 +13,13 @@ namespace Kryz.RPG.Stats
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float AddOperation(float currentValue, SimpleStatModifier modifier)
+		protected override float AddOperation(float currentValue, StatModifier modifier)
 		{
 			return currentValue + modifier.Value;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float RemoveOperation(float currentValue, SimpleStatModifier modifier)
+		protected override float RemoveOperation(float currentValue, StatModifier modifier)
 		{
 			return currentValue - modifier.Value;
 		}

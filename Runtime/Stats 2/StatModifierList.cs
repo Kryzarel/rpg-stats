@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats2
 {
 	public abstract class StatModifierList<T> : IStatModifierList<T> where T : struct, IStatModifier
 	{
@@ -10,8 +10,6 @@ namespace Kryz.RPG.Stats
 
 		private readonly List<T> modifiers = new();
 		private float currentValue;
-
-		public StatModifierList() : this(defaultValue: 0) { }
 
 		protected StatModifierList(float defaultValue)
 		{

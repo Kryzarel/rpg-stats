@@ -1,8 +1,8 @@
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats2
 {
-	public class Stat2
+	public class Stat
 	{
-		private readonly StatModifierList<SimpleStatModifier>[] modifierLists;
+		private readonly StatModifierList<StatModifier>[] modifierLists;
 
 		private float baseValue;
 		private float finalValue;
@@ -10,16 +10,16 @@ namespace Kryz.RPG.Stats
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
 
-		public Stat2(float baseValue = 0) : this(baseValue, new StatModifierListAdd(), new StatModifierListMultiplyBase(), new StatModifierListMultiplyTotal()) { }
+		public Stat(float baseValue = 0) : this(baseValue, new StatModifierListAdd(), new StatModifierListMultiplyBase(), new StatModifierListMultiplyTotal()) { }
 
-		public Stat2(float baseValue = 0, params StatModifierList<SimpleStatModifier>[] modifierLists)
+		public Stat(float baseValue = 0, params StatModifierList<StatModifier>[] modifierLists)
 		{
 			this.modifierLists = modifierLists;
 			this.baseValue = baseValue;
 			finalValue = baseValue;
 		}
 
-		public bool TryAddModifier(int listIndex, SimpleStatModifier modifier)
+		public bool TryAddModifier(int listIndex, StatModifier modifier)
 		{
 			if (listIndex >= 0 && listIndex < modifierLists.Length)
 			{
@@ -30,7 +30,7 @@ namespace Kryz.RPG.Stats
 			return false;
 		}
 
-		public bool TryRemoveModifier(int listIndex, SimpleStatModifier modifier)
+		public bool TryRemoveModifier(int listIndex, StatModifier modifier)
 		{
 			if (listIndex >= 0 && listIndex < modifierLists.Length)
 			{

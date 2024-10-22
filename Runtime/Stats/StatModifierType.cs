@@ -1,4 +1,4 @@
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats2
 {
 	public enum StatModifierType
 	{
