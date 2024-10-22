@@ -9,10 +9,12 @@ namespace Kryz.RPG.Stats2
 		public float CurrentValue => currentValue;
 
 		private readonly List<T> modifiers = new();
+		private readonly float defaultValue;
 		private float currentValue;
 
 		protected StatModifierList(float defaultValue)
 		{
+			this.defaultValue = defaultValue;
 			currentValue = defaultValue;
 		}
 
@@ -51,7 +53,7 @@ namespace Kryz.RPG.Stats2
 		public void Clear()
 		{
 			modifiers.Clear();
-			currentValue = 0;
+			currentValue = defaultValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
