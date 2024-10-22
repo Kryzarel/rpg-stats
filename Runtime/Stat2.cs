@@ -2,46 +2,68 @@ namespace Kryz.RPG.Stats
 {
 	public class Stat2
 	{
-		private readonly StatModifierListAdd modifiersAdd = new();
-		private readonly StatModifierListMultiplyBase modifiersMultiplyBase = new();
-		private readonly StatModifierListMultiplyTotal modifiersMultiplyTotal = new();
+		private readonly StatModifierList<SimpleStatModifier>[] modifierLists;
 
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set => baseValue = value; }
+		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
 
-		public Stat2(float baseValue = 0)
+		public Stat2(float baseValue = 0) : this(baseValue, new StatModifierListAdd(), new StatModifierListMultiplyBase(), new StatModifierListMultiplyTotal()) { }
+
+		public Stat2(float baseValue = 0, params StatModifierList<SimpleStatModifier>[] modifierLists)
 		{
+			this.modifierLists = modifierLists;
 			this.baseValue = baseValue;
 			finalValue = baseValue;
 		}
 
-		public void AddModifierAdd(SimpleStatModifier modifier)
+		public bool TryAddModifier(int listIndex, SimpleStatModifier modifier)
 		{
-			modifiersAdd.Add(modifier);
-			CalculateFinalValue();
+			if (listIndex >= 0 && listIndex < modifierLists.Length)
+			{
+				modifierLists[listIndex].Add(modifier);
+				CalculateFinalValue();
+				return true;
+			}
+			return false;
 		}
 
-		public void AddModifierMultiplyBase(SimpleStatModifier modifier)
+		public bool TryRemoveModifier(int listIndex, SimpleStatModifier modifier)
 		{
-			modifiersMultiplyBase.Add(modifier);
-			CalculateFinalValue();
+			if (listIndex >= 0 && listIndex < modifierLists.Length)
+			{
+				if (modifierLists[listIndex].Remove(modifier))
+				{
+					CalculateFinalValue();
+					return true;
+				}
+			}
+			return false;
 		}
 
-		public void AddModifierMultiplyTotal(SimpleStatModifier modifier)
+		public int RemoveAllFromSource(object source)
 		{
-			modifiersMultiplyTotal.Add(modifier);
-			CalculateFinalValue();
+			int numRemoved = 0;
+			for (int i = 0; i < modifierLists.Length; i++)
+			{
+				numRemoved += modifierLists[i].RemoveFromSource(source);
+			}
+			if (numRemoved > 0)
+			{
+				CalculateFinalValue();
+			}
+			return numRemoved;
 		}
 
 		private void CalculateFinalValue()
 		{
-			finalValue = 0;
-			finalValue = modifiersAdd.Calculate(finalValue);
-			finalValue = modifiersMultiplyBase.Calculate(finalValue);
-			finalValue = modifiersMultiplyTotal.Calculate(finalValue);
+			finalValue = baseValue;
+			for (int i = 0; i < modifierLists.Length; i++)
+			{
+				finalValue = modifierLists[i].Calculate(finalValue);
+			}
 		}
 	}
 }

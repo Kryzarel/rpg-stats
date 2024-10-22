@@ -56,6 +56,7 @@ namespace Kryz.RPG.Stats
 			currentValue = 0;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract float Calculate(float value);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
