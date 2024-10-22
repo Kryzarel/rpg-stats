@@ -1,12 +1,14 @@
+using System.Collections.Generic;
+
 namespace Kryz.RPG.Stats2
 {
-	public class Stat
+	public class Stat : IStat<StatModifier>
 	{
 		private readonly StatModifierList<StatModifier>[] modifierLists;
-
 		private float baseValue;
 		private float finalValue;
 
+		public IReadOnlyList<IReadOnlyStatModifierList<StatModifier>> Modifiers => modifierLists;
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
 
@@ -43,7 +45,7 @@ namespace Kryz.RPG.Stats2
 			return false;
 		}
 
-		public int RemoveAllFromSource(object source)
+		public int RemoveModifiersFromSource(object source)
 		{
 			int numRemoved = 0;
 			for (int i = 0; i < modifierLists.Length; i++)
