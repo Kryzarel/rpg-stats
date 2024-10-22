@@ -1,109 +1,90 @@
-using System;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
+using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats
 {
 	public class Stat
 	{
-		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
-
-		private readonly NativeArray<NativeList<float>> modifiers = new(modifierTypes.Length, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+		private readonly List<StatModifier> modifiers = new();
 
 		private float baseValue;
 		private float finalValue;
-		private bool isDirty;
+		private bool shouldSort;
+		private bool shouldCalculate;
 
 		public float BaseValue { get => baseValue; set => baseValue = value; }
-		public float FinalValue => finalValue;
+		public float FinalValue => GetFinalValue();
+		public IReadOnlyList<StatModifier> Modifiers => modifiers;
 
-		public Stat(float baseValue = 0)
+		public Stat(float baseValue)
 		{
-			for (int i = 0; i < modifiers.Length; i++)
-			{
-				modifiers[i] = new NativeList<float>(10, Allocator.Persistent);
-			}
 			this.baseValue = baseValue;
-			finalValue = baseValue;
 		}
 
-		private void Calculate()
+		public void Add(StatModifier modifier)
 		{
-			AddJob addJob = new() { Modifiers = modifiers[0] };
-			JobHandle addJobHandle = addJob.Schedule();
-
-			MultiplyBaseJob multiplyBaseJob = new() { Modifiers = modifiers[1], BaseValue = baseValue };
-			JobHandle multiplyBaseJobHandle = multiplyBaseJob.Schedule();
-
-			addJobHandle.Complete();
-			multiplyBaseJobHandle.Complete();
-
-			MultiplyTotalJob multiplyTotalJob = new() { Modifiers = modifiers[2], StartingValue = addJob.Result + multiplyBaseJob.Result };
-			multiplyTotalJob.Run();
-
-			finalValue = multiplyTotalJob.Result;
+			modifiers.Add(modifier);
+			shouldSort = shouldCalculate = true;
 		}
 
-		[BurstCompile]
-		private struct AddJob : IJob
+		public bool Remove(StatModifier modifier)
 		{
-			[ReadOnly]
-			public NativeList<float> Modifiers;
-			[WriteOnly]
-			public float Result;
-
-			public void Execute()
+			if (modifiers.Remove(modifier))
 			{
-				float result = 0;
-				for (int i = 0; i < Modifiers.Length; i++)
-				{
-					result += Modifiers[i];
-				}
-				Result = result;
+				shouldCalculate = true;
+				return true;
 			}
+			return false;
 		}
 
-		[BurstCompile]
-		private struct MultiplyBaseJob : IJob
+		public int RemoveAllFromSource(object source)
 		{
-			[ReadOnly]
-			public float BaseValue;
-			[ReadOnly]
-			public NativeList<float> Modifiers;
-			[WriteOnly]
-			public float Result;
-
-			public void Execute()
+			int removedCount = modifiers.RemoveAll(m => m.Source == source);
+			if (removedCount > 0)
 			{
-				float result = 0;
-				for (int i = 0; i < Modifiers.Length; i++)
-				{
-					result += BaseValue * Modifiers[i];
-				}
-				Result = result;
+				shouldCalculate = true;
 			}
+			return removedCount;
 		}
 
-		[BurstCompile]
-		private struct MultiplyTotalJob : IJob
+		private float GetFinalValue()
 		{
-			[ReadOnly]
-			public float StartingValue;
-			[ReadOnly]
-			public NativeList<float> Modifiers;
-			[WriteOnly]
-			public float Result;
-
-			public void Execute()
+			if (shouldCalculate)
 			{
-				float result = StartingValue;
-				for (int i = 0; i < Modifiers.Length; i++)
+				if (shouldSort)
 				{
-					result += result * Modifiers[i];
+					// Sort in reverse to get higher priority first
+					modifiers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+					shouldSort = false;
 				}
-				Result = result;
+				finalValue = CalculateFinalValue();
+				shouldCalculate = false;
 			}
+			return finalValue;
 		}
+
+		private float CalculateFinalValue()
+		{
+			float result = baseValue;
+			for (int i = 0; i < modifiers.Count; i++)
+			{
+				StatModifier modifier = modifiers[i];
+				result = CalculateModifier(result, baseValue, modifier);
+
+				if (modifier.Type == StatModifierType.Override)
+				{
+					break;
+				}
+			}
+			return result;
+		}
+
+		private static float CalculateModifier(float currentValue, float baseValue, StatModifier modifier) => modifier.Type switch
+		{
+			StatModifierType.Add => currentValue + modifier.Value,
+			StatModifierType.MultiplyBase => currentValue + baseValue * modifier.Value,
+			StatModifierType.MultiplyTotal => currentValue + currentValue * modifier.Value,
+			StatModifierType.Override => modifier.Value,
+			_ => currentValue,
+		};
 	}
 }

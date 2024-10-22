@@ -6,9 +6,5 @@
   "license": "MIT",
   "author": {
     "name": "Kryzarel"
-  },
-  "dependencies": {
-    "com.unity.burst": "1.0.0",
-    "com.unity.collections": "1.0.0"
   }
 }
