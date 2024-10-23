@@ -1,0 +1,17 @@
+{
+    "name": "Kryz.RPG.Stats.PerfTests",
+    "rootNamespace": "Kryz.RPG.Stats.PerfTests",
+    "references": [
+        "Kryz.RPG.Stats",
+        "Kryz.RPG.Stats2"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
