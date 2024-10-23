@@ -2,7 +2,7 @@ using System;
 
 namespace Kryz.RPG.Stats
 {
-	public readonly struct StatModifier : IEquatable<StatModifier>
+	public readonly struct StatModifier : IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
 		public readonly StatModifierType Type;
@@ -27,6 +27,12 @@ namespace Kryz.RPG.Stats
 			StatModifierType.Override => 1000,
 			_ => 0,
 		};
+
+		public int CompareTo(StatModifier other)
+		{
+			// Compare in reverse to get higher priority first
+			return other.Priority.CompareTo(Priority);
+		}
 
 		public bool Equals(StatModifier other)
 		{

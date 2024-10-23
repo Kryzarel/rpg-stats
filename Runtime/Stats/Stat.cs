@@ -28,8 +28,10 @@ namespace Kryz.RPG.Stats
 
 		public bool Remove(StatModifier modifier)
 		{
-			if (modifiers.Remove(modifier))
+			int index = modifiers.BinarySearch(modifier);
+			if (index >= 0)
 			{
+				modifiers.RemoveAt(index);
 				shouldCalculate = true;
 				return true;
 			}
@@ -38,12 +40,18 @@ namespace Kryz.RPG.Stats
 
 		public int RemoveAllFromSource(object source)
 		{
-			int removedCount = modifiers.RemoveAll(m => m.Source == source);
-			if (removedCount > 0)
+			int numRemoved = 0;
+			for (int i = modifiers.Count - 1; i >= 0; i--)
 			{
-				shouldCalculate = true;
+				StatModifier modifier = modifiers[i];
+				if (modifier.Source == source)
+				{
+					modifiers.RemoveAt(i);
+					numRemoved++;
+				}
 			}
-			return removedCount;
+			shouldCalculate |= numRemoved > 0;
+			return numRemoved;
 		}
 
 		private float GetFinalValue()
