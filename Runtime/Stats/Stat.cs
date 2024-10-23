@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Kryz.RPG.Stats2
+namespace Kryz.RPG.Stats
 {
 	public class Stat
 	{

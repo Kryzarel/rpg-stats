@@ -1,6 +1,6 @@
 using System;
 
-namespace Kryz.RPG.Stats2
+namespace Kryz.RPG.Stats
 {
 	public readonly struct StatModifier : IEquatable<StatModifier>
 	{
