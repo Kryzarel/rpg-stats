@@ -69,5 +69,19 @@ namespace Kryz.RPG.Stats2
 				finalValue = modifierLists[i].Calculate(finalValue);
 			}
 		}
+
+		public void Clear()
+		{
+			baseValue = 0;
+			ClearModifiers();
+		}
+
+		public void ClearModifiers()
+		{
+			for (int i = 0; i < modifierLists.Length; i++)
+			{
+				modifierLists[i].Clear();
+			}
+		}
 	}
 }

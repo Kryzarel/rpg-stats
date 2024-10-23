@@ -6,6 +6,9 @@ namespace Kryz.RPG.Stats2
 	{
 		float BaseValue { get; set; }
 		float FinalValue { get; }
+
+		void Clear();
+		void ClearModifiers();
 	}
 
 	public interface IStat<T> : IStat where T : struct, IStatModifier
