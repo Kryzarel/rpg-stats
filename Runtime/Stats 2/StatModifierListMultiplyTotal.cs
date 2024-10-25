@@ -7,9 +7,9 @@ namespace Kryz.RPG.Stats2
 		public StatModifierListMultiplyTotal() : base(defaultValue: 1) { }
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override float Calculate(float value)
+		protected override float Calculate(float value, float currentValue)
 		{
-			return value * CurrentValue;
+			return value * currentValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

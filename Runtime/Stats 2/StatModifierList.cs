@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -5,12 +6,13 @@ namespace Kryz.RPG.Stats2
 {
 	public abstract class StatModifierList<T> : IStatModifierList<T> where T : struct, IStatModifier
 	{
-		public IReadOnlyList<T> Modifiers => modifiers;
-		public float CurrentValue => currentValue;
-
 		private readonly List<T> modifiers = new();
 		private readonly float defaultValue;
 		private float currentValue;
+
+		public float CurrentValue => currentValue;
+		public int Count => modifiers.Count;
+		public T this[int index] => modifiers[index];
 
 		protected StatModifierList(float defaultValue)
 		{
@@ -57,11 +59,19 @@ namespace Kryz.RPG.Stats2
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public abstract float Calculate(float value);
+		public float Calculate(float value)
+		{
+			return Calculate(value, currentValue);
+		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract float Calculate(float value, float currentValue);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract float AddOperation(float currentValue, T modifier);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract float RemoveOperation(float currentValue, T modifier);
+
+		public IEnumerator<T> GetEnumerator() => modifiers.GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => modifiers.GetEnumerator();
 	}
 }

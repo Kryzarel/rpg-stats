@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats2
 {
-	public interface IReadOnlyStatModifierList<out T> where T : struct, IStatModifier
+	public interface IReadOnlyStatModifierList<out T> : IReadOnlyList<T> where T : struct, IStatModifier
 	{
-		IReadOnlyList<T> Modifiers { get; }
+		float CurrentValue { get; }
 		float Calculate(float value);
 	}
 
