@@ -2,12 +2,14 @@ using System;
 
 namespace Kryz.RPG.Stats
 {
-	public readonly struct StatModifier : IComparable<StatModifier>, IEquatable<StatModifier>
+	public readonly struct StatModifier : IStatModifier, IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
 		public readonly StatModifierType Type;
 		public readonly int Priority;
 		public readonly object? Source;
+
+		object? IStatModifier.Source => Source;
 
 		public StatModifier(float value, StatModifierType type, object? source = null) : this(value, type, GetDefaultPriority(type), source) { }
 
@@ -24,14 +26,23 @@ namespace Kryz.RPG.Stats
 			StatModifierType.Add => 100,
 			StatModifierType.MultiplyBase => 200,
 			StatModifierType.MultiplyTotal => 300,
-			StatModifierType.Override => 1000,
+			StatModifierType.Override => 900,
 			_ => 0,
 		};
 
 		public int CompareTo(StatModifier other)
 		{
-			// Compare in reverse to get higher priority first
-			return other.Priority.CompareTo(Priority);
+			int result = Priority.CompareTo(other.Priority);
+			if (result == 0)
+			{
+				// Cast to int to avoid boxing
+				result = ((int)Type).CompareTo((int)other.Type);
+			}
+			if (result == 0)
+			{
+				result = Value.CompareTo(other.Value);
+			}
+			return result;
 		}
 
 		public bool Equals(StatModifier other)

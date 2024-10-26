@@ -32,7 +32,7 @@ namespace Kryz.RPG.Stats.PerfTests
 				modifiers2[i] = modifier2;
 				listIndexes[i] = listIndex;
 
-				stat.Add(modifider);
+				stat.AddModifier(modifider);
 				stat2.TryAddModifier(listIndex, modifier2);
 			}
 		}
@@ -56,8 +56,8 @@ namespace Kryz.RPG.Stats.PerfTests
 
 		private void AddRemove1()
 		{
-			stat.Remove(modifiers[step1]);
-			stat.Add(modifiers[step1]);
+			stat.RemoveModifier(modifiers[step1]);
+			stat.AddModifier(modifiers[step1]);
 			float value = stat.FinalValue;
 		}
 
@@ -65,8 +65,8 @@ namespace Kryz.RPG.Stats.PerfTests
 		{
 			for (int i = step10, count = 0; i < Length && count < 10; i += step10, count++)
 			{
-				stat.Remove(modifiers[i]);
-				stat.Add(modifiers[i]);
+				stat.RemoveModifier(modifiers[i]);
+				stat.AddModifier(modifiers[i]);
 			}
 			float value = stat.FinalValue;
 		}
@@ -75,18 +75,18 @@ namespace Kryz.RPG.Stats.PerfTests
 		{
 			for (int i = step100, count = 0; i < Length && count < 100; i += step100, count++)
 			{
-				stat.Remove(modifiers[i]);
-				stat.Add(modifiers[i]);
+				stat.RemoveModifier(modifiers[i]);
+				stat.AddModifier(modifiers[i]);
 			}
 			float value = stat.FinalValue;
 		}
 
 		private void AddRemoveAllFromSource()
 		{
-			stat.RemoveAllFromSource(this);
+			stat.RemoveModifiersFromSource(this);
 			for (int i = 0; i < Length; i++)
 			{
-				stat.Add(modifiers[i]);
+				stat.AddModifier(modifiers[i]);
 			}
 			float value = stat.FinalValue;
 		}
