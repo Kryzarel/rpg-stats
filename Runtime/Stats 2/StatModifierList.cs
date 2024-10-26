@@ -8,29 +8,29 @@ namespace Kryz.RPG.Stats2
 	{
 		private readonly List<T> modifiers = new();
 		private readonly float defaultValue;
-		private float currentValue;
+		private float modifierValue;
 
-		public float CurrentValue => currentValue;
+		public float ModifierValue => modifierValue;
 		public int Count => modifiers.Count;
 		public T this[int index] => modifiers[index];
 
 		protected StatModifierList(float defaultValue)
 		{
 			this.defaultValue = defaultValue;
-			currentValue = defaultValue;
+			modifierValue = defaultValue;
 		}
 
 		public void Add(T modifier)
 		{
 			modifiers.Add(modifier);
-			currentValue = AddOperation(currentValue, modifier);
+			modifierValue = AddOperation(modifierValue, modifier);
 		}
 
 		public bool Remove(T modifier)
 		{
 			if (modifiers.Remove(modifier))
 			{
-				currentValue = RemoveOperation(currentValue, modifier);
+				modifierValue = RemoveOperation(modifierValue, modifier);
 				return true;
 			}
 			return false;
@@ -45,7 +45,7 @@ namespace Kryz.RPG.Stats2
 				if (modifier.Source == source)
 				{
 					modifiers.RemoveAt(i);
-					currentValue = RemoveOperation(currentValue, modifier);
+					modifierValue = RemoveOperation(modifierValue, modifier);
 					numRemoved++;
 				}
 			}
@@ -55,23 +55,20 @@ namespace Kryz.RPG.Stats2
 		public void Clear()
 		{
 			modifiers.Clear();
-			currentValue = defaultValue;
+			modifierValue = defaultValue;
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public float Calculate(float value)
-		{
-			return Calculate(value, currentValue);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract float Calculate(float value, float currentValue);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract float AddOperation(float currentValue, T modifier);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract float RemoveOperation(float currentValue, T modifier);
 
 		public IEnumerator<T> GetEnumerator() => modifiers.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => modifiers.GetEnumerator();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public float Calculate(float statBaseValue, float statCurrentValue) => Calculate(statBaseValue, statCurrentValue, modifierValue);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract float Calculate(float statBaseValue, float statCurrentValue, float modifierValue);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract float AddOperation(float modifierValue, T modifier);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract float RemoveOperation(float modifierValue, T modifier);
 	}
 }

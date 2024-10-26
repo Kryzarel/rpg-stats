@@ -4,8 +4,8 @@ namespace Kryz.RPG.Stats2
 {
 	public interface IReadOnlyStatModifierList<out T> : IReadOnlyList<T> where T : struct, IStatModifier
 	{
-		float CurrentValue { get; }
-		float Calculate(float value);
+		float ModifierValue { get; }
+		float Calculate(float statBaseValue, float statCurrentValue);
 	}
 
 	public interface IStatModifierList<T> : IReadOnlyStatModifierList<T> where T : struct, IStatModifier

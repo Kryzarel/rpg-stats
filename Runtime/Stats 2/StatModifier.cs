@@ -2,7 +2,7 @@ using System;
 
 namespace Kryz.RPG.Stats2
 {
-	public readonly struct StatModifier : IStatModifier, IEquatable<StatModifier>
+	public readonly struct StatModifier : IStatModifier, IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
 		public readonly object? Source;
@@ -13,6 +13,11 @@ namespace Kryz.RPG.Stats2
 		{
 			Value = value;
 			Source = source;
+		}
+
+		public int CompareTo(StatModifier other)
+		{
+			return Value.CompareTo(other.Value);
 		}
 
 		public bool Equals(StatModifier other)

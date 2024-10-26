@@ -7,21 +7,21 @@ namespace Kryz.RPG.Stats2
 		public StatModifierListAdd() : base(defaultValue: 0) { }
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float Calculate(float value, float currentValue)
+		protected override float Calculate(float statBaseValue, float statCurrentValue, float modifierValue)
 		{
-			return value + currentValue;
+			return statCurrentValue + modifierValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float AddOperation(float currentValue, StatModifier modifier)
+		protected override float AddOperation(float modifierValue, StatModifier modifier)
 		{
-			return currentValue + modifier.Value;
+			return modifierValue + modifier.Value;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float RemoveOperation(float currentValue, StatModifier modifier)
+		protected override float RemoveOperation(float modifierValue, StatModifier modifier)
 		{
-			return currentValue - modifier.Value;
+			return modifierValue - modifier.Value;
 		}
 	}
 }
