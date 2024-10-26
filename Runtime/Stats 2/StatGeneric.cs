@@ -73,6 +73,7 @@ namespace Kryz.RPG.Stats2
 		public void Clear()
 		{
 			baseValue = 0;
+			finalValue = baseValue;
 			ClearModifiers();
 		}
 
@@ -82,6 +83,7 @@ namespace Kryz.RPG.Stats2
 			{
 				modifierLists[i].Clear();
 			}
+			finalValue = baseValue;
 		}
 	}
 }

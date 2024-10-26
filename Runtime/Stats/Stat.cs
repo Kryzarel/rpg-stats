@@ -60,8 +60,7 @@ namespace Kryz.RPG.Stats
 			{
 				if (shouldSort)
 				{
-					// Sort in reverse to get higher priority first
-					modifiers.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+					modifiers.Sort();
 					shouldSort = false;
 				}
 				finalValue = CalculateFinalValue();
