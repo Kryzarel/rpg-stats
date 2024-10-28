@@ -4,9 +4,9 @@ namespace Kryz.RPG.Stats3
 {
 	public sealed class StatModifierListAdd<T> : StatModifierList<T> where T : struct, IStatModifier
 	{
-		public static readonly IStatModifierType<T> Type = new StatModifierType<T, StatModifierListAdd<T>>(100);
+		public static readonly IStatModifierType<T> Type = new StatModifierType<T, StatModifierListAdd<T>>();
 
-		public override int Priority => Type.Priority;
+		public override int Priority => 100;
 
 		public StatModifierListAdd() : base(defaultValue: 0) { }
 

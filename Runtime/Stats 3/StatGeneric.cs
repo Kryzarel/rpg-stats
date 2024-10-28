@@ -1,25 +1,38 @@
-using System;
 using System.Collections.Generic;
-using Kryz.SharpUtils;
 
 namespace Kryz.RPG.Stats3
 {
 	public class Stat : IStat
 	{
-		private class PriorityBucket : IComparable<PriorityBucket>
+		private readonly struct ListContainer
 		{
 			public readonly int Priority;
-			public readonly List<IStatModifierList> Lists = new();
+			public readonly IStatModifierList List;
 
-			public PriorityBucket(int priority)
+			public ListContainer(int priority, IStatModifierList list)
 			{
 				Priority = priority;
+				List = list;
 			}
-
-			public int CompareTo(PriorityBucket other) => Priority.CompareTo(other.Priority);
 		}
 
-		private readonly List<PriorityBucket> buckets = new();
+		private class ListContainerComparer : IComparer<ListContainer>
+		{
+			public int Compare(ListContainer x, ListContainer y)
+			{
+				int result = x.Priority.CompareTo(y.Priority);
+				if (result == 0)
+				{
+					int listPriority = x.List?.Priority ?? int.MinValue;
+					int otherListPriority = y.List?.Priority ?? int.MinValue;
+					result = listPriority.CompareTo(otherListPriority);
+				}
+				return result;
+			}
+		}
+
+		private static readonly ListContainerComparer comparer = new();
+		private readonly List<ListContainer> containers = new();
 
 		private float baseValue;
 		private float finalValue;
@@ -35,19 +48,17 @@ namespace Kryz.RPG.Stats3
 
 		public void AddModifier<T>(T modifier) where T : struct, IStatModifier
 		{
-			PriorityBucket bucket = GetBucket(modifier.Priority);
-			IStatModifierList<T> list = GetStatModifierList(bucket, modifier);
-
+			if (!TryGetModifierList(modifier, out IStatModifierList<T> list, out int index))
+			{
+				list = CreateModifierList(modifier, index);
+			}
 			list.Add(modifier);
 			CalculateFinalValue();
 		}
 
 		public bool RemoveModifier<T>(T modifier) where T : struct, IStatModifier
 		{
-			PriorityBucket bucket = GetBucket(modifier.Priority);
-			IStatModifierList<T> list = GetStatModifierList(bucket, modifier);
-
-			if (list.Remove(modifier))
+			if (TryGetModifierList(modifier, out IStatModifierList<T> list, out _) && list.Remove(modifier))
 			{
 				CalculateFinalValue();
 				return true;
@@ -58,14 +69,9 @@ namespace Kryz.RPG.Stats3
 		public int RemoveModifiersFromSource(object source)
 		{
 			int numRemoved = 0;
-			for (int i = 0; i < buckets.Count; i++)
+			for (int i = 0; i < containers.Count; i++)
 			{
-				PriorityBucket bucket = buckets[i];
-				for (int j = 0; j < bucket.Lists.Count; j++)
-				{
-					IStatModifierList list = bucket.Lists[j];
-					numRemoved += list.RemoveFromSource(source);
-				}
+				numRemoved += containers[i].List.RemoveFromSource(source);
 			}
 			if (numRemoved > 0)
 			{
@@ -74,45 +80,58 @@ namespace Kryz.RPG.Stats3
 			return numRemoved;
 		}
 
-		private PriorityBucket GetBucket(int priority)
-		{
-			PriorityBucket bucket;
-			int index = buckets.BinarySearchLeftmost(b => b.Priority.CompareTo(priority));
-
-			// Bucket not found, create one
-			if (index >= buckets.Count || (bucket = buckets[index]).Priority != priority)
-			{
-				bucket = new PriorityBucket(priority);
-				buckets.Insert(index, bucket);
-			}
-			return bucket;
-		}
-
-		private static IStatModifierList<T> GetStatModifierList<T>(PriorityBucket bucket, T modifier) where T : struct, IStatModifier
+		private bool TryGetModifierList<T>(T modifier, out IStatModifierList<T> list, out int index) where T : struct, IStatModifier
 		{
 			IStatModifierType<T> type = (IStatModifierType<T>)modifier.Type;
-			int index = bucket.Lists.BinarySearchLeftmost(l => l.Priority.CompareTo(type.Priority));
 
-			// List not found, create one
-			if (index >= bucket.Lists.Count || bucket.Lists[index] is not IStatModifierList<T> list || !type.IsListValid(list))
+			index = containers.BinarySearch(new ListContainer(modifier.Priority, null!), comparer);
+
+			if (index < 0)
 			{
-				list = type.CreateList();
-				bucket.Lists.Insert(index, list);
+				index = ~index;
 			}
+
+			for (int i = index; i < containers.Count; i++)
+			{
+				ListContainer container = containers[i];
+				if (container.Priority > modifier.Priority)
+				{
+					break;
+				}
+
+				if (container.List is IStatModifierList<T> listMatch && type.IsListValid(listMatch))
+				{
+					list = listMatch;
+					return true;
+				}
+			}
+
+			list = null!;
+			return false;
+		}
+
+		private IStatModifierList<T> CreateModifierList<T>(T modifier, int startIndex) where T : struct, IStatModifier
+		{
+			IStatModifierType<T> type = (IStatModifierType<T>)modifier.Type;
+			IStatModifierList<T> list = type.CreateList();
+
+			ListContainer container = new(modifier.Priority, list);
+			int index = containers.BinarySearch(startIndex, containers.Count - startIndex, container, comparer);
+			if (index < 0)
+			{
+				index = ~index;
+			}
+			containers.Insert(index, container);
+
 			return list;
 		}
 
 		private void CalculateFinalValue()
 		{
 			finalValue = baseValue;
-			for (int i = 0; i < buckets.Count; i++)
+			for (int i = 0; i < containers.Count; i++)
 			{
-				PriorityBucket bucket = buckets[i];
-				for (int j = 0; j < bucket.Lists.Count; j++)
-				{
-					IStatModifierList list = bucket.Lists[j];
-					finalValue = list.Calculate(baseValue, finalValue);
-				}
+				finalValue = containers[i].List.Calculate(baseValue, finalValue);
 			}
 		}
 
@@ -124,14 +143,9 @@ namespace Kryz.RPG.Stats3
 
 		public void ClearModifiers()
 		{
-			for (int i = 0; i < buckets.Count; i++)
+			for (int i = 0; i < containers.Count; i++)
 			{
-				PriorityBucket bucket = buckets[i];
-				for (int j = 0; j < bucket.Lists.Count; j++)
-				{
-					IStatModifierList list = bucket.Lists[j];
-					list.Clear();
-				}
+				containers[i].List.Clear();
 			}
 			finalValue = baseValue;
 		}

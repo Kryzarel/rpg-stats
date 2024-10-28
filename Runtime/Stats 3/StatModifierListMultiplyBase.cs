@@ -4,9 +4,9 @@ namespace Kryz.RPG.Stats3
 {
 	public sealed class StatModifierListMultiplyBase<T> : StatModifierList<T> where T : struct, IStatModifier
 	{
-		public static readonly IStatModifierType<T> Type = new StatModifierType<T, StatModifierListMultiplyBase<T>>(200);
+		public static readonly IStatModifierType<T> Type = new StatModifierType<T, StatModifierListMultiplyBase<T>>();
 
-		public override int Priority => Type.Priority;
+		public override int Priority => 200;
 
 		public StatModifierListMultiplyBase() : base(defaultValue: 1) { }
 
