@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -10,9 +9,11 @@ namespace Kryz.RPG.Stats3
 		private readonly float defaultValue;
 		private float modifierValue;
 
-		public float ModifierValue => modifierValue;
-		public int Count => modifiers.Count;
 		public T this[int index] => modifiers[index];
+		public int Count => modifiers.Count;
+		public float ModifierValue => modifierValue;
+
+		public abstract int Priority { get; }
 
 		protected StatModifierList(float defaultValue)
 		{
@@ -57,9 +58,6 @@ namespace Kryz.RPG.Stats3
 			modifiers.Clear();
 			modifierValue = defaultValue;
 		}
-
-		public IEnumerator<T> GetEnumerator() => modifiers.GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => modifiers.GetEnumerator();
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public float Calculate(float statBaseValue, float statCurrentValue) => Calculate(statBaseValue, statCurrentValue, modifierValue);

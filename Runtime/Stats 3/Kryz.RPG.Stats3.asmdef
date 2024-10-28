@@ -1,7 +1,9 @@
 {
     "name": "Kryz.RPG.Stats3",
     "rootNamespace": "Kryz.RPG.Stats3",
-    "references": [],
+    "references": [
+        "Kryz.SharpUtils"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

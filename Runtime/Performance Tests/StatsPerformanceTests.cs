@@ -2,6 +2,10 @@ using UnityEngine;
 using Stat2 = Kryz.RPG.Stats2.Stat;
 using StatModifier2 = Kryz.RPG.Stats2.StatModifier;
 
+using Kryz.RPG.Stats3;
+using Stat3 = Kryz.RPG.Stats3.Stat;
+using StatModifier3 = Kryz.RPG.Stats3.StatModifier;
+
 namespace Kryz.RPG.Stats.PerfTests
 {
 	public class StatsPerformanceTests : MonoBehaviour
@@ -10,9 +14,11 @@ namespace Kryz.RPG.Stats.PerfTests
 		private readonly StatModifier[] modifiers = new StatModifier[Length];
 		private readonly StatModifier2[] modifiers2 = new StatModifier2[Length];
 		private readonly int[] listIndexes = new int[Length];
+		private readonly StatModifier3[] modifiers3 = new StatModifier3[Length];
 
 		private readonly Stat stat = new(10);
 		private readonly Stat2 stat2 = new(10);
+		private readonly Stat3 stat3 = new(10);
 
 		private int step1;
 		private int step10;
@@ -28,12 +34,23 @@ namespace Kryz.RPG.Stats.PerfTests
 				StatModifier modifider = new(value, (StatModifierType)listIndex, this);
 				StatModifier2 modifier2 = new(value, this);
 
+				IStatModifierType<StatModifier3> type = listIndex switch
+				{
+					0 => StatModifierListAdd<StatModifier3>.Type,
+					1 => StatModifierListMultiplyBase<StatModifier3>.Type,
+					2 => StatModifierListMultiplyTotal<StatModifier3>.Type,
+					_ => throw new System.NotImplementedException(),
+				};
+				StatModifier3 modifier3 = new(value, type, priority: 0, this);
+
 				modifiers[i] = modifider;
 				modifiers2[i] = modifier2;
 				listIndexes[i] = listIndex;
+				modifiers3[i] = modifier3;
 
 				stat.AddModifier(modifider);
 				stat2.TryAddModifier(listIndex, modifier2);
+				stat3.AddModifier(modifier3);
 			}
 		}
 
@@ -52,6 +69,11 @@ namespace Kryz.RPG.Stats.PerfTests
 			AddRemove10_2();
 			AddRemove100_2();
 			AddRemoveAllFromSource_2();
+
+			AddRemove1_3();
+			AddRemove10_3();
+			AddRemove100_3();
+			AddRemoveAllFromSource_3();
 		}
 
 		private void AddRemove1()
@@ -126,6 +148,43 @@ namespace Kryz.RPG.Stats.PerfTests
 				stat2.TryAddModifier(listIndexes[i], modifiers2[i]);
 			}
 			float value = stat2.FinalValue;
+		}
+
+		private void AddRemove1_3()
+		{
+			stat3.RemoveModifier(modifiers3[step1]);
+			stat3.AddModifier(modifiers3[step1]);
+			float value = stat3.FinalValue;
+		}
+
+		private void AddRemove10_3()
+		{
+			for (int i = step10, count = 0; i < Length && count < 10; i += step10, count++)
+			{
+				stat3.RemoveModifier(modifiers3[i]);
+				stat3.AddModifier(modifiers3[i]);
+			}
+			float value = stat3.FinalValue;
+		}
+
+		private void AddRemove100_3()
+		{
+			for (int i = step100, count = 0; i < Length && count < 100; i += step100, count++)
+			{
+				stat3.RemoveModifier(modifiers3[i]);
+				stat3.AddModifier(modifiers3[i]);
+			}
+			float value = stat3.FinalValue;
+		}
+
+		private void AddRemoveAllFromSource_3()
+		{
+			stat3.RemoveModifiersFromSource(this);
+			for (int i = 0; i < Length; i++)
+			{
+				stat3.AddModifier(modifiers3[i]);
+			}
+			float value = stat3.FinalValue;
 		}
 	}
 }

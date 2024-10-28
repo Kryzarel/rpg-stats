@@ -1,18 +1,19 @@
-using System.Collections.Generic;
-
 namespace Kryz.RPG.Stats3
 {
-	public interface IReadOnlyStatModifierList<out T> : IReadOnlyList<T> where T : struct, IStatModifier
+	public interface IStatModifierList
 	{
+		int Priority { get; }
+
 		float ModifierValue { get; }
 		float Calculate(float statBaseValue, float statCurrentValue);
+
+		int RemoveFromSource(object source);
+		void Clear();
 	}
 
-	public interface IStatModifierList<T> : IReadOnlyStatModifierList<T> where T : struct, IStatModifier
+	public interface IStatModifierList<T> : IStatModifierList where T : struct, IStatModifier
 	{
 		void Add(T modifier);
 		bool Remove(T modifier);
-		int RemoveFromSource(object source);
-		void Clear();
 	}
 }

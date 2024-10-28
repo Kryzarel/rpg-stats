@@ -5,14 +5,21 @@ namespace Kryz.RPG.Stats3
 	public readonly struct StatModifier : IStatModifier, IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
+		public readonly int Priority;
 		public readonly object? Source;
+		public readonly IStatModifierType<StatModifier> Type;
 
+		float IStatModifier.Value => Value;
+		int IStatModifier.Priority => Priority;
 		object? IStatModifier.Source => Source;
+		IStatModifierType IStatModifier.Type => Type;
 
-		public StatModifier(float value, object? source = null)
+		public StatModifier(float value, IStatModifierType<StatModifier> type, int priority = 0, object? source = null)
 		{
 			Value = value;
+			Priority = priority;
 			Source = source;
+			Type = type;
 		}
 
 		public int CompareTo(StatModifier other)
@@ -37,7 +44,7 @@ namespace Kryz.RPG.Stats3
 
 		public static bool operator ==(StatModifier a, StatModifier b)
 		{
-			return a.Value == b.Value && a.Source == b.Source;
+			return a.Value == b.Value && a.Source == b.Source && a.Priority == b.Priority && a.Type == b.Type;
 		}
 
 		public static bool operator !=(StatModifier a, StatModifier b)

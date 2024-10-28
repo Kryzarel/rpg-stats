@@ -3,7 +3,8 @@
     "rootNamespace": "Kryz.RPG.Stats.PerfTests",
     "references": [
         "Kryz.RPG.Stats",
-        "Kryz.RPG.Stats2"
+        "Kryz.RPG.Stats2",
+        "Kryz.RPG.Stats3"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
