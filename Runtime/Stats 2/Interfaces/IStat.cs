@@ -15,8 +15,7 @@ namespace Kryz.RPG.Stats2
 	{
 		IReadOnlyList<IReadOnlyStatModifierList<T>> Modifiers { get; }
 
-		bool TryAddModifier(int listIndex, T modifier);
-		bool TryRemoveModifier(int listIndex, T modifier);
-		int RemoveModifiersFromSource(object source);
+		void AddModifier(T modifier);
+		bool RemoveModifier(T modifier);
 	}
 }

@@ -12,7 +12,6 @@ namespace Kryz.RPG.Stats2
 	{
 		void Add(T modifier);
 		bool Remove(T modifier);
-		int RemoveFromSource(object source);
 		void Clear();
 	}
 }

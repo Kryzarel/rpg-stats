@@ -36,22 +36,6 @@ namespace Kryz.RPG.Stats2
 			return false;
 		}
 
-		public int RemoveFromSource(object source)
-		{
-			int numRemoved = 0;
-			for (int i = modifiers.Count - 1; i >= 0; i--)
-			{
-				T modifier = modifiers[i];
-				if (modifier.Source == source)
-				{
-					modifiers.RemoveAt(i);
-					modifierValue = RemoveOperation(modifierValue, modifier);
-					numRemoved++;
-				}
-			}
-			return numRemoved;
-		}
-
 		public void Clear()
 		{
 			modifiers.Clear();

@@ -1,24 +1,55 @@
+using System;
+
 namespace Kryz.RPG.Stats2
 {
-	public class Stat : Stat<StatModifier, StatModifierList<StatModifier>>
+	public sealed class Stat : Stat<StatModifier, StatModifierList<StatModifier>>
 	{
-		public enum Type
+		public Stat(float baseValue = 0) : base(baseValue, GetModifierLists()) { }
+
+		public override void AddModifier(StatModifier modifier)
 		{
-			Add,
-			MultiplyBase,
-			MultiplyTotal,
+			AddModifier((int)modifier.Type, modifier);
 		}
 
-		public Stat(float baseValue = 0) : base(baseValue, new StatModifierListAdd(), new StatModifierListMultiplyBase(), new StatModifierListMultiplyTotal()) { }
-
-		public bool TryAddModifier(Type type, StatModifier modifier)
+		public override bool RemoveModifier(StatModifier modifier)
 		{
-			return TryAddModifier((int)type, modifier);
+			return RemoveModifier((int)modifier.Type, modifier);
 		}
 
-		public bool TryRemoveModifier(Type type, StatModifier modifier)
+		public int RemoveModifiersFromSource(object source)
 		{
-			return TryRemoveModifier((int)type, modifier);
+			int numRemoved = 0;
+			for (int i = 0; i < modifierLists.Length; i++)
+			{
+				numRemoved += modifierLists[i].RemoveFromSource(source);
+			}
+			if (numRemoved > 0)
+			{
+				CalculateFinalValue();
+
+			}
+			return numRemoved;
+		}
+
+		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
+
+		private static StatModifierList<StatModifier>[] GetModifierLists()
+		{
+			StatModifierList<StatModifier>[] lists = new StatModifierList<StatModifier>[modifierTypes.Length];
+
+			for (int i = 0; i < modifierTypes.Length; i++)
+			{
+				StatModifierType type = modifierTypes[i];
+				lists[i] = type switch
+				{
+					StatModifierType.Add => new StatModifierListAdd(),
+					StatModifierType.MultiplyBase => new StatModifierListMultiplyBase(),
+					StatModifierType.MultiplyTotal => new StatModifierListMultiplyTotal(),
+					StatModifierType.Override => throw new NotImplementedException(),
+					_ => throw new NotImplementedException(),
+				};
+			}
+			return lists;
 		}
 	}
 }

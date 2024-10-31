@@ -5,13 +5,13 @@ namespace Kryz.RPG.Stats2
 	public readonly struct StatModifier : IStatModifier, IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
+		public readonly StatModifierType Type;
 		public readonly object? Source;
 
-		object? IStatModifier.Source => Source;
-
-		public StatModifier(float value, object? source = null)
+		public StatModifier(float value, StatModifierType type, object? source = default)
 		{
 			Value = value;
+			Type = type;
 			Source = source;
 		}
 
@@ -37,7 +37,7 @@ namespace Kryz.RPG.Stats2
 
 		public static bool operator ==(StatModifier a, StatModifier b)
 		{
-			return a.Value == b.Value && a.Source == b.Source;
+			return a.Value == b.Value && a.Type == b.Type && a.Source == b.Source;
 		}
 
 		public static bool operator !=(StatModifier a, StatModifier b)
