@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats2
 {
-	public sealed class StatModifierListOverride : StatModifierList
+	public sealed class StatModifierListOverride<T> : StatModifierList<T> where T : struct, IStatModifier
 	{
 		public StatModifierListOverride() : base(defaultValue: 1) { }
 
@@ -14,7 +14,7 @@ namespace Kryz.RPG.Stats2
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float AddOperation(float modifierValue, StatModifier modifier)
+		protected override float AddOperation(float modifierValue, T modifier)
 		{
 			if (modifier.Value >= modifierValue)
 			{
@@ -30,12 +30,12 @@ namespace Kryz.RPG.Stats2
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float RemoveOperation(float modifierValue, StatModifier modifier)
+		protected override float RemoveOperation(float modifierValue, T modifier)
 		{
 			return modifiers[^1].Value;
 		}
 
-		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier> list, StatModifier value)
+		private static int BinarySearchLeftmost(IReadOnlyList<T> list, T value)
 		{
 			int min = 0;
 			int max = list.Count;

@@ -1,9 +1,8 @@
 using System;
-using Kryz.RPG.Stats2.Core;
 
-namespace Kryz.RPG.Stats2
+namespace Kryz.RPG.Stats2.Default
 {
-	public sealed class Stat : Stat<StatModifier, StatModifierList>, IStat
+	public sealed class Stat : Stat<StatModifier>, IStat<StatModifier>
 	{
 		public Stat(float baseValue = 0) : base(baseValue, GetModifierLists()) { }
 
@@ -17,35 +16,21 @@ namespace Kryz.RPG.Stats2
 			return RemoveModifier((int)modifier.Type, modifier);
 		}
 
-		public int RemoveModifiersFromSource(object source)
-		{
-			int numRemoved = 0;
-			for (int i = 0; i < modifierLists.Length; i++)
-			{
-				numRemoved += modifierLists[i].RemoveModifiersFromSource(source);
-			}
-			if (numRemoved > 0)
-			{
-				CalculateFinalValue();
-			}
-			return numRemoved;
-		}
-
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
-		private static StatModifierList[] GetModifierLists()
+		private static StatModifierList<StatModifier>[] GetModifierLists()
 		{
-			StatModifierList[] lists = new StatModifierList[modifierTypes.Length];
+			StatModifierList<StatModifier>[] lists = new StatModifierList<StatModifier>[modifierTypes.Length];
 
 			for (int i = 0; i < modifierTypes.Length; i++)
 			{
 				StatModifierType type = modifierTypes[i];
 				lists[i] = type switch
 				{
-					StatModifierType.Add => new StatModifierListAdd(),
-					StatModifierType.MultiplyBase => new StatModifierListMultiplyBase(),
-					StatModifierType.MultiplyTotal => new StatModifierListMultiplyTotal(),
-					StatModifierType.Override => new StatModifierListOverride(),
+					StatModifierType.Add => new StatModifierListAdd<StatModifier>(),
+					StatModifierType.MultiplyBase => new StatModifierListMultiplyBase<StatModifier>(),
+					StatModifierType.MultiplyTotal => new StatModifierListMultiplyTotal<StatModifier>(),
+					StatModifierType.Override => new StatModifierListOverride<StatModifier>(),
 					_ => throw new NotImplementedException(),
 				};
 			}

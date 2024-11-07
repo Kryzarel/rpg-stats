@@ -1,8 +1,6 @@
-using Kryz.RPG.Stats2.Core;
-
 namespace Kryz.RPG.Stats2
 {
-	public abstract class StatModifierList : StatModifierList<StatModifier>, IStatModifierList
+	public abstract class StatModifierList<T> : Core.StatModifierList<T>, IStatModifierList<T> where T : struct, IStatModifier
 	{
 		protected StatModifierList(float defaultValue) : base(defaultValue) { }
 

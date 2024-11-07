@@ -1,7 +1,7 @@
 using UnityEngine;
-using Stat2 = Kryz.RPG.Stats2.Stat;
-using StatModifier2 = Kryz.RPG.Stats2.StatModifier;
-using StatModifierType2 = Kryz.RPG.Stats2.StatModifierType;
+using Stat2 = Kryz.RPG.Stats2.Default.Stat;
+using StatModifier2 = Kryz.RPG.Stats2.Default.StatModifier;
+using StatModifierType2 = Kryz.RPG.Stats2.Default.StatModifierType;
 
 using Kryz.RPG.Stats3;
 using Stat3 = Kryz.RPG.Stats3.Stat;

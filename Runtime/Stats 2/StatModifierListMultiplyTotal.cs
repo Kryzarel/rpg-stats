@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats2
 {
-	public sealed class StatModifierListMultiplyTotal : StatModifierList
+	public sealed class StatModifierListMultiplyTotal<T> : StatModifierList<T> where T : struct, IStatModifier
 	{
 		public StatModifierListMultiplyTotal() : base(defaultValue: 1) { }
 
@@ -13,13 +13,13 @@ namespace Kryz.RPG.Stats2
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float AddOperation(float modifierValue, StatModifier modifier)
+		protected override float AddOperation(float modifierValue, T modifier)
 		{
 			return modifierValue * (1 + modifier.Value);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float RemoveOperation(float modifierValue, StatModifier modifier)
+		protected override float RemoveOperation(float modifierValue, T modifier)
 		{
 			return modifierValue / (1 + modifier.Value);
 		}

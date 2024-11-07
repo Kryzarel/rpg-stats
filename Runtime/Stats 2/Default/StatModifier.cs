@@ -1,13 +1,25 @@
 using System;
-using Kryz.RPG.Stats2.Core;
+using System.Runtime.CompilerServices;
 
-namespace Kryz.RPG.Stats2
+namespace Kryz.RPG.Stats2.Default
 {
 	public readonly struct StatModifier : IStatModifier, IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
 		public readonly StatModifierType Type;
 		public readonly object? Source;
+
+		float IStatModifier.Value
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => Value;
+		}
+
+		object? IStatModifier.Source
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => Source;
+		}
 
 		public StatModifier(float value, StatModifierType type, object? source = default)
 		{
