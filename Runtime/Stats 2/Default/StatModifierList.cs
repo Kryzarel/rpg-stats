@@ -1,13 +1,14 @@
+using Kryz.RPG.Stats2.Core;
+
 namespace Kryz.RPG.Stats2
 {
-	public abstract class StatModifierListDefault : StatModifierList<StatModifier>
+	public abstract class StatModifierList : StatModifierList<StatModifier>, IStatModifierList
 	{
-		protected StatModifierListDefault(float defaultValue) : base(defaultValue) { }
+		protected StatModifierList(float defaultValue) : base(defaultValue) { }
 
-		public int RemoveFromSource(object source)
+		public int RemoveModifiersFromSource(object source)
 		{
 			int numRemoved = 0;
-
 			for (int i = modifiers.Count - 1; i >= 0; i--)
 			{
 				if (modifiers[i].Source == source)

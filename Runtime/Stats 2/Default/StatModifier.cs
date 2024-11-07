@@ -1,4 +1,5 @@
 using System;
+using Kryz.RPG.Stats2.Core;
 
 namespace Kryz.RPG.Stats2
 {
@@ -32,7 +33,7 @@ namespace Kryz.RPG.Stats2
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Value, Source);
+			return HashCode.Combine(Value, Type, Source);
 		}
 
 		public static bool operator ==(StatModifier a, StatModifier b)

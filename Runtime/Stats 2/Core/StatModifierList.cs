@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Kryz.RPG.Stats2
+namespace Kryz.RPG.Stats2.Core
 {
 	public abstract class StatModifierList<T> : IStatModifierList<T> where T : struct, IStatModifier
 	{

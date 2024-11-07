@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Kryz.RPG.Stats2
+namespace Kryz.RPG.Stats2.Core
 {
 	public abstract class Stat<T, TList> : IStat<T> where T : struct, IStatModifier where TList : IStatModifierList<T>
 	{
@@ -23,9 +23,6 @@ namespace Kryz.RPG.Stats2
 			this.baseValue = baseValue;
 			CalculateFinalValue();
 		}
-
-		public abstract void AddModifier(T modifier);
-		public abstract bool RemoveModifier(T modifier);
 
 		protected void AddModifier(int listIndex, T modifier)
 		{
@@ -66,5 +63,8 @@ namespace Kryz.RPG.Stats2
 				modifierLists[i].Clear();
 			}
 		}
+
+		public abstract void AddModifier(T modifier);
+		public abstract bool RemoveModifier(T modifier);
 	}
 }
