@@ -2,7 +2,7 @@ using System;
 
 namespace Kryz.RPG.Stats2
 {
-	public sealed class Stat : Stat<StatModifier, StatModifierList<StatModifier>>
+	public sealed class Stat : Stat<StatModifier, StatModifierListDefault>
 	{
 		public Stat(float baseValue = 0) : base(baseValue, GetModifierLists()) { }
 
@@ -26,16 +26,15 @@ namespace Kryz.RPG.Stats2
 			if (numRemoved > 0)
 			{
 				CalculateFinalValue();
-
 			}
 			return numRemoved;
 		}
 
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
-		private static StatModifierList<StatModifier>[] GetModifierLists()
+		private static StatModifierListDefault[] GetModifierLists()
 		{
-			StatModifierList<StatModifier>[] lists = new StatModifierList<StatModifier>[modifierTypes.Length];
+			StatModifierListDefault[] lists = new StatModifierListDefault[modifierTypes.Length];
 
 			for (int i = 0; i < modifierTypes.Length; i++)
 			{

@@ -4,7 +4,8 @@ namespace Kryz.RPG.Stats2
 {
 	public abstract class Stat<T, TList> : IStat<T> where T : struct, IStatModifier where TList : IStatModifierList<T>
 	{
-		private readonly TList[] modifierLists;
+		protected readonly TList[] modifierLists;
+
 		private float baseValue;
 		private float finalValue;
 
@@ -42,7 +43,7 @@ namespace Kryz.RPG.Stats2
 			return false;
 		}
 
-		private void CalculateFinalValue()
+		protected void CalculateFinalValue()
 		{
 			finalValue = baseValue;
 			for (int i = 0; i < modifierLists.Length; i++)

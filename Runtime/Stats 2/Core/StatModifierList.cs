@@ -6,7 +6,8 @@ namespace Kryz.RPG.Stats2
 {
 	public abstract class StatModifierList<T> : IStatModifierList<T> where T : struct, IStatModifier
 	{
-		private readonly List<T> modifiers = new();
+		protected readonly List<T> modifiers = new();
+
 		private readonly float defaultValue;
 		private float modifierValue;
 

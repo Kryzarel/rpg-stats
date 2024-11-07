@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats2
 {
-	public sealed class StatModifierListMultiplyBase : StatModifierList<StatModifier>
+	public sealed class StatModifierListMultiplyBase : StatModifierListDefault
 	{
 		public StatModifierListMultiplyBase() : base(defaultValue: 1) { }
 
