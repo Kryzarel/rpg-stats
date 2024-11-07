@@ -27,10 +27,10 @@ namespace Kryz.RPG.Stats2.Default
 				StatModifierType type = modifierTypes[i];
 				lists[i] = type switch
 				{
-					StatModifierType.Add => new StatModifierListAdd<StatModifier>(),
-					StatModifierType.MultiplyBase => new StatModifierListMultiplyBase<StatModifier>(),
-					StatModifierType.MultiplyTotal => new StatModifierListMultiplyTotal<StatModifier>(),
-					StatModifierType.Override => new StatModifierListOverride<StatModifier>(),
+					StatModifierType.Add => new StatModifierListAdd(),
+					StatModifierType.MultiplyBase => new StatModifierListMultiplyBase(),
+					StatModifierType.MultiplyTotal => new StatModifierListMultiplyTotal(),
+					StatModifierType.Override => new StatModifierListOverride(),
 					_ => throw new NotImplementedException(),
 				};
 			}
