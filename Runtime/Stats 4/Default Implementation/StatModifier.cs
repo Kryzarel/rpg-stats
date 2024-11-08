@@ -5,23 +5,23 @@ namespace Kryz.RPG.Stats4
 	public readonly struct StatModifier : IComparable<StatModifier>, IEquatable<StatModifier>
 	{
 		public readonly float Value;
-		public readonly StatModifierMetaData MetaData;
+		public readonly StatModifierdata Data;
 
 		public StatModifier(float value, StatModifierType type, object? source = default)
 		{
 			Value = value;
-			MetaData = new StatModifierMetaData(type, source);
+			Data = new StatModifierdata(type, source);
 		}
 
-		public StatModifier(float value, StatModifierMetaData metaData)
+		public StatModifier(float value, StatModifierdata data)
 		{
 			Value = value;
-			MetaData = metaData;
+			Data = data;
 		}
 
 		public int CompareTo(StatModifier other)
 		{
-			int result = MetaData.CompareTo(other.MetaData);
+			int result = Data.CompareTo(other.Data);
 			if (result == 0)
 			{
 				result = Value.CompareTo(other.Value);
@@ -41,12 +41,12 @@ namespace Kryz.RPG.Stats4
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Value, MetaData);
+			return HashCode.Combine(Value, Data);
 		}
 
 		public static bool operator ==(StatModifier a, StatModifier b)
 		{
-			return a.Value == b.Value && a.MetaData == b.MetaData;
+			return a.Value == b.Value && a.Data == b.Data;
 		}
 
 		public static bool operator !=(StatModifier a, StatModifier b)

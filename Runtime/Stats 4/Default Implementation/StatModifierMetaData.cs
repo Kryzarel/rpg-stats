@@ -2,30 +2,30 @@ using System;
 
 namespace Kryz.RPG.Stats4
 {
-	public readonly struct StatModifierMetaData : IStatModifierMetaData, IComparable<StatModifierMetaData>, IEquatable<StatModifierMetaData>
+	public readonly struct StatModifierdata : IStatModifierData, IComparable<StatModifierdata>, IEquatable<StatModifierdata>
 	{
 		public readonly StatModifierType Type;
 		public readonly object? Source;
 
-		public StatModifierMetaData(StatModifierType type, object? source = default)
+		public StatModifierdata(StatModifierType type, object? source = default)
 		{
 			Type = type;
 			Source = source;
 		}
 
-		public int CompareTo(StatModifierMetaData other)
+		public int CompareTo(StatModifierdata other)
 		{
 			return Type.CompareTo(other.Type);
 		}
 
-		public bool Equals(StatModifierMetaData other)
+		public bool Equals(StatModifierdata other)
 		{
 			return this == other;
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is StatModifierMetaData other && Equals(other);
+			return obj is StatModifierdata other && Equals(other);
 		}
 
 		public override int GetHashCode()
@@ -33,12 +33,12 @@ namespace Kryz.RPG.Stats4
 			return HashCode.Combine(Type, Source);
 		}
 
-		public static bool operator ==(StatModifierMetaData a, StatModifierMetaData b)
+		public static bool operator ==(StatModifierdata a, StatModifierdata b)
 		{
 			return a.Type == b.Type && a.Source == b.Source;
 		}
 
-		public static bool operator !=(StatModifierMetaData a, StatModifierMetaData b)
+		public static bool operator !=(StatModifierdata a, StatModifierdata b)
 		{
 			return !(a == b);
 		}

@@ -1,27 +1,26 @@
+using System;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
 {
-	public abstract class Stat<T, TList> : IStat<T> where T : struct, IStatModifierMetaData where TList : IStatModifierList<T>
+	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData
 	{
-		protected readonly TList[] modifierLists;
+		protected readonly IStat<T>[] innerStats;
 
 		private float baseValue;
 		private float finalValue;
 
+		public event Action<IReadOnlyStat, float>? OnValueChanged;
+
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
 
-		public IReadOnlyList<IReadOnlyStatModifierList<T>> Modifiers { get; }
-		IReadOnlyList<IStatModifierList> IStat.Modifiers => (IReadOnlyList<IStatModifierList>)Modifiers;
+		public IReadOnlyList<float> ModifierValues => throw new System.NotImplementedException();
+		public IReadOnlyList<T> ModifierDatas => throw new System.NotImplementedException();
 
-		protected Stat(float baseValue = 0, params TList[] modifierLists)
+		protected Stat(float baseValue = 0, params IStat<T>[] innerStats)
 		{
-			// I legit don't understand why all these gymnastics are needed.
-			// If TList is already constrained to be IStatModifierList<T>, direct implicit cast should work?
-			Modifiers = (IReadOnlyList<IReadOnlyStatModifierList<T>>)(IReadOnlyList<TList>)modifierLists;
-
-			this.modifierLists = modifierLists;
+			this.innerStats = innerStats;
 			this.baseValue = baseValue;
 			CalculateFinalValue();
 		}
@@ -29,21 +28,21 @@ namespace Kryz.RPG.Stats4
 		protected void CalculateFinalValue()
 		{
 			finalValue = baseValue;
-			for (int i = 0; i < modifierLists.Length; i++)
+			for (int i = 0; i < innerStats.Length; i++)
 			{
-				finalValue = modifierLists[i].Calculate(finalValue);
+				// finalValue = modifierLists[i].Calculate(finalValue);
 			}
 		}
 
-		protected void AddModifier(int listIndex, float modifierValue, T metaData)
+		protected void AddModifier(int listIndex, float modifierValue, T data)
 		{
-			modifierLists[listIndex].Add(modifierValue, metaData);
+			innerStats[listIndex].AddModifier(modifierValue, data);
 			CalculateFinalValue();
 		}
 
-		protected bool RemoveModifier(int listIndex, float modifierValue, T metaData)
+		protected bool RemoveModifier(int listIndex, float modifierValue, T data)
 		{
-			if (modifierLists[listIndex].Remove(modifierValue, metaData))
+			if (innerStats[listIndex].RemoveModifier(modifierValue, data))
 			{
 				CalculateFinalValue();
 				return true;
@@ -54,9 +53,9 @@ namespace Kryz.RPG.Stats4
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
 		{
 			int removedCount = 0;
-			for (int i = 0; i < modifierLists.Length; i++)
+			for (int i = 0; i < innerStats.Length; i++)
 			{
-				removedCount += modifierLists[i].RemoveWhere(match);
+				removedCount += innerStats[i].RemoveWhere(match);
 			}
 			return removedCount;
 		}
@@ -70,13 +69,13 @@ namespace Kryz.RPG.Stats4
 		public void ClearModifiers()
 		{
 			finalValue = baseValue;
-			for (int i = 0; i < modifierLists.Length; i++)
+			for (int i = 0; i < innerStats.Length; i++)
 			{
-				modifierLists[i].Clear();
+				innerStats[i].Clear();
 			}
 		}
 
-		public abstract void AddModifier(float modifierValue, T metaData);
-		public abstract bool RemoveModifier(float modifierValue, T metaData);
+		public abstract void AddModifier(float modifierValue, T data);
+		public abstract bool RemoveModifier(float modifierValue, T data);
 	}
 }

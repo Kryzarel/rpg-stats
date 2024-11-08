@@ -1,23 +1,34 @@
+using System;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
 {
-	public interface IStat
+	public interface IReadOnlyStat
 	{
-		float BaseValue { get; set; }
+		float BaseValue { get; }
 		float FinalValue { get; }
-		IReadOnlyList<IStatModifierList> Modifiers { get; }
+		IReadOnlyList<float> ModifierValues { get; }
+
+		event Action<IReadOnlyStat, float> OnValueChanged;
+	}
+
+	public interface IReadOnlyStat<T> : IReadOnlyStat where T : struct, IStatModifierData
+	{
+		IReadOnlyList<T> ModifierDatas { get; }
+	}
+
+	public interface IStat : IReadOnlyStat
+	{
+		new float BaseValue { get; set; }
 
 		void Clear();
 		void ClearModifiers();
 	}
 
-	public interface IStat<T> : IStat where T : struct, IStatModifierMetaData
+	public interface IStat<T> : IStat, IReadOnlyStat<T> where T : struct, IStatModifierData
 	{
-		new IReadOnlyList<IReadOnlyStatModifierList<T>> Modifiers { get; }
-
-		void AddModifier(float modifierValue, T metaData);
-		bool RemoveModifier(float modifierValue, T metaData);
+		void AddModifier(float modifierValue, T data);
+		bool RemoveModifier(float modifierValue, T data);
 		int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>;
 	}
 }

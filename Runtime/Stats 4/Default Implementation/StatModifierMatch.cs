@@ -1,6 +1,6 @@
 namespace Kryz.RPG.Stats4
 {
-	public readonly struct StatModifierMatch : IStatModifierMatch<StatModifierMetaData>
+	public readonly struct StatModifierMatch : IStatModifierMatch<StatModifierdata>
 	{
 		public readonly ValueContainer<float> ModifierValue;
 		public readonly ValueContainer<StatModifierType> Type;
@@ -13,9 +13,9 @@ namespace Kryz.RPG.Stats4
 			Source = source;
 		}
 
-		public bool IsMatch(float modifierValue, StatModifierMetaData metaData)
+		public bool IsMatch(float modifierValue, StatModifierdata data)
 		{
-			return (!ModifierValue.HasValue || ModifierValue.Value == modifierValue) && (!Type.HasValue || Type.Value == metaData.Type) && (!Source.HasValue || Source.Value == metaData.Source);
+			return (!ModifierValue.HasValue || ModifierValue.Value == modifierValue) && (!Type.HasValue || Type.Value == data.Type) && (!Source.HasValue || Source.Value == data.Source);
 		}
 	}
 

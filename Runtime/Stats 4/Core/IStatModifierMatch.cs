@@ -1,7 +1,7 @@
 namespace Kryz.RPG.Stats4
 {
-	public interface IStatModifierMatch<T> where T : struct, IStatModifierMetaData
+	public interface IStatModifierMatch<T> where T : struct, IStatModifierData
 	{
-		bool IsMatch(float modifierValue, T metaData);
+		bool IsMatch(float modifierValue, T data);
 	}
 }
