@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
@@ -52,12 +51,12 @@ namespace Kryz.RPG.Stats4
 			return false;
 		}
 
-		public int RemoveWhere(Func<float, T, bool> predicate)
+		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
 		{
 			int removedCount = 0;
 			for (int i = 0; i < modifierLists.Length; i++)
 			{
-				removedCount += modifierLists[i].RemoveWhere(predicate);
+				removedCount += modifierLists[i].RemoveWhere(match);
 			}
 			return removedCount;
 		}

@@ -18,7 +18,7 @@ namespace Kryz.RPG.Stats4
 
 		public int RemoveModifiersFromSource(object source)
 		{
-			return RemoveWhere((value, metaData) => metaData.Source == source);
+			return RemoveWhere(new StatModifierMatch(source: source));
 		}
 
 		public override void AddModifier(float value, StatModifierMetaData metaData)

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
@@ -24,6 +23,6 @@ namespace Kryz.RPG.Stats4
 	{
 		void Add(float modifierValue, T metaData);
 		bool Remove(float modifierValue, T metaData);
-		int RemoveWhere(Func<float, T, bool> predicate);
+		int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>;
 	}
 }
