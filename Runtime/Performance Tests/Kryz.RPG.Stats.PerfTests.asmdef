@@ -4,7 +4,8 @@
     "references": [
         "Kryz.RPG.Stats",
         "Kryz.RPG.Stats2",
-        "Kryz.RPG.Stats3"
+        "Kryz.RPG.Stats3",
+        "Kryz.RPG.Stats4"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
