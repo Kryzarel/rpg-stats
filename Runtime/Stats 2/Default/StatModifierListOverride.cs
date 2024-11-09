@@ -10,7 +10,7 @@ namespace Kryz.RPG.Stats2.Default
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override float Calculate(float statBaseValue, float statCurrentValue, float modifierValue)
 		{
-			return modifierValue;
+			return modifiers.Count > 0 ? modifierValue : statCurrentValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,7 +32,7 @@ namespace Kryz.RPG.Stats2.Default
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override float RemoveOperation(float modifierValue, StatModifier modifier)
 		{
-			return modifiers[^1].Value;
+			return modifiers.Count > 0 ? modifiers[^1].Value : modifierValue;
 		}
 
 		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier> list, StatModifier value)
