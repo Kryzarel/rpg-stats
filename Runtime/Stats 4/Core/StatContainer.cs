@@ -1,5 +1,3 @@
-using System;
-
 namespace Kryz.RPG.Stats4
 {
 	public readonly struct StatContainer<T, TStat> where T : struct, IStatModifierData<T> where TStat : IStat<T>

@@ -102,7 +102,7 @@ namespace Kryz.RPG.Stats4
 
 		private (int, int) FindIndices(int index)
 		{
-			int i = 0;
+			int i;
 			for (i = 0; i < statContainers.Length; i++)
 			{
 				int count = statContainers[i].Stat.ModifiersCount;
