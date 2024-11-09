@@ -2,8 +2,8 @@ namespace Kryz.RPG.Stats4
 {
 	public enum StatModifierType
 	{
-		MultiplyBase,
 		Add,
+		Multiply,
 		MultiplyTotal,
 		Override,
 	}

@@ -33,23 +33,27 @@ namespace Kryz.RPG.Stats4
 
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
-		private static SimpleStat<StatModifierdata>[] GetModifierLists()
+		private static StatContainer<StatModifierdata, IStat<StatModifierdata>>[] GetModifierLists()
 		{
-			SimpleStat<StatModifierdata>[] lists = new SimpleStat<StatModifierdata>[modifierTypes.Length];
+			var lists = new StatContainer<StatModifierdata, IStat<StatModifierdata>>[modifierTypes.Length];
 
 			for (int i = 0; i < modifierTypes.Length; i++)
 			{
 				StatModifierType type = modifierTypes[i];
 				lists[i] = type switch
 				{
-					StatModifierType.Add => new SimpleStatAdd<StatModifierdata>(0),
-					StatModifierType.MultiplyBase => new SimpleStatAdd<StatModifierdata>(1),
-					StatModifierType.MultiplyTotal => new SimpleStatMult<StatModifierdata>(1),
-					StatModifierType.Override => new SimpleStatOverride<StatModifierdata>(0),
+					StatModifierType.Add => new(new SimpleStatAdd<StatModifierdata>(0), Add),
+					StatModifierType.Multiply => new(new SimpleStatAdd<StatModifierdata>(1), Multiply),
+					StatModifierType.MultiplyTotal => new(new SimpleStatMult<StatModifierdata>(1), Multiply),
+					StatModifierType.Override => new(new SimpleStatOverride<StatModifierdata>(0), Override),
 					_ => throw new NotImplementedException(),
 				};
 			}
 			return lists;
 		}
+
+		private static float Add(float a, IStat<StatModifierdata> b) => a + b.FinalValue;
+		private static float Multiply(float a, IStat<StatModifierdata> b) => a * b.FinalValue;
+		private static float Override(float a, IStat<StatModifierdata> b) => b.ModifierValues.Count > 0 ? b.FinalValue : a;
 	}
 }

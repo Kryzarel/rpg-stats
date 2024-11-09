@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats4
 {
-	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData
+    public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData
 	{
 		private static readonly EqualityComparer<T> dataComparer = EqualityComparer<T>.Default;
 
@@ -30,10 +29,17 @@ namespace Kryz.RPG.Stats4
 
 		protected void CalculateFinalValue()
 		{
+			float initialValue = finalValue;
 			finalValue = baseValue;
+
 			for (int i = 0; i < modifierValues.Count; i++)
 			{
 				AddOperation(finalValue, modifierValues[i], modifierDatas[i]);
+			}
+
+			if (finalValue != initialValue)
+			{
+				OnValueChanged?.Invoke(this, finalValue);
 			}
 		}
 
@@ -41,7 +47,14 @@ namespace Kryz.RPG.Stats4
 		{
 			modifierValues.Add(modifierValue);
 			modifierDatas.Add(data);
+
+			float initialValue = finalValue;
 			finalValue = AddOperation(finalValue, modifierValue, data);
+
+			if (finalValue != initialValue)
+			{
+				OnValueChanged?.Invoke(this, finalValue);
+			}
 		}
 
 		public bool RemoveModifier(float modifierValue, T data)
@@ -52,7 +65,14 @@ namespace Kryz.RPG.Stats4
 				{
 					modifierValues.RemoveAt(i);
 					modifierDatas.RemoveAt(i);
+
+					float initialValue = finalValue;
 					finalValue = RemoveOperation(finalValue, modifierValue, data);
+
+					if (finalValue != initialValue)
+					{
+						OnValueChanged?.Invoke(this, finalValue);
+					}
 					return true;
 				}
 			}
@@ -61,16 +81,28 @@ namespace Kryz.RPG.Stats4
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
 		{
+			float initialValue = finalValue;
 			int removedCount = 0;
+
 			for (int i = modifierValues.Count - 1; i >= 0; i--)
 			{
-				if (match.IsMatch(modifierValues[i], modifierDatas[i]))
+				float value = modifierValues[i];
+				T data = modifierDatas[i];
+
+				if (match.IsMatch(value, data))
 				{
 					modifierValues.RemoveAt(i);
 					modifierDatas.RemoveAt(i);
+					finalValue = RemoveOperation(finalValue, value, data);
 					removedCount++;
 				}
 			}
+
+			if (finalValue != initialValue)
+			{
+				OnValueChanged?.Invoke(this, finalValue);
+			}
+
 			return removedCount;
 		}
 
@@ -82,14 +114,18 @@ namespace Kryz.RPG.Stats4
 
 		public void ClearModifiers()
 		{
+			float initialValue = finalValue;
 			finalValue = baseValue;
 			modifierValues.Clear();
 			modifierDatas.Clear();
+
+			if (finalValue != initialValue)
+			{
+				OnValueChanged?.Invoke(this, finalValue);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract float AddOperation(float currentValue, float modifierValue, T data);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract float RemoveOperation(float currentValue, float modifierValue, T data);
 	}
 }
