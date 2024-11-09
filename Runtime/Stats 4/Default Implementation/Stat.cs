@@ -35,7 +35,7 @@ namespace Kryz.RPG.Stats4
 					StatModifierType.Add => new(new SimpleStatAdd<StatModifierData>(0), AddOperation<StatModifierData>.Instance),
 					StatModifierType.Multiply => new(new SimpleStatAdd<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
 					StatModifierType.MultiplyTotal => new(new SimpleStatMult<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
-					StatModifierType.Override => new(new SimpleStatOverride<StatModifierData>(0), OverrideOperation<StatModifierData>.Instance),
+					StatModifierType.Override => new(new SimpleStatOverride<StatModifierData>(), OverrideOperation<StatModifierData>.Instance),
 					_ => throw new NotImplementedException(),
 				};
 			}

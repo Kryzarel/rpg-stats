@@ -33,7 +33,7 @@ namespace Kryz.RPG.Stats4
 
 		protected void CalculateFinalValue()
 		{
-			finalValue = CalculateFinalValue(finalValue);
+			finalValue = CalculateFinalValue(baseValue);
 		}
 
 		public void AddModifier(StatModifier<T> modifier)

@@ -4,7 +4,7 @@ namespace Kryz.RPG.Stats4
 {
 	public class SimpleStatOverride<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
-		public SimpleStatOverride(float baseValue = 0) : base(baseValue) { }
+		public SimpleStatOverride() : base() { }
 
 		protected override float AddOperation(float currentValue, StatModifier<T> modifier)
 		{
@@ -17,7 +17,7 @@ namespace Kryz.RPG.Stats4
 			int index = BinarySearchLeftmost(modifiers, modifier.Value);
 			modifiers.RemoveAt(modifiers.Count - 1);
 			modifiers.Insert(index, modifier);
-			return modifier.Value;
+			return currentValue;
 		}
 
 		protected override float RemoveOperation(float currentValue, StatModifier<T> modifier)
