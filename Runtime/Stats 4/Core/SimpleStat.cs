@@ -3,12 +3,9 @@ using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
 {
-    public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData
+	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		private static readonly EqualityComparer<T> dataComparer = EqualityComparer<T>.Default;
-
-		protected readonly List<float> modifierValues = new();
-		protected readonly List<T> modifierDatas = new();
+		protected readonly List<StatModifier<T>> modifiers = new();
 
 		private float baseValue;
 		private float finalValue;
@@ -17,9 +14,7 @@ namespace Kryz.RPG.Stats4
 
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
-
-		public IReadOnlyList<float> ModifierValues => modifierValues;
-		public IReadOnlyList<T> ModifierDatas => modifierDatas;
+		public int ModifiersCount => modifiers.Count;
 
 		protected SimpleStat(float baseValue = 0)
 		{
@@ -32,9 +27,9 @@ namespace Kryz.RPG.Stats4
 			float initialValue = finalValue;
 			finalValue = baseValue;
 
-			for (int i = 0; i < modifierValues.Count; i++)
+			for (int i = 0; i < modifiers.Count; i++)
 			{
-				AddOperation(finalValue, modifierValues[i], modifierDatas[i]);
+				AddOperation(finalValue, modifiers[i]);
 			}
 
 			if (finalValue != initialValue)
@@ -43,13 +38,12 @@ namespace Kryz.RPG.Stats4
 			}
 		}
 
-		public void AddModifier(float modifierValue, T data)
+		public void AddModifier(StatModifier<T> modifier)
 		{
-			modifierValues.Add(modifierValue);
-			modifierDatas.Add(data);
+			modifiers.Add(modifier);
 
 			float initialValue = finalValue;
-			finalValue = AddOperation(finalValue, modifierValue, data);
+			finalValue = AddOperation(finalValue, modifier);
 
 			if (finalValue != initialValue)
 			{
@@ -57,17 +51,16 @@ namespace Kryz.RPG.Stats4
 			}
 		}
 
-		public bool RemoveModifier(float modifierValue, T data)
+		public bool RemoveModifier(StatModifier<T> modifier)
 		{
-			for (int i = modifierValues.Count - 1; i >= 0; i--)
+			for (int i = modifiers.Count - 1; i >= 0; i--)
 			{
-				if (modifierValues[i] == modifierValue && dataComparer.Equals(modifierDatas[i], data))
+				if (modifiers[i] == modifier)
 				{
-					modifierValues.RemoveAt(i);
-					modifierDatas.RemoveAt(i);
+					modifiers.RemoveAt(i);
 
 					float initialValue = finalValue;
-					finalValue = RemoveOperation(finalValue, modifierValue, data);
+					finalValue = RemoveOperation(finalValue, modifier);
 
 					if (finalValue != initialValue)
 					{
@@ -84,16 +77,14 @@ namespace Kryz.RPG.Stats4
 			float initialValue = finalValue;
 			int removedCount = 0;
 
-			for (int i = modifierValues.Count - 1; i >= 0; i--)
+			for (int i = modifiers.Count - 1; i >= 0; i--)
 			{
-				float value = modifierValues[i];
-				T data = modifierDatas[i];
+				StatModifier<T> modifier = modifiers[i];
 
-				if (match.IsMatch(value, data))
+				if (match.IsMatch(modifier))
 				{
-					modifierValues.RemoveAt(i);
-					modifierDatas.RemoveAt(i);
-					finalValue = RemoveOperation(finalValue, value, data);
+					modifiers.RemoveAt(i);
+					finalValue = RemoveOperation(finalValue, modifier);
 					removedCount++;
 				}
 			}
@@ -116,8 +107,7 @@ namespace Kryz.RPG.Stats4
 		{
 			float initialValue = finalValue;
 			finalValue = baseValue;
-			modifierValues.Clear();
-			modifierDatas.Clear();
+			modifiers.Clear();
 
 			if (finalValue != initialValue)
 			{
@@ -125,7 +115,17 @@ namespace Kryz.RPG.Stats4
 			}
 		}
 
-		protected abstract float AddOperation(float currentValue, float modifierValue, T data);
-		protected abstract float RemoveOperation(float currentValue, float modifierValue, T data);
+		protected abstract float AddOperation(float currentValue, StatModifier<T> modifier);
+		protected abstract float RemoveOperation(float currentValue, StatModifier<T> modifier);
+
+		public StatModifier<T> GetModifier(int index)
+		{
+			throw new NotImplementedException();
+		}
+
+		public float GetModifierValue(int index)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

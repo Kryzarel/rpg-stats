@@ -1,67 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Kryz.RPG.Stats4
 {
-	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData
+	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		private class MultiStatList : IReadOnlyList<float>
-		{
-			private readonly StatContainer<T, IStat<T>>[] statContainers;
-
-			public MultiStatList(StatContainer<T, IStat<T>>[] statContainers)
-			{
-				this.statContainers = statContainers;
-			}
-
-			public float this[int index]
-			{
-				get
-				{
-					(int i, int j) = FindIndices(index);
-					return statContainers[i].Stat.ModifierValues[j];
-				}
-			}
-
-			public int Count => SumCounts();
-
-			public IEnumerator<float> GetEnumerator()
-			{
-				foreach (StatContainer<T, IStat<T>> container in statContainers)
-				{
-					foreach (float value in container.Stat.ModifierValues)
-					{
-						yield return value;
-					}
-				}
-			}
-
-			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-			private int SumCounts()
-			{
-				int count = 0;
-				for (int i = 0; i < statContainers.Length; i++)
-				{
-					count += statContainers[i].Stat.ModifierValues.Count;
-				}
-				return count;
-			}
-
-			private (int, int) FindIndices(int index)
-			{
-				int i = 0;
-				for (i = 0; i < statContainers.Length; i++)
-				{
-					int count = statContainers[i].Stat.ModifierValues.Count;
-					if (index < count) break;
-					index -= count;
-				}
-				return (i, index);
-			}
-		}
-
 		protected readonly StatContainer<T, IStat<T>>[] statContainers;
 
 		private float baseValue;
@@ -71,9 +14,7 @@ namespace Kryz.RPG.Stats4
 
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
-
-		public IReadOnlyList<float> ModifierValues => throw new System.NotImplementedException();
-		public IReadOnlyList<T> ModifierDatas => throw new System.NotImplementedException();
+		public int ModifiersCount => statContainers.Select(c => c.Stat.ModifiersCount).Sum();
 
 		protected Stat(float baseValue = 0, params StatContainer<T, IStat<T>>[] statContainers)
 		{
@@ -97,19 +38,20 @@ namespace Kryz.RPG.Stats4
 			finalValue = baseValue;
 			for (int i = 0; i < statContainers.Length; i++)
 			{
-				finalValue = statContainers[i].Apply(finalValue);
+				StatContainer<T, IStat<T>> container = statContainers[i];
+				finalValue = container.Operation.Calculate(finalValue, container.Stat);
 			}
 		}
 
-		protected void AddModifier(int listIndex, float modifierValue, T data)
+		protected void AddModifier(int listIndex, StatModifier<T> modifier)
 		{
-			statContainers[listIndex].Stat.AddModifier(modifierValue, data);
+			statContainers[listIndex].Stat.AddModifier(modifier);
 			CalculateFinalValue();
 		}
 
-		protected bool RemoveModifier(int listIndex, float modifierValue, T data)
+		protected bool RemoveModifier(int listIndex, StatModifier<T> modifier)
 		{
-			if (statContainers[listIndex].Stat.RemoveModifier(modifierValue, data))
+			if (statContainers[listIndex].Stat.RemoveModifier(modifier))
 			{
 				CalculateFinalValue();
 				return true;
@@ -147,7 +89,27 @@ namespace Kryz.RPG.Stats4
 			}
 		}
 
-		public abstract void AddModifier(float modifierValue, T data);
-		public abstract bool RemoveModifier(float modifierValue, T data);
+		public abstract void AddModifier(StatModifier<T> modifier);
+		public abstract bool RemoveModifier(StatModifier<T> modifier);
+
+		public StatModifier<T> GetModifier(int index)
+		{
+			(int i, int j) = FindIndices(index);
+			return statContainers[i].Stat.GetModifier(j);
+		}
+
+		public float GetModifierValue(int index) => GetModifier(index).Value;
+
+		private (int, int) FindIndices(int index)
+		{
+			int i = 0;
+			for (i = 0; i < statContainers.Length; i++)
+			{
+				int count = statContainers[i].Stat.ModifiersCount;
+				if (index < count) break;
+				index -= count;
+			}
+			return (i, index);
+		}
 	}
 }

@@ -2,35 +2,30 @@ using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
 {
-	public class SimpleStatOverride<T> : SimpleStat<T> where T : struct, IStatModifierData
+	public class SimpleStatOverride<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
 		public SimpleStatOverride(float baseValue = 0) : base(baseValue) { }
 
-		protected override float AddOperation(float currentValue, float modifierValue, T data)
+		protected override float AddOperation(float currentValue, StatModifier<T> modifier)
 		{
-			if (modifierValue >= currentValue)
+			if (modifier.Value >= currentValue)
 			{
-				return modifierValue;
+				return modifier.Value;
 			}
 
 			// Improves performance by essentially inserting the modifiers sorted
-			int index = BinarySearchLeftmost(modifierValues, modifierValue);
-
-			modifierValues.RemoveAt(modifierValues.Count - 1);
-			modifierDatas.RemoveAt(modifierDatas.Count - 1);
-
-			modifierValues.Insert(index, modifierValue);
-			modifierDatas.Insert(index, data);
-
-			return modifierValue;
+			int index = BinarySearchLeftmost(modifiers, modifier.Value);
+			modifiers.RemoveAt(modifiers.Count - 1);
+			modifiers.Insert(index, modifier);
+			return modifier.Value;
 		}
 
-		protected override float RemoveOperation(float currentValue, float modifierValue, T data)
+		protected override float RemoveOperation(float currentValue, StatModifier<T> modifier)
 		{
-			return modifierValues.Count > 0 ? modifierValues[^1] : currentValue;
+			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
 		}
 
-		private static int BinarySearchLeftmost(IReadOnlyList<float> list, float value)
+		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier<T>> list, float value)
 		{
 			int min = 0;
 			int max = list.Count;
@@ -39,7 +34,7 @@ namespace Kryz.RPG.Stats4
 			{
 				int mid = (min + max) / 2;
 
-				if (list[mid] < value)
+				if (list[mid].Value < value)
 					min = mid + 1;
 				else
 					max = mid;

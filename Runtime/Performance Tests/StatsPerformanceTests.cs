@@ -9,7 +9,7 @@ using StatModifier3 = Kryz.RPG.Stats3.StatModifier;
 
 using Kryz.RPG.Stats4;
 using Stat4 = Kryz.RPG.Stats4.Stat;
-using StatModifier4 = Kryz.RPG.Stats4.StatModifier;
+using StatModifier4 = Kryz.RPG.Stats4.StatModifier<Kryz.RPG.Stats4.StatModifierData>;
 using StatModifierType4 = Kryz.RPG.Stats4.StatModifierType;
 
 namespace Kryz.RPG.Stats.PerfTests
@@ -40,7 +40,7 @@ namespace Kryz.RPG.Stats.PerfTests
 
 				StatModifier modifider = new(value, (StatModifierType)listIndex, this);
 				StatModifier2 modifier2 = new(value, (StatModifierType2)listIndex, this);
-				StatModifier4 modifier4 = new(value, (StatModifierType4)listIndex, this);
+				StatModifier4 modifier4 = new(value, new((StatModifierType4)listIndex, this));
 
 				IStatModifierType<StatModifier3> type = listIndex switch
 				{
