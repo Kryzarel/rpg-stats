@@ -1,62 +1,50 @@
 using System;
-using System.Linq;
 
 namespace Kryz.RPG.Stats4
 {
 	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		protected readonly StatContainer<T, IStat<T>>[] statContainers;
+		protected readonly StatContainer<T>[] statContainers;
+		private readonly float[] cachedValues;
 
 		private float baseValue;
 		private float finalValue;
 
+		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
+		public float FinalValue { get { CheckValueChanged(); return finalValue; } }
+		public int ModifiersCount => SumCounts();
+
 		public event Action<IReadOnlyStat, float>? OnValueChanged;
 
-		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
-		public float FinalValue => finalValue;
-		public int ModifiersCount => statContainers.Select(c => c.Stat.ModifiersCount).Sum();
-
-		protected Stat(float baseValue = 0, params StatContainer<T, IStat<T>>[] statContainers)
+		protected Stat(float baseValue = 0, params StatContainer<T>[] statContainers)
 		{
+			cachedValues = new float[statContainers.Length];
 			this.statContainers = statContainers;
 			this.baseValue = baseValue;
 			CalculateFinalValue();
-
-			// for (int i = 0; i < statContainers.Length; i++)
-			// {
-			// 	statContainers[i].Stat.OnValueChanged += OnStatValueChanged;
-			// }
 		}
 
-		// private void OnStatValueChanged(IReadOnlyStat stat, float value)
-		// {
-		// 	CalculateFinalValue();
-		// }
+		private void CheckValueChanged()
+		{
+			for (int i = 0; i < cachedValues.Length; i++)
+			{
+				if (cachedValues[i] != statContainers[i].Stat.FinalValue)
+				{
+					CalculateFinalValue();
+					break;
+				}
+			}
+		}
 
-		protected void CalculateFinalValue()
+		private void CalculateFinalValue()
 		{
 			finalValue = baseValue;
 			for (int i = 0; i < statContainers.Length; i++)
 			{
-				StatContainer<T, IStat<T>> container = statContainers[i];
+				StatContainer<T> container = statContainers[i];
 				finalValue = container.Operation.Calculate(finalValue, container.Stat);
+				cachedValues[i] = container.Stat.FinalValue;
 			}
-		}
-
-		protected void AddModifier(int listIndex, StatModifier<T> modifier)
-		{
-			statContainers[listIndex].Stat.AddModifier(modifier);
-			CalculateFinalValue();
-		}
-
-		protected bool RemoveModifier(int listIndex, StatModifier<T> modifier)
-		{
-			if (statContainers[listIndex].Stat.RemoveModifier(modifier))
-			{
-				CalculateFinalValue();
-				return true;
-			}
-			return false;
 		}
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
@@ -65,11 +53,6 @@ namespace Kryz.RPG.Stats4
 			for (int i = 0; i < statContainers.Length; i++)
 			{
 				removedCount += statContainers[i].Stat.RemoveWhere(match);
-			}
-
-			if (removedCount > 0)
-			{
-				CalculateFinalValue();
 			}
 			return removedCount;
 		}
@@ -98,7 +81,10 @@ namespace Kryz.RPG.Stats4
 			return statContainers[i].Stat.GetModifier(j);
 		}
 
-		public float GetModifierValue(int index) => GetModifier(index).Value;
+		public float GetModifierValue(int index)
+		{
+			return GetModifier(index).Value;
+		}
 
 		private (int, int) FindIndices(int index)
 		{
@@ -110,6 +96,16 @@ namespace Kryz.RPG.Stats4
 				index -= count;
 			}
 			return (i, index);
+		}
+
+		private int SumCounts()
+		{
+			int count = 0;
+			for (int i = 0; i < statContainers.Length; i++)
+			{
+				count += statContainers[i].Stat.ModifiersCount;
+			}
+			return count;
 		}
 	}
 }

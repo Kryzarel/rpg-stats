@@ -7,7 +7,6 @@ using Kryz.RPG.Stats3;
 using Stat3 = Kryz.RPG.Stats3.Stat;
 using StatModifier3 = Kryz.RPG.Stats3.StatModifier;
 
-using Kryz.RPG.Stats4;
 using Stat4 = Kryz.RPG.Stats4.Stat;
 using StatModifier4 = Kryz.RPG.Stats4.StatModifier<Kryz.RPG.Stats4.StatModifierData>;
 using StatModifierType4 = Kryz.RPG.Stats4.StatModifierType;
@@ -44,10 +43,10 @@ namespace Kryz.RPG.Stats.PerfTests
 
 				IStatModifierType<StatModifier3> type = listIndex switch
 				{
-					0 => Stats3.StatModifierListAdd<StatModifier3>.Type,
-					1 => Stats3.StatModifierListMultiplyBase<StatModifier3>.Type,
-					2 => Stats3.StatModifierListMultiplyTotal<StatModifier3>.Type,
-					3 => Stats3.StatModifierListMultiplyTotal<StatModifier3>.Type,
+					0 => StatModifierListAdd<StatModifier3>.Type,
+					1 => StatModifierListMultiplyBase<StatModifier3>.Type,
+					2 => StatModifierListMultiplyTotal<StatModifier3>.Type,
+					3 => StatModifierListMultiplyTotal<StatModifier3>.Type,
 					_ => throw new System.NotImplementedException(),
 				};
 				StatModifier3 modifier3 = new(value, type, priority: 0, this);

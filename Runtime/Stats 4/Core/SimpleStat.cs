@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
@@ -10,8 +9,6 @@ namespace Kryz.RPG.Stats4
 		private float baseValue;
 		private float finalValue;
 
-		public event Action<IReadOnlyStat, float>? OnValueChanged;
-
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
 		public int ModifiersCount => modifiers.Count;
@@ -19,64 +16,45 @@ namespace Kryz.RPG.Stats4
 		protected SimpleStat(float baseValue = 0)
 		{
 			this.baseValue = baseValue;
-			finalValue = baseValue;
+			CalculateFinalValue();
+		}
+
+		protected abstract float AddOperation(float currentValue, StatModifier<T> modifier);
+		protected abstract float RemoveOperation(float currentValue, StatModifier<T> modifier);
+
+		protected virtual float CalculateFinalValue(float currentValue)
+		{
+			for (int i = 0; i < modifiers.Count; i++)
+			{
+				currentValue = AddOperation(currentValue, modifiers[i]);
+			}
+			return currentValue;
 		}
 
 		protected void CalculateFinalValue()
 		{
-			float initialValue = finalValue;
-			finalValue = baseValue;
-
-			for (int i = 0; i < modifiers.Count; i++)
-			{
-				AddOperation(finalValue, modifiers[i]);
-			}
-
-			if (finalValue != initialValue)
-			{
-				OnValueChanged?.Invoke(this, finalValue);
-			}
+			finalValue = CalculateFinalValue(finalValue);
 		}
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
 			modifiers.Add(modifier);
-
-			float initialValue = finalValue;
 			finalValue = AddOperation(finalValue, modifier);
-
-			if (finalValue != initialValue)
-			{
-				OnValueChanged?.Invoke(this, finalValue);
-			}
 		}
 
 		public bool RemoveModifier(StatModifier<T> modifier)
 		{
-			for (int i = modifiers.Count - 1; i >= 0; i--)
+			if (modifiers.Remove(modifier))
 			{
-				if (modifiers[i] == modifier)
-				{
-					modifiers.RemoveAt(i);
-
-					float initialValue = finalValue;
-					finalValue = RemoveOperation(finalValue, modifier);
-
-					if (finalValue != initialValue)
-					{
-						OnValueChanged?.Invoke(this, finalValue);
-					}
-					return true;
-				}
+				finalValue = RemoveOperation(finalValue, modifier);
+				return true;
 			}
 			return false;
 		}
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
 		{
-			float initialValue = finalValue;
 			int removedCount = 0;
-
 			for (int i = modifiers.Count - 1; i >= 0; i--)
 			{
 				StatModifier<T> modifier = modifiers[i];
@@ -88,12 +66,6 @@ namespace Kryz.RPG.Stats4
 					removedCount++;
 				}
 			}
-
-			if (finalValue != initialValue)
-			{
-				OnValueChanged?.Invoke(this, finalValue);
-			}
-
 			return removedCount;
 		}
 
@@ -105,27 +77,11 @@ namespace Kryz.RPG.Stats4
 
 		public void ClearModifiers()
 		{
-			float initialValue = finalValue;
 			finalValue = baseValue;
 			modifiers.Clear();
-
-			if (finalValue != initialValue)
-			{
-				OnValueChanged?.Invoke(this, finalValue);
-			}
 		}
 
-		protected abstract float AddOperation(float currentValue, StatModifier<T> modifier);
-		protected abstract float RemoveOperation(float currentValue, StatModifier<T> modifier);
-
-		public StatModifier<T> GetModifier(int index)
-		{
-			throw new NotImplementedException();
-		}
-
-		public float GetModifierValue(int index)
-		{
-			throw new NotImplementedException();
-		}
+		public StatModifier<T> GetModifier(int index) => modifiers[index];
+		public float GetModifierValue(int index) => modifiers[index].Value;
 	}
 }

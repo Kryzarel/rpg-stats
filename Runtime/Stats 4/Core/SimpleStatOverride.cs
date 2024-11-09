@@ -25,6 +25,11 @@ namespace Kryz.RPG.Stats4
 			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
 		}
 
+		protected override float CalculateFinalValue(float currentValue)
+		{
+			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
+		}
+
 		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier<T>> list, float value)
 		{
 			int min = 0;

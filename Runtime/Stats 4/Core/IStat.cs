@@ -1,5 +1,3 @@
-using System;
-
 namespace Kryz.RPG.Stats4
 {
 	public interface IReadOnlyStat
@@ -9,8 +7,6 @@ namespace Kryz.RPG.Stats4
 
 		int ModifiersCount { get; }
 		float GetModifierValue(int index);
-
-		event Action<IReadOnlyStat, float> OnValueChanged;
 	}
 
 	public interface IReadOnlyStat<T> : IReadOnlyStat where T : struct, IStatModifierData<T>
