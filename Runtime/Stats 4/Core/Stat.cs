@@ -20,27 +20,42 @@ namespace Kryz.RPG.Stats4
 			CalculateFinalValue();
 		}
 
+		public abstract void AddModifier(StatModifier<T> modifier);
+		public abstract bool RemoveModifier(StatModifier<T> modifier);
+
+		protected virtual float CalculateFinalValue(float baseValue)
+		{
+			float currentValue = baseValue;
+			for (int i = 0; i < statContainers.Length; i++)
+			{
+				StatContainer<T> container = statContainers[i];
+				currentValue = container.Operation.Calculate(currentValue, container.Stat);
+			}
+			return currentValue;
+		}
+
 		private void CheckValueChanged()
 		{
+			bool changed = false;
 			for (int i = 0; i < cachedValues.Length; i++)
 			{
-				if (cachedValues[i] != statContainers[i].Stat.FinalValue)
+				float value = statContainers[i].Stat.FinalValue;
+				if (cachedValues[i] != value)
 				{
-					CalculateFinalValue();
-					break;
+					cachedValues[i] = value;
+					changed = true;
 				}
+			}
+
+			if (changed)
+			{
+				CalculateFinalValue();
 			}
 		}
 
 		private void CalculateFinalValue()
 		{
-			finalValue = baseValue;
-			for (int i = 0; i < statContainers.Length; i++)
-			{
-				StatContainer<T> container = statContainers[i];
-				finalValue = container.Operation.Calculate(finalValue, container.Stat);
-				cachedValues[i] = container.Stat.FinalValue;
-			}
+			finalValue = CalculateFinalValue(baseValue);
 		}
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
@@ -67,9 +82,6 @@ namespace Kryz.RPG.Stats4
 				statContainers[i].Stat.ClearModifiers();
 			}
 		}
-
-		public abstract void AddModifier(StatModifier<T> modifier);
-		public abstract bool RemoveModifier(StatModifier<T> modifier);
 
 		public StatModifier<T> GetModifier(int index)
 		{

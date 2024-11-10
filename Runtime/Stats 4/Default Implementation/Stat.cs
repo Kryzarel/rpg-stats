@@ -16,6 +16,15 @@ namespace Kryz.RPG.Stats4
 			return statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier);
 		}
 
+		protected override float CalculateFinalValue(float baseValue)
+		{
+			if (statContainers[3].Stat.ModifiersCount > 0)
+			{
+				return statContainers[3].Stat.FinalValue;
+			}
+			return (baseValue + statContainers[0].Stat.FinalValue) * statContainers[1].Stat.FinalValue * statContainers[2].Stat.FinalValue;
+		}
+
 		public int RemoveModifiersFromSource(object source)
 		{
 			return RemoveWhere(new StatModifierMatch(source: source));
@@ -32,10 +41,10 @@ namespace Kryz.RPG.Stats4
 				StatModifierType type = modifierTypes[i];
 				lists[i] = type switch
 				{
-					StatModifierType.Add => new(new SimpleStatAdd<StatModifierData>(0), AddOperation<StatModifierData>.Instance),
-					StatModifierType.Multiply => new(new SimpleStatAdd<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
-					StatModifierType.MultiplyTotal => new(new SimpleStatMult<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
-					StatModifierType.Override => new(new SimpleStatOverride<StatModifierData>(), OverrideOperation<StatModifierData>.Instance),
+					StatModifierType.Add => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(0), AddOperation<StatModifierData>.Instance),
+					StatModifierType.Multiply => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
+					StatModifierType.MultiplyTotal => new StatContainer<StatModifierData>(new SimpleStatMult<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
+					StatModifierType.Override => new StatContainer<StatModifierData>(new SimpleStatOverride<StatModifierData>(), OverrideOperation<StatModifierData>.Instance),
 					_ => throw new NotImplementedException(),
 				};
 			}
