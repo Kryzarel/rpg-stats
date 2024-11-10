@@ -1,5 +1,3 @@
-using System;
-
 namespace Kryz.RPG.Stats4
 {
 	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
@@ -13,8 +11,6 @@ namespace Kryz.RPG.Stats4
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue { get { CheckValueChanged(); return finalValue; } }
 		public int ModifiersCount => SumCounts();
-
-		public event Action<IReadOnlyStat, float>? OnValueChanged;
 
 		protected Stat(float baseValue = 0, params StatContainer<T>[] statContainers)
 		{
