@@ -6,8 +6,8 @@ namespace Kryz.RPG.Stats4
 	{
 		protected readonly List<StatModifier<T>> modifiers = new();
 
-		private float baseValue;
-		private float finalValue;
+		protected float baseValue;
+		protected float finalValue;
 
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
 		public float FinalValue => finalValue;
@@ -42,7 +42,7 @@ namespace Kryz.RPG.Stats4
 			finalValue = AddOperation(finalValue, modifier);
 		}
 
-		public bool RemoveModifier(StatModifier<T> modifier)
+		public virtual bool RemoveModifier(StatModifier<T> modifier)
 		{
 			if (modifiers.Remove(modifier))
 			{
@@ -52,7 +52,7 @@ namespace Kryz.RPG.Stats4
 			return false;
 		}
 
-		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
+		public virtual int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
 		{
 			int removedCount = 0;
 			for (int i = modifiers.Count - 1; i >= 0; i--)

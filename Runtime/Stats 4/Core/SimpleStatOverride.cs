@@ -8,26 +8,55 @@ namespace Kryz.RPG.Stats4
 
 		protected override float AddOperation(float currentValue, StatModifier<T> modifier)
 		{
-			if (modifier.Value >= currentValue)
-			{
-				return modifier.Value;
-			}
+			return modifier.Value >= currentValue ? modifier.Value : currentValue;
+		}
 
-			// Improves performance by essentially inserting the modifiers sorted
-			int index = BinarySearchLeftmost(modifiers, modifier.Value);
-			modifiers.RemoveAt(modifiers.Count - 1);
-			modifiers.Insert(index, modifier);
-			return currentValue;
+		public override bool RemoveModifier(StatModifier<T> modifier)
+		{
+			bool removed = false;
+			float maxValue = float.MinValue;
+			for (int i = modifiers.Count - 1; i >= 0; i--)
+			{
+				StatModifier<T> mod = modifiers[i];
+				if (mod == modifier)
+				{
+					modifiers.RemoveAt(i);
+					removed = true;
+				}
+				else if (mod.Value > maxValue)
+				{
+					maxValue = mod.Value;
+				}
+			}
+			finalValue = maxValue;
+			return removed;
+		}
+
+		public override int RemoveWhere<TMatch>(TMatch match)
+		{
+			int removedCount = 0;
+			float maxValue = float.MinValue;
+			for (int i = modifiers.Count - 1; i >= 0; i--)
+			{
+				StatModifier<T> modifier = modifiers[i];
+
+				if (match.IsMatch(modifier))
+				{
+					modifiers.RemoveAt(i);
+					removedCount++;
+				}
+				else if (modifier.Value > maxValue)
+				{
+					maxValue = modifier.Value;
+				}
+			}
+			finalValue = maxValue;
+			return removedCount;
 		}
 
 		protected override float RemoveOperation(float currentValue, StatModifier<T> modifier)
 		{
-			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
-		}
-
-		protected override float CalculateFinalValue(float currentValue)
-		{
-			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
+			throw new System.NotImplementedException();
 		}
 
 		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier<T>> list, float value)
