@@ -37,7 +37,7 @@ namespace Kryz.RPG.Stats.PerfTests
 				float value = Random.Range(-100, 100 + 1);
 				int listIndex = Random.Range(0, 4);
 
-				StatModifier modifider = new(value, (StatModifierType)listIndex, this);
+				StatModifier modifier = new(value, (StatModifierType)listIndex, this);
 				StatModifier2 modifier2 = new(value, (StatModifierType2)listIndex, this);
 				StatModifier4 modifier4 = new(value, new((StatModifierType4)listIndex, this));
 
@@ -51,12 +51,12 @@ namespace Kryz.RPG.Stats.PerfTests
 				};
 				StatModifier3 modifier3 = new(value, type, priority: 0, this);
 
-				modifiers[i] = modifider;
+				modifiers[i] = modifier;
 				modifiers2[i] = modifier2;
 				modifiers3[i] = modifier3;
 				modifiers4[i] = modifier4;
 
-				stat.AddModifier(modifider);
+				stat.AddModifier(modifier);
 				stat2.AddModifier(modifier2);
 				stat3.AddModifier(modifier3);
 				stat4.AddModifier(modifier4);
