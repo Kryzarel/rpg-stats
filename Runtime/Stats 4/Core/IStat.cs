@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Kryz.RPG.Stats4
 {
 	public interface IReadOnlyStat
@@ -9,9 +11,10 @@ namespace Kryz.RPG.Stats4
 		float GetModifierValue(int index);
 	}
 
-	public interface IReadOnlyStat<T> : IReadOnlyStat where T : struct, IStatModifierData<T>
+	public interface IReadOnlyStat<T> : IReadOnlyStat, IEnumerable<StatModifier<T>> where T : struct, IStatModifierData<T>
 	{
 		StatModifier<T> GetModifier(int index);
+		new StatEnumerator<T> GetEnumerator();
 	}
 
 	public interface IStat : IReadOnlyStat

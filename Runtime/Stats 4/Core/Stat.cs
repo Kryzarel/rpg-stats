@@ -1,6 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
+
 namespace Kryz.RPG.Stats4
 {
-	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
+	public abstract partial class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
 		protected readonly StatContainer<T>[] statContainers;
 		private readonly float[] cachedValues;
@@ -115,5 +118,10 @@ namespace Kryz.RPG.Stats4
 			}
 			return count;
 		}
+
+		public Enumerator GetEnumerator() => new(statContainers);
+		StatEnumerator<T> IReadOnlyStat<T>.GetEnumerator() => new(this);
+		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}
 }

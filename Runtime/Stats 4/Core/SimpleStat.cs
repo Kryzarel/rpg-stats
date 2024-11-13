@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats4
@@ -83,5 +84,10 @@ namespace Kryz.RPG.Stats4
 
 		public StatModifier<T> GetModifier(int index) => modifiers[index];
 		public float GetModifierValue(int index) => modifiers[index].Value;
+
+		public List<StatModifier<T>>.Enumerator GetEnumerator() => modifiers.GetEnumerator();
+		StatEnumerator<T> IReadOnlyStat<T>.GetEnumerator() => new(this);
+		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
 	}
 }
