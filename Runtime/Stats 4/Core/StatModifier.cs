@@ -15,10 +15,10 @@ namespace Kryz.RPG.Stats4
 
 		public int CompareTo(StatModifier<T> other)
 		{
-			int result = Data.CompareTo(other.Data);
+			int result = Value.CompareTo(other.Value);
 			if (result == 0)
 			{
-				result = Value.CompareTo(other.Value);
+				result = Data.CompareTo(other.Data);
 			}
 			return result;
 		}
