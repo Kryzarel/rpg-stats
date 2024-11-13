@@ -1,6 +1,8 @@
+using System;
+using System.Linq;
 using Kryz.RPG.Stats4;
 using NUnit.Framework;
-using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Kryz.RPG.Stats.Tests.Editor
 {
@@ -19,70 +21,128 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			}
 		}
 
+		private const int numIterations = 100;
+		private static readonly int[] values = { 0, 1, 2, 3, 10 };
+
 		[Test]
-		public void TestWithoutModifiers()
+		public void StatAdd_NoModifiers_FinalEqualsBase()
 		{
-			{
-				SimpleStatAdd<TestModifierData> statAdd = new(0);
-				Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
-				Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
+			SimpleStatAdd<TestModifierData> statAdd = new(0);
+			Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
+			Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
 
-				statAdd.BaseValue = 1;
-				Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
-				Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
-
-				SimpleStatMult<TestModifierData> statMult = new(0);
-				Assert.AreEqual(0, statMult.BaseValue, delta: 0);
-				Assert.AreEqual(0, statMult.FinalValue, delta: 0);
-
-				statMult.BaseValue = 1;
-				Assert.AreEqual(1, statMult.BaseValue, delta: 0);
-				Assert.AreEqual(1, statMult.FinalValue, delta: 0);
-
-				SimpleStatOverride<TestModifierData> statOverride = new();
-				Assert.AreEqual(0, statOverride.BaseValue, delta: 0);
-				Assert.AreEqual(0, statOverride.FinalValue, delta: 0);
-
-				statOverride.BaseValue = 1;
-				Assert.AreEqual(1, statOverride.BaseValue, delta: 0);
-				Assert.AreEqual(1, statOverride.FinalValue, delta: 0);
-			}
-
-			{
-				SimpleStatAdd<TestModifierData> statAdd = new(1);
-				Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
-				Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
-
-				statAdd.BaseValue = 1;
-				Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
-				Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
-			}
+			statAdd.BaseValue = 1;
+			Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
+			Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
 		}
 
 		[Test]
-		public void TestModifiersAdd()
+		public void StatMult_NoModifiers_FinalEqualsBase()
 		{
-			SimpleStatAdd<TestModifierData> stat = new(0);
+			SimpleStatMult<TestModifierData> statAdd = new(0);
+			Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
+			Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
 
-			stat.AddModifier(new StatModifier<TestModifierData>(1, default));
-			Assert.AreEqual(0, stat.BaseValue, delta: 0);
-			Assert.AreEqual(1, stat.FinalValue, delta: 0);
+			statAdd.BaseValue = 1;
+			Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
+			Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
+		}
 
-			stat.BaseValue = 1;
-			Assert.AreEqual(1, stat.BaseValue, delta: 0);
-			Assert.AreEqual(2, stat.FinalValue, delta: 0);
+		[Test]
+		public void StatOverride_NoModifiers_FinalEqualsBase()
+		{
+			SimpleStatOverride<TestModifierData> statAdd = new(0);
+			Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
+			Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
 
-			float expected = stat.FinalValue;
-			const int numIterations = 1000;
+			statAdd.BaseValue = 1;
+			Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
+			Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
+		}
+
+		[Test]
+		public void StatAdd_1Modifier_FinalEqualsSum([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2, [ValueSource(nameof(values))] float modifierValue)
+		{
+			// Arrange
+			SimpleStatAdd<TestModifierData> stat = new(baseValue);
+
+			// Act
+			stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
+
+			// Assert
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue + modifierValue, stat.FinalValue, delta: 0);
+
+			// Act
+			stat.BaseValue = baseValue2;
+
+			// Assert
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue2 + modifierValue, stat.FinalValue, delta: 0);
+		}
+
+		[Test]
+		public void StatMult_1Modifier_FinalEqualsMult([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2, [ValueSource(nameof(values))] float modifierValue)
+		{
+			// Arrange
+			SimpleStatMult<TestModifierData> stat = new(baseValue);
+
+			// Act
+			stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
+
+			// Assert
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta: 0);
+
+			// Act
+			stat.BaseValue = baseValue2;
+
+			// Assert
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta: 0);
+		}
+
+		[Test]
+		public void StatOverride_1Modifier_FinalEqualsModifier([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2, [ValueSource(nameof(values))] float modifierValue)
+		{
+			// Arrange
+			SimpleStatOverride<TestModifierData> stat = new(baseValue);
+
+			// Act
+			stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
+
+			// Assert
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(modifierValue, stat.FinalValue, delta: 0);
+
+			// Act
+			stat.BaseValue = baseValue2;
+
+			// Assert
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(modifierValue, stat.FinalValue, delta: 0);
+		}
+
+		[Test]
+		public void StatAdd_RandomModifiers_FinalEqualsSum([ValueSource(nameof(values))] float baseValue)
+		{
+			// Arrange
+			SimpleStatAdd<TestModifierData> stat = new(baseValue);
+			float expected = stat.BaseValue;
+
+			// Act
 			for (int i = 0; i < numIterations; i++)
 			{
 				float modifierValue = Random.Range(1f, 100f);
-				expected += modifierValue;
 				stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
-				Assert.AreEqual(1, stat.BaseValue, delta: 0);
+				expected += modifierValue;
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 				Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 			}
 
+			// Act
 			for (int i = 0; i < stat.ModifiersCount; i++)
 			{
 				StatModifier<TestModifierData> modifier = stat.GetModifier(i);
@@ -90,37 +150,33 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				{
 					expected -= modifier.Value;
 				}
-				Assert.AreEqual(1, stat.BaseValue, delta: 0);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 				Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 			}
 		}
 
 		[Test]
-		public void TestModifiersMult()
+		public void StatMult_RandomModifiers_FinalEqualsMult([ValueSource(nameof(values))] float baseValue)
 		{
-			SimpleStatMult<TestModifierData> stat = new(0);
-
-			stat.AddModifier(new StatModifier<TestModifierData>(1, default));
-			Assert.AreEqual(0, stat.BaseValue, delta: 0);
-			Assert.AreEqual(0, stat.FinalValue, delta: 0);
-
-			stat.BaseValue = 1;
-			Assert.AreEqual(1, stat.BaseValue, delta: 0);
-			Assert.AreEqual(2, stat.FinalValue, delta: 0);
-
-			stat.ClearModifiers();
-
+			// Arrange
+			SimpleStatMult<TestModifierData> stat = new(baseValue);
 			float expected = stat.BaseValue;
-			const int numIterations = 1000;
+
+			// Act
 			for (int i = 0; i < numIterations; i++)
 			{
 				float modifierValue = Random.Range(1f, 100f);
-				expected *= 1 + modifierValue;
 				stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
-				Assert.AreEqual(1, stat.BaseValue, delta: 0);
+				expected *= 1 + modifierValue;
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 				Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 			}
 
+			// Act
 			for (int i = 0; i < stat.ModifiersCount; i++)
 			{
 				StatModifier<TestModifierData> modifier = stat.GetModifier(i);
@@ -128,51 +184,43 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				{
 					expected /= 1 + modifier.Value;
 				}
-				Assert.AreEqual(1, stat.BaseValue, delta: 0);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 				Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 			}
 		}
 
 		[Test]
-		public void TestModifiersOverride()
+		public void StatOverride_RandomModifiers_FinalEqualsMult([ValueSource(nameof(values))] float baseValue)
 		{
-			SimpleStatOverride<TestModifierData> stat = new();
+			// Arrange
+			SimpleStatOverride<TestModifierData> stat = new(baseValue);
+			float expected = stat.BaseValue;
 
-			stat.AddModifier(new StatModifier<TestModifierData>(1, default));
-			Assert.AreEqual(0, stat.BaseValue, delta: 0);
-			Assert.AreEqual(1, stat.FinalValue, delta: 0);
-
-			stat.BaseValue = 1;
-			Assert.AreEqual(1, stat.BaseValue, delta: 0);
-			Assert.AreEqual(1, stat.FinalValue, delta: 0);
-
-			stat.AddModifier(new StatModifier<TestModifierData>(10, default));
-			Assert.AreEqual(1, stat.BaseValue, delta: 0);
-			Assert.AreEqual(10, stat.FinalValue, delta: 0);
-
-			float expected = stat.FinalValue;
-			const int numIterations = 10;
+			// Act
 			for (int i = 0; i < numIterations; i++)
 			{
 				float modifierValue = Random.Range(1f, 100f);
-				if (modifierValue > expected)
-				{
-					expected = modifierValue;
-				}
 				stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
-				Assert.AreEqual(1, stat.BaseValue, delta: 0);
+				expected = Math.Max(expected, modifierValue);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 				Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 			}
 
+			// Act
 			for (int i = 0; i < stat.ModifiersCount; i++)
 			{
 				StatModifier<TestModifierData> modifier = stat.GetModifier(i);
-				stat.RemoveModifier(modifier);
-				if (stat.ModifiersCount == 0)
+				if (stat.RemoveModifier(modifier))
 				{
-					expected = stat.BaseValue;
+					expected = stat.Max().Value;
 				}
-				Assert.AreEqual(1, stat.BaseValue, delta: 0);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 				Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 			}
 		}
