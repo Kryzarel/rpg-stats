@@ -4,11 +4,11 @@ namespace Kryz.RPG.Stats4
 {
 	public class SimpleStatOverride<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
-		public SimpleStatOverride() : base() { }
+		public SimpleStatOverride(float baseValue = 0) : base(baseValue) { }
 
-		protected override float AddOperation(float currentValue, StatModifier<T> modifier)
+		protected override float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
-			if (modifier.Value >= currentValue)
+			if (modifier.Value >= currentValue || modifiers.Count == 1)
 			{
 				return modifier.Value;
 			}
@@ -20,14 +20,14 @@ namespace Kryz.RPG.Stats4
 			return currentValue;
 		}
 
-		protected override float RemoveOperation(float currentValue, StatModifier<T> modifier)
+		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
-			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
+			return modifiers.Count > 0 ? modifiers[^1].Value : baseValue;
 		}
 
-		protected override float CalculateFinalValue(float currentValue)
+		protected override float CalculateFinalValue(float baseValue, float currentValue)
 		{
-			return modifiers.Count > 0 ? modifiers[^1].Value : currentValue;
+			return modifiers.Count > 0 ? modifiers[^1].Value : baseValue;
 		}
 
 		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier<T>> list, float value)

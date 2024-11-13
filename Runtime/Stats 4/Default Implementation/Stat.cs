@@ -44,7 +44,7 @@ namespace Kryz.RPG.Stats4
 					StatModifierType.Add => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(0), AddOperation<StatModifierData>.Instance),
 					StatModifierType.Multiply => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
 					StatModifierType.MultiplyTotal => new StatContainer<StatModifierData>(new SimpleStatMult<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
-					StatModifierType.Override => new StatContainer<StatModifierData>(new SimpleStatOverride<StatModifierData>(), OverrideOperation<StatModifierData>.Instance),
+					StatModifierType.Override => new StatContainer<StatModifierData>(new SimpleStatOverride<StatModifierData>(0), OverrideOperation<StatModifierData>.Instance),
 					_ => throw new NotImplementedException(),
 				};
 			}

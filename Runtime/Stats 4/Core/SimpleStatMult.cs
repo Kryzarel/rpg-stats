@@ -4,12 +4,12 @@ namespace Kryz.RPG.Stats4
 	{
 		public SimpleStatMult(float baseValue = 1) : base(baseValue) { }
 
-		protected override float AddOperation(float currentValue, StatModifier<T> modifier)
+		protected override float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
 			return currentValue * (1 + modifier.Value);
 		}
 
-		protected override float RemoveOperation(float currentValue, StatModifier<T> modifier)
+		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
 			return currentValue / (1 + modifier.Value);
 		}

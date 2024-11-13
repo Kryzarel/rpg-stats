@@ -20,34 +20,34 @@ namespace Kryz.RPG.Stats4
 			CalculateFinalValue();
 		}
 
-		protected abstract float AddOperation(float currentValue, StatModifier<T> modifier);
-		protected abstract float RemoveOperation(float currentValue, StatModifier<T> modifier);
+		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
+		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 
-		protected virtual float CalculateFinalValue(float currentValue)
+		protected virtual float CalculateFinalValue(float baseValue, float currentValue)
 		{
 			for (int i = 0; i < modifiers.Count; i++)
 			{
-				currentValue = AddOperation(currentValue, modifiers[i]);
+				currentValue = AddOperation(baseValue, currentValue, modifiers[i]);
 			}
 			return currentValue;
 		}
 
 		protected void CalculateFinalValue()
 		{
-			finalValue = CalculateFinalValue(baseValue);
+			finalValue = CalculateFinalValue(baseValue, baseValue);
 		}
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
 			modifiers.Add(modifier);
-			finalValue = AddOperation(finalValue, modifier);
+			finalValue = AddOperation(baseValue, finalValue, modifier);
 		}
 
 		public bool RemoveModifier(StatModifier<T> modifier)
 		{
 			if (modifiers.Remove(modifier))
 			{
-				finalValue = RemoveOperation(finalValue, modifier);
+				finalValue = RemoveOperation(baseValue, finalValue, modifier);
 				return true;
 			}
 			return false;
@@ -63,7 +63,7 @@ namespace Kryz.RPG.Stats4
 				if (match.IsMatch(modifier))
 				{
 					modifiers.RemoveAt(i);
-					finalValue = RemoveOperation(finalValue, modifier);
+					finalValue = RemoveOperation(baseValue, finalValue, modifier);
 					removedCount++;
 				}
 			}
