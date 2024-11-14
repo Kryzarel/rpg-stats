@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using Kryz.RPG.Stats4;
+using Kryz.RPG.Stats;
 using NUnit.Framework;
 using Random = UnityEngine.Random;
 
-namespace Kryz.RPG.Stats.Tests.Editor
+namespace Kryz.RPG.StatsLegacy.Tests.Editor
 {
 	public class SimpleStatTests
 	{

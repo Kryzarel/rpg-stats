@@ -4,7 +4,7 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Kryz.RPG.Stats4"
+        "Kryz.RPG.Stats"
     ],
     "includePlatforms": [
         "Editor"
