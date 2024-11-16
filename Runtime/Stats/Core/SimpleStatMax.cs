@@ -1,14 +1,15 @@
+using System;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats
 {
-	public class SimpleStatOverride<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
+	public class SimpleStatMax<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
-		public SimpleStatOverride(float baseValue = 0) : base(baseValue) { }
+		public SimpleStatMax(float baseValue = 0) : base(baseValue) { }
 
 		protected override float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
-			if (modifier.Value >= currentValue || modifiers.Count == 1)
+			if (modifier.Value >= currentValue)
 			{
 				return modifier.Value;
 			}
@@ -22,12 +23,12 @@ namespace Kryz.RPG.Stats
 
 		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
-			return modifiers.Count > 0 ? modifiers[^1].Value : baseValue;
+			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}
 
 		protected override float CalculateFinalValue(float baseValue, float currentValue)
 		{
-			return modifiers.Count > 0 ? modifiers[^1].Value : baseValue;
+			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}
 
 		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier<T>> list, float value)

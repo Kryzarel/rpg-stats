@@ -1,38 +1,52 @@
+using System;
+
 namespace Kryz.RPG.Stats
 {
 	public class AddOperation<T> : IStatOperation<T> where T : struct, IStatModifierData<T>
 	{
-		public static readonly AddOperation<T> Instance = new();
+		public static readonly AddOperation<T> Default = new();
 		public float Calculate(float outerStatValue, IStat<T> innerStat) => outerStatValue + innerStat.FinalValue;
 
 		/// <summary>
 		/// Default constructor is not allowed to avoid unnecessary allocations.
-		/// Use '<see cref="Instance"/>' instead.
+		/// Use '<see cref="Default"/>' instead.
 		/// </summary>
 		private AddOperation() { }
 	}
 
-	public class MultiplyOperation<T> : IStatOperation<T> where T : struct, IStatModifierData<T>
+	public class MultOperation<T> : IStatOperation<T> where T : struct, IStatModifierData<T>
 	{
-		public static readonly MultiplyOperation<T> Instance = new();
+		public static readonly MultOperation<T> Default = new();
 		public float Calculate(float outerStatValue, IStat<T> innerStat) => outerStatValue * innerStat.FinalValue;
 
 		/// <summary>
 		/// Default constructor is not allowed to avoid unnecessary allocations.
-		/// Use '<see cref="Instance"/>' instead.
+		/// Use '<see cref="Default"/>' instead.
 		/// </summary>
-		private MultiplyOperation() { }
+		private MultOperation() { }
 	}
 
-	public class OverrideOperation<T> : IStatOperation<T> where T : struct, IStatModifierData<T>
+	public class MaxOperation<T> : IStatOperation<T> where T : struct, IStatModifierData<T>
 	{
-		public static readonly OverrideOperation<T> Instance = new();
-		public float Calculate(float outerStatValue, IStat<T> innerStat) => innerStat.ModifiersCount > 0 ? innerStat.FinalValue : outerStatValue;
+		public static readonly MaxOperation<T> Default = new();
+		public float Calculate(float outerStatValue, IStat<T> innerStat) => Math.Max(outerStatValue, innerStat.FinalValue);
 
 		/// <summary>
 		/// Default constructor is not allowed to avoid unnecessary allocations.
-		/// Use '<see cref="Instance"/>' instead.
+		/// Use '<see cref="Default"/>' instead.
 		/// </summary>
-		private OverrideOperation() { }
+		private MaxOperation() { }
+	}
+
+	public class MinOperation<T> : IStatOperation<T> where T : struct, IStatModifierData<T>
+	{
+		public static readonly MinOperation<T> Default = new();
+		public float Calculate(float outerStatValue, IStat<T> innerStat) => Math.Min(outerStatValue, innerStat.FinalValue);
+
+		/// <summary>
+		/// Default constructor is not allowed to avoid unnecessary allocations.
+		/// Use '<see cref="Default"/>' instead.
+		/// </summary>
+		private MinOperation() { }
 	}
 }

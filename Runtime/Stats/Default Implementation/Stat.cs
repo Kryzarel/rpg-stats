@@ -9,17 +9,11 @@ namespace Kryz.RPG.Stats
 		public override void AddModifier(StatModifier<StatModifierData> modifier)
 		{
 			statContainers[(int)modifier.Data.Type].Stat.AddModifier(modifier);
-			// CalculateFinalValue();
 		}
 
 		public override bool RemoveModifier(StatModifier<StatModifierData> modifier)
 		{
-			if (statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier))
-			{
-				// CalculateFinalValue();
-				return true;
-			}
-			return false;
+			return statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier);
 		}
 
 		// protected override float CalculateFinalValue(float baseValue)
@@ -47,10 +41,11 @@ namespace Kryz.RPG.Stats
 				StatModifierType type = modifierTypes[i];
 				lists[i] = type switch
 				{
-					StatModifierType.Add => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(0), AddOperation<StatModifierData>.Instance),
-					StatModifierType.Multiply => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
-					StatModifierType.MultiplyTotal => new StatContainer<StatModifierData>(new SimpleStatMult<StatModifierData>(1), MultiplyOperation<StatModifierData>.Instance),
-					StatModifierType.Override => new StatContainer<StatModifierData>(new SimpleStatOverride<StatModifierData>(0), OverrideOperation<StatModifierData>.Instance),
+					StatModifierType.Add => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(0), AddOperation<StatModifierData>.Default),
+					StatModifierType.Mult => new StatContainer<StatModifierData>(new SimpleStatAdd<StatModifierData>(1), MultOperation<StatModifierData>.Default),
+					StatModifierType.MultTotal => new StatContainer<StatModifierData>(new SimpleStatMult<StatModifierData>(1), MultOperation<StatModifierData>.Default),
+					StatModifierType.Max => new StatContainer<StatModifierData>(new SimpleStatMax<StatModifierData>(0), MaxOperation<StatModifierData>.Default),
+					StatModifierType.Min => new StatContainer<StatModifierData>(new SimpleStatMin<StatModifierData>(float.MaxValue), MinOperation<StatModifierData>.Default),
 					_ => throw new NotImplementedException(),
 				};
 			}

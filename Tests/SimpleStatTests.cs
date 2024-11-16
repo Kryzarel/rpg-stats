@@ -48,9 +48,9 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		}
 
 		[Test]
-		public void StatOverride_NoModifiers_FinalEqualsBase([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2)
+		public void StatMax_NoModifiers_FinalEqualsBase([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2)
 		{
-			SimpleStatOverride<TestModifierData> stat = new(baseValue);
+			SimpleStatMax<TestModifierData> stat = new(baseValue);
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
 			Assert.AreEqual(baseValue, stat.FinalValue, delta: 0);
 
@@ -102,24 +102,45 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		}
 
 		[Test]
-		public void StatOverride_1Modifier_FinalEqualsModifier([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2, [ValueSource(nameof(values))] float modifierValue)
+		public void StatMax_1Modifier_FinalEqualsMax([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2, [ValueSource(nameof(values))] float modifierValue)
 		{
 			// Arrange
-			SimpleStatOverride<TestModifierData> stat = new(baseValue);
+			SimpleStatMax<TestModifierData> stat = new(baseValue);
 
 			// Act
 			stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
 
 			// Assert
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(modifierValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(Math.Max(baseValue, modifierValue), stat.FinalValue, delta: 0);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
 			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(modifierValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(Math.Max(baseValue2, modifierValue), stat.FinalValue, delta: 0);
+		}
+
+		[Test]
+		public void StatMin_1Modifier_FinalEqualsMin([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2, [ValueSource(nameof(values))] float modifierValue)
+		{
+			// Arrange
+			SimpleStatMin<TestModifierData> stat = new(baseValue);
+
+			// Act
+			stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
+
+			// Assert
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(Math.Min(baseValue, modifierValue), stat.FinalValue, delta: 0);
+
+			// Act
+			stat.BaseValue = baseValue2;
+
+			// Assert
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(Math.Min(baseValue2, modifierValue), stat.FinalValue, delta: 0);
 		}
 
 		[Test]
@@ -191,10 +212,10 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		}
 
 		[Test]
-		public void StatOverride_RandomModifiers_FinalEqualsMult([ValueSource(nameof(values))] float baseValue)
+		public void StatMax_RandomModifiers_FinalEqualsMult([ValueSource(nameof(values))] float baseValue)
 		{
 			// Arrange
-			SimpleStatOverride<TestModifierData> stat = new(baseValue);
+			SimpleStatMax<TestModifierData> stat = new(baseValue);
 			float expected = stat.BaseValue;
 
 			// Act

@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using NUnit.Framework;
 
@@ -48,7 +49,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			Stat stat = new(baseValue);
 
 			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Multiply)));
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Mult)));
 
 			// Assert
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
@@ -69,7 +70,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			Stat stat = new(baseValue);
 
 			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.MultiplyTotal)));
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.MultTotal)));
 
 			// Assert
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
@@ -84,48 +85,78 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		}
 
 		[Test]
-		public void Stat_ModifierOverride_FinalEqualsLargest([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
+		public void Stat_ModifierMax_FinalEqualsMax([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
 		{
 			// Arrange
 			Stat stat = new(baseValue);
 
 			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Override)));
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Max)));
 
 			// Assert
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(modifierValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(Math.Max(baseValue, modifierValue), stat.FinalValue, delta: 0);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
 			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(modifierValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(Math.Max(baseValue2, modifierValue), stat.FinalValue, delta: 0);
 		}
 
 		[Test]
-		public void Stat_AllModifiers_CorrectCalc([ValueSource(vals)] float baseValue, [ValueSource(vals)] float modifierAdd, [ValueSource(vals)] float modifierMult, [ValueSource(vals)] float modifierMultTotal, [ValueSource(vals)] float modifierOverride)
+		public void Stat_ModifierMin_FinalEqualsMin([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
+		{
+			// Arrange
+			Stat stat = new(baseValue);
+
+			// Act
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Min)));
+
+			// Assert
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(Math.Min(baseValue, modifierValue), stat.FinalValue, delta: 0);
+
+			// Act
+			stat.BaseValue = baseValue2;
+
+			// Assert
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(Math.Min(baseValue2, modifierValue), stat.FinalValue, delta: 0);
+		}
+
+		[Test]
+		public void Stat_AllModifiers_CorrectCalc([ValueSource(vals)] float baseValue, [ValueSource(vals)] float modifierAdd, [ValueSource(vals)] float modifierMult, [ValueSource(vals)] float modifierMultTotal, [ValueSource(vals)] float modifierMax, [ValueSource(vals)] float modifierMin)
 		{
 			// Arrange
 			Stat stat = new(baseValue);
 
 			// Act
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierAdd, new StatModifierData(StatModifierType.Add)));
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierMult, new StatModifierData(StatModifierType.Multiply)));
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierMultTotal, new StatModifierData(StatModifierType.MultiplyTotal)));
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierMult, new StatModifierData(StatModifierType.Mult)));
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierMultTotal, new StatModifierData(StatModifierType.MultTotal)));
+			float expected = (baseValue + modifierAdd) * (1 + modifierMult) * (1 + modifierMultTotal);
 
 			// Assert
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual((baseValue + modifierAdd) * (1 + modifierMult) * (1 + modifierMultTotal), stat.FinalValue, delta: 0);
+			Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 
 			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierOverride, new StatModifierData(StatModifierType.Override)));
-			float CONAPIUSSAPJPEQIOHEPIUQWHEPU = stat.FinalValue;
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierMax, new StatModifierData(StatModifierType.Max)));
+			expected = Math.Max(expected, modifierMax);
 
 			// Assert
 			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(modifierOverride, stat.FinalValue, delta: 0);
+			Assert.AreEqual(expected, stat.FinalValue, delta: 0);
+
+			// Act
+			stat.AddModifier(new StatModifier<StatModifierData>(modifierMin, new StatModifierData(StatModifierType.Min)));
+			expected = Math.Min(expected, modifierMin);
+
+			// Assert
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(expected, stat.FinalValue, delta: 0);
 		}
 
 		// [Test]
