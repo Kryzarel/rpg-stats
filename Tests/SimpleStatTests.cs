@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
-using Kryz.RPG.Stats;
 using NUnit.Framework;
 using Random = UnityEngine.Random;
 
-namespace Kryz.RPG.StatsLegacy.Tests.Editor
+namespace Kryz.RPG.Stats.Tests.Editor
 {
 	public class SimpleStatTests
 	{
@@ -25,39 +24,39 @@ namespace Kryz.RPG.StatsLegacy.Tests.Editor
 		private static readonly int[] values = { 0, 1, 2, 3, 10 };
 
 		[Test]
-		public void StatAdd_NoModifiers_FinalEqualsBase()
+		public void StatAdd_NoModifiers_FinalEqualsBase([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2)
 		{
-			SimpleStatAdd<TestModifierData> statAdd = new(0);
-			Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
-			Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
+			SimpleStatAdd<TestModifierData> stat = new(baseValue);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.FinalValue, delta: 0);
 
-			statAdd.BaseValue = 1;
-			Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
-			Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
+			stat.BaseValue = baseValue2;
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.FinalValue, delta: 0);
 		}
 
 		[Test]
-		public void StatMult_NoModifiers_FinalEqualsBase()
+		public void StatMult_NoModifiers_FinalEqualsBase([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2)
 		{
-			SimpleStatMult<TestModifierData> statAdd = new(0);
-			Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
-			Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
+			SimpleStatMult<TestModifierData> stat = new(baseValue);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.FinalValue, delta: 0);
 
-			statAdd.BaseValue = 1;
-			Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
-			Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
+			stat.BaseValue = baseValue2;
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.FinalValue, delta: 0);
 		}
 
 		[Test]
-		public void StatOverride_NoModifiers_FinalEqualsBase()
+		public void StatOverride_NoModifiers_FinalEqualsBase([ValueSource(nameof(values))] float baseValue, [ValueSource(nameof(values))] float baseValue2)
 		{
-			SimpleStatOverride<TestModifierData> statAdd = new(0);
-			Assert.AreEqual(0, statAdd.BaseValue, delta: 0);
-			Assert.AreEqual(0, statAdd.FinalValue, delta: 0);
+			SimpleStatOverride<TestModifierData> stat = new(baseValue);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.FinalValue, delta: 0);
 
-			statAdd.BaseValue = 1;
-			Assert.AreEqual(1, statAdd.BaseValue, delta: 0);
-			Assert.AreEqual(1, statAdd.FinalValue, delta: 0);
+			stat.BaseValue = baseValue2;
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.FinalValue, delta: 0);
 		}
 
 		[Test]

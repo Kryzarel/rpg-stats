@@ -9,21 +9,27 @@ namespace Kryz.RPG.Stats
 		public override void AddModifier(StatModifier<StatModifierData> modifier)
 		{
 			statContainers[(int)modifier.Data.Type].Stat.AddModifier(modifier);
+			// CalculateFinalValue();
 		}
 
 		public override bool RemoveModifier(StatModifier<StatModifierData> modifier)
 		{
-			return statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier);
+			if (statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier))
+			{
+				// CalculateFinalValue();
+				return true;
+			}
+			return false;
 		}
 
-		protected override float CalculateFinalValue(float baseValue)
-		{
-			if (statContainers[3].Stat.ModifiersCount > 0)
-			{
-				return statContainers[3].Stat.FinalValue;
-			}
-			return (baseValue + statContainers[0].Stat.FinalValue) * statContainers[1].Stat.FinalValue * statContainers[2].Stat.FinalValue;
-		}
+		// protected override float CalculateFinalValue(float baseValue)
+		// {
+		// 	if (statContainers[3].Stat.ModifiersCount > 0)
+		// 	{
+		// 		return statContainers[3].Stat.FinalValue;
+		// 	}
+		// 	return (baseValue + statContainers[0].Stat.FinalValue) * statContainers[1].Stat.FinalValue * statContainers[2].Stat.FinalValue;
+		// }
 
 		public int RemoveModifiersFromSource(object source)
 		{

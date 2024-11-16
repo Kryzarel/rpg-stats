@@ -11,7 +11,7 @@ namespace Kryz.RPG.Stats
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
+		public float BaseValue { get => baseValue; set { baseValue = value; CheckValueChanged(); } }
 		public float FinalValue { get { CheckValueChanged(); return finalValue; } }
 		public int ModifiersCount => SumCounts();
 
@@ -20,7 +20,7 @@ namespace Kryz.RPG.Stats
 			cachedValues = new float[statContainers.Length];
 			this.statContainers = statContainers;
 			this.baseValue = baseValue;
-			CalculateFinalValue();
+			CheckValueChanged();
 		}
 
 		public abstract void AddModifier(StatModifier<T> modifier);
@@ -37,28 +37,28 @@ namespace Kryz.RPG.Stats
 			return currentValue;
 		}
 
-		private void CheckValueChanged()
-		{
-			bool changed = false;
-			for (int i = 0; i < cachedValues.Length; i++)
-			{
-				float value = statContainers[i].Stat.FinalValue;
-				if (cachedValues[i] != value)
-				{
-					cachedValues[i] = value;
-					changed = true;
-				}
-			}
-
-			if (changed)
-			{
-				CalculateFinalValue();
-			}
-		}
-
-		private void CalculateFinalValue()
+		protected void CalculateFinalValue()
 		{
 			finalValue = CalculateFinalValue(baseValue);
+		}
+
+		private void CheckValueChanged()
+		{
+			// bool changed = false;
+			// for (int i = 0; i < cachedValues.Length; i++)
+			// {
+			// 	float value = statContainers[i].Stat.FinalValue;
+			// 	if (cachedValues[i] != value)
+			// 	{
+			// 		cachedValues[i] = value;
+			// 		changed = true;
+			// 	}
+			// }
+
+			// if (changed)
+			// {
+				finalValue = CalculateFinalValue(baseValue);
+			// }
 		}
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
@@ -68,6 +68,7 @@ namespace Kryz.RPG.Stats
 			{
 				removedCount += statContainers[i].Stat.RemoveWhere(match);
 			}
+			// finalValue = CalculateFinalValue(baseValue);
 			return removedCount;
 		}
 
