@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using NUnit.Framework;
 
 namespace Kryz.RPG.Stats.Tests.Editor
@@ -7,18 +6,19 @@ namespace Kryz.RPG.Stats.Tests.Editor
 	public class StatTests
 	{
 		private const string vals = nameof(values);
-		private static readonly int[] values = { 0, 1, 2, 3, 10 };
+		private const float delta = 0.0001f;
+		private static readonly float[] values = { 0, 0.3f, 2.5f, 5 };
 
 		[Test]
 		public void Stat_NoModifiers_FinalEqualsBase([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2)
 		{
 			Stat stat = new(baseValue);
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue, stat.FinalValue, delta);
 
 			stat.BaseValue = baseValue2;
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue2, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue2, stat.FinalValue, delta);
 		}
 
 		[Test]
@@ -31,15 +31,15 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Add)));
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue + modifierValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue + modifierValue, stat.FinalValue, delta);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue2 + modifierValue, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue2 + modifierValue, stat.FinalValue, delta);
 		}
 
 		[Test]
@@ -52,15 +52,15 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Mult)));
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta);
 		}
 
 		[Test]
@@ -73,15 +73,15 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.MultTotal)));
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
+			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta);
 		}
 
 		[Test]
@@ -94,15 +94,15 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Max)));
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(Math.Max(baseValue, modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(Math.Max(baseValue, modifierValue), stat.FinalValue, delta);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(Math.Max(baseValue2, modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
+			Assert.AreEqual(Math.Max(baseValue2, modifierValue), stat.FinalValue, delta);
 		}
 
 		[Test]
@@ -115,15 +115,15 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Min)));
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(Math.Min(baseValue, modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(Math.Min(baseValue, modifierValue), stat.FinalValue, delta);
 
 			// Act
 			stat.BaseValue = baseValue2;
 
 			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta: 0);
-			Assert.AreEqual(Math.Min(baseValue2, modifierValue), stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
+			Assert.AreEqual(Math.Min(baseValue2, modifierValue), stat.FinalValue, delta);
 		}
 
 		[Test]
@@ -139,24 +139,24 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			float expected = (baseValue + modifierAdd) * (1 + modifierMult) * (1 + modifierMultTotal);
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(expected, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(expected, stat.FinalValue, delta);
 
 			// Act
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierMax, new StatModifierData(StatModifierType.Max)));
 			expected = Math.Max(expected, modifierMax);
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(expected, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(expected, stat.FinalValue, delta);
 
 			// Act
 			stat.AddModifier(new StatModifier<StatModifierData>(modifierMin, new StatModifierData(StatModifierType.Min)));
 			expected = Math.Min(expected, modifierMin);
 
 			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-			Assert.AreEqual(expected, stat.FinalValue, delta: 0);
+			Assert.AreEqual(baseValue, stat.BaseValue, delta);
+			Assert.AreEqual(expected, stat.FinalValue, delta);
 		}
 
 		// [Test]
@@ -174,8 +174,8 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		// 		expected += modifierValue;
 
 		// 		// Assert
-		// 		Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-		// 		Assert.AreEqual(expected, stat.FinalValue, delta: 0);
+		// 		Assert.AreEqual(baseValue, stat.BaseValue, delta);
+		// 		Assert.AreEqual(expected, stat.FinalValue, delta);
 		// 	}
 
 		// 	// Act
@@ -188,8 +188,8 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		// 		}
 
 		// 		// Assert
-		// 		Assert.AreEqual(baseValue, stat.BaseValue, delta: 0);
-		// 		Assert.AreEqual(expected, stat.FinalValue, delta: 0);
+		// 		Assert.AreEqual(baseValue, stat.BaseValue, delta);
+		// 		Assert.AreEqual(expected, stat.FinalValue, delta);
 		// 	}
 		// }
 	}
