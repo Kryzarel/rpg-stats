@@ -16,14 +16,13 @@ namespace Kryz.RPG.Stats
 			return statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier);
 		}
 
-		// protected override float CalculateFinalValue(float baseValue)
-		// {
-		// 	if (statContainers[3].Stat.ModifiersCount > 0)
-		// 	{
-		// 		return statContainers[3].Stat.FinalValue;
-		// 	}
-		// 	return (baseValue + statContainers[0].Stat.FinalValue) * statContainers[1].Stat.FinalValue * statContainers[2].Stat.FinalValue;
-		// }
+		protected override float CalculateFinalValue(float baseValue)
+		{
+			float result = (baseValue + statContainers[0].Stat.FinalValue) * statContainers[1].Stat.FinalValue * statContainers[2].Stat.FinalValue;
+			result = Math.Max(result, statContainers[3].Stat.FinalValue);
+			result = Math.Min(result, statContainers[4].Stat.FinalValue);
+			return result;
+		}
 
 		public int RemoveModifiersFromSource(object source)
 		{
