@@ -1,5 +1,7 @@
 using System;
+using System.Reflection;
 using NUnit.Framework;
+using Random = UnityEngine.Random;
 
 namespace Kryz.RPG.Stats.Tests.Editor
 {
@@ -8,6 +10,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		private const string vals = nameof(values);
 		private const float delta = 0.0001f;
 		private static readonly float[] values = { 0, 0.3f, 2.5f, 5 };
+		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
 		[Test]
 		public void Stat_NoModifiers_FinalEqualsBase([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2)
@@ -159,38 +162,45 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			Assert.AreEqual(expected, stat.FinalValue, delta);
 		}
 
-		// [Test]
-		// public void StatAdd_RandomModifiers_FinalEqualsSum([ValueSource(vals)] float baseValue)
-		// {
-		// 	// Arrange
-		// 	SimpleStatAdd<TestModifierData> stat = new(baseValue);
-		// 	float expected = stat.BaseValue;
+		[Test]
+		public void StatAdd_RandomModifiers_CorrectCalc([ValueSource(vals)] float baseValue)
+		{
+			// Arrange
+			const int numIterations = 1000;
+			Stat stat = new(baseValue);
+			FieldInfo statContainersField = typeof(Stat).GetField("statContainers", BindingFlags.Instance | BindingFlags.NonPublic);
+			StatContainer<StatModifierData>[] containers = (StatContainer<StatModifierData>[])statContainersField.GetValue(stat);
 
-		// 	// Act
-		// 	for (int i = 0; i < numIterations; i++)
-		// 	{
-		// 		float modifierValue = Random.Range(1f, 100f);
-		// 		stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
-		// 		expected += modifierValue;
+			// Act
+			for (int i = 0; i < numIterations; i++)
+			{
+				float modifierValue = Random.Range(-100f, 100f);
+				StatModifierType modifierType = modifierTypes[Random.Range(0, modifierTypes.Length)];
+				stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(modifierType)));
 
-		// 		// Assert
-		// 		Assert.AreEqual(baseValue, stat.BaseValue, delta);
-		// 		Assert.AreEqual(expected, stat.FinalValue, delta);
-		// 	}
+				float expected = (baseValue + containers[0].Stat.FinalValue) * containers[1].Stat.FinalValue * containers[2].Stat.FinalValue;
+				expected = Math.Max(expected, containers[3].Stat.FinalValue);
+				expected = Math.Min(expected, containers[4].Stat.FinalValue);
 
-		// 	// Act
-		// 	for (int i = 0; i < stat.ModifiersCount; i++)
-		// 	{
-		// 		StatModifier<TestModifierData> modifier = stat.GetModifier(i);
-		// 		if (stat.RemoveModifier(modifier))
-		// 		{
-		// 			expected -= modifier.Value;
-		// 		}
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta);
+				Assert.AreEqual(expected, stat.FinalValue, delta);
+			}
 
-		// 		// Assert
-		// 		Assert.AreEqual(baseValue, stat.BaseValue, delta);
-		// 		Assert.AreEqual(expected, stat.FinalValue, delta);
-		// 	}
-		// }
+			// Act
+			for (int i = 0; i < stat.ModifiersCount; i++)
+			{
+				StatModifier<StatModifierData> modifier = stat.GetModifier(i);
+				stat.RemoveModifier(modifier);
+
+				float expected = (baseValue + containers[0].Stat.FinalValue) * containers[1].Stat.FinalValue * containers[2].Stat.FinalValue;
+				expected = Math.Max(expected, containers[3].Stat.FinalValue);
+				expected = Math.Min(expected, containers[4].Stat.FinalValue);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta);
+				Assert.AreEqual(expected, stat.FinalValue, delta);
+			}
+		}
 	}
 }
