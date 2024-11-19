@@ -1,4 +1,6 @@
-namespace Kryz.RPG.Stats
+using Kryz.RPG.Stats.Core;
+
+namespace Kryz.RPG.Stats.Default
 {
 	public readonly struct StatModifierMatch : IStatModifierMatch<StatModifierData>
 	{

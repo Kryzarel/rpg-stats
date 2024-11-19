@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats.Core
 {
 	public struct StatEnumerator<T> : IEnumerator<StatModifier<T>> where T : struct, IStatModifierData<T>
 	{

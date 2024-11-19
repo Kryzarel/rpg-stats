@@ -1,12 +1,10 @@
+using Kryz.RPG.Stats.Core;
+using Kryz.RPG.Stats.Default;
 using UnityEngine;
 
 using StatLegacy = Kryz.RPG.StatsLegacy.Stat;
 using StatModifierLegacy = Kryz.RPG.StatsLegacy.StatModifier;
 using StatModifierTypeLegacy = Kryz.RPG.StatsLegacy.StatModifierType;
-
-using Stat = Kryz.RPG.Stats.Stat;
-using StatModifier = Kryz.RPG.Stats.StatModifier<Kryz.RPG.Stats.StatModifierData>;
-using StatModifierType = Kryz.RPG.Stats.StatModifierType;
 
 namespace Kryz.RPG.StatsPerfTests
 {
@@ -14,7 +12,7 @@ namespace Kryz.RPG.StatsPerfTests
 	{
 		private const int Length = 1000;
 		private readonly StatModifierLegacy[] modifiers_legacy = new StatModifierLegacy[Length];
-		private readonly StatModifier[] modifiers = new StatModifier[Length];
+		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[Length];
 
 		private readonly StatLegacy stat_legacy = new(10);
 		private readonly Stat stat = new(10);
@@ -31,7 +29,7 @@ namespace Kryz.RPG.StatsPerfTests
 				int listIndex = Random.Range(0, 4);
 
 				StatModifierLegacy modifier_legacy = new(value, (StatModifierTypeLegacy)listIndex, this);
-				StatModifier modifier = new(value, new((StatModifierType)listIndex, this));
+				StatModifier<StatModifierData> modifier = new(value, new((StatModifierType)listIndex, this));
 
 				modifiers_legacy[i] = modifier_legacy;
 				modifiers[i] = modifier;

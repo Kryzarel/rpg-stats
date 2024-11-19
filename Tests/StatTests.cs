@@ -1,5 +1,7 @@
 using System;
 using System.Reflection;
+using Kryz.RPG.Stats.Core;
+using Kryz.RPG.Stats.Default;
 using NUnit.Framework;
 using Random = UnityEngine.Random;
 

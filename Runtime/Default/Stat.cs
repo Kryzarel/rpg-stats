@@ -1,6 +1,7 @@
 using System;
+using Kryz.RPG.Stats.Core;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats.Default
 {
 	public sealed class Stat : Stat<StatModifierData>
 	{

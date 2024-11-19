@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Kryz.RPG.Stats.Core;
 using NUnit.Framework;
 using Random = UnityEngine.Random;
 

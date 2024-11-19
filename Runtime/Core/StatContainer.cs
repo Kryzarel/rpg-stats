@@ -1,4 +1,4 @@
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats.Core
 {
 	public readonly struct StatContainer<T> where T : struct, IStatModifierData<T>
 	{

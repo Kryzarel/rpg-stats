@@ -1,6 +1,6 @@
 using System;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats.Core
 {
 	public readonly struct StatModifier<T> : IComparable<StatModifier<T>>, IEquatable<StatModifier<T>> where T : struct, IStatModifierData<T>
 	{

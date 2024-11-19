@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats.Core
 {
 	public abstract partial class Stat<T>
 	{

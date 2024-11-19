@@ -1,4 +1,4 @@
-namespace Kryz.RPG.Stats
+namespace Kryz.RPG.Stats.Core
 {
 	public interface IStatModifierMatch<T> where T : struct, IStatModifierData<T>
 	{
