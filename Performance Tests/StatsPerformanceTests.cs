@@ -17,6 +17,9 @@ namespace Kryz.RPG.StatsPerfTests
 		private readonly StatLegacy stat_legacy = new(10);
 		private readonly Stat stat = new(10);
 
+		private readonly object source1 = new();
+		private readonly object source2 = new();
+
 		private int step1;
 		private int step10;
 		private int step100;
@@ -27,9 +30,10 @@ namespace Kryz.RPG.StatsPerfTests
 			{
 				float value = Random.Range(-100, 100 + 1);
 				int listIndex = Random.Range(0, 4);
+				object source = i % 2 == 0 ? source1 : source2;
 
-				StatModifierLegacy modifier_legacy = new(value, (StatModifierTypeLegacy)listIndex, this);
-				StatModifier<StatModifierData> modifier = new(value, new((StatModifierType)listIndex, this));
+				StatModifierLegacy modifier_legacy = new(value, (StatModifierTypeLegacy)listIndex, source);
+				StatModifier<StatModifierData> modifier = new(value, new((StatModifierType)listIndex, source));
 
 				modifiers_legacy[i] = modifier_legacy;
 				modifiers[i] = modifier;
@@ -85,7 +89,8 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void AddRemoveAllFromSource_Legacy()
 		{
-			stat_legacy.RemoveModifiersFromSource(this);
+			stat_legacy.RemoveModifiersFromSource(source1);
+			stat_legacy.RemoveModifiersFromSource(source2);
 			for (int i = 0; i < Length; i++)
 			{
 				stat_legacy.AddModifier(modifiers_legacy[i]);
@@ -122,7 +127,8 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void AddRemoveAllFromSource()
 		{
-			stat.RemoveModifiersFromSource(this);
+			stat.RemoveModifiersFromSource(source1);
+			stat.RemoveModifiersFromSource(source2);
 			for (int i = 0; i < Length; i++)
 			{
 				stat.AddModifier(modifiers[i]);
