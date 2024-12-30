@@ -31,7 +31,7 @@ namespace Kryz.RPG.Stats.Core
 					IStat<T> stat = statContainers[containerIndex].Stat;
 					if (index < stat.ModifiersCount)
 					{
-						current = stat.GetModifier(index);
+						current = stat[index];
 						return true;
 					}
 					containerIndex++;

@@ -22,9 +22,9 @@ namespace Kryz.RPG.Stats.Core
 
 		public bool MoveNext()
 		{
-			if (index++ < stat.ModifiersCount)
+			if (index < stat.ModifiersCount)
 			{
-				current = stat.GetModifier(index);
+				current = stat[index++];
 				return true;
 			}
 			return false;

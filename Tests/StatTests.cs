@@ -192,7 +192,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			// Act
 			for (int i = 0; i < stat.ModifiersCount; i++)
 			{
-				StatModifier<StatModifierData> modifier = stat.GetModifier(i);
+				StatModifier<StatModifierData> modifier = stat[i];
 				stat.RemoveModifier(modifier);
 
 				float expected = (baseValue + containers[0].Stat.FinalValue) * containers[1].Stat.FinalValue * containers[2].Stat.FinalValue;

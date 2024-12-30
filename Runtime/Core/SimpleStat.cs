@@ -20,6 +20,9 @@ namespace Kryz.RPG.Stats.Core
 			CalculateFinalValue();
 		}
 
+		protected virtual void Add(float baseValue, float currentValue, StatModifier<T> modifier) => modifiers.Add(modifier);
+		protected virtual bool Remove(float baseValue, float currentValue, StatModifier<T> modifier) => modifiers.Remove(modifier);
+
 		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 
@@ -39,13 +42,13 @@ namespace Kryz.RPG.Stats.Core
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
-			modifiers.Add(modifier);
+			Add(baseValue, finalValue, modifier);
 			finalValue = AddOperation(baseValue, finalValue, modifier);
 		}
 
 		public bool RemoveModifier(StatModifier<T> modifier)
 		{
-			if (modifiers.Remove(modifier))
+			if (Remove(baseValue, finalValue, modifier))
 			{
 				finalValue = RemoveOperation(baseValue, finalValue, modifier);
 				return true;
@@ -82,8 +85,8 @@ namespace Kryz.RPG.Stats.Core
 			modifiers.Clear();
 		}
 
-		public StatModifier<T> GetModifier(int index) => modifiers[index];
-		public float GetModifierValue(int index) => modifiers[index].Value;
+		public StatModifier<T> this[int index] => modifiers[index];
+		float IReadOnlyStat.this[int index] => modifiers[index].Value;
 
 		public List<StatModifier<T>>.Enumerator GetEnumerator() => modifiers.GetEnumerator();
 		StatEnumerator<T> IReadOnlyStat<T>.GetEnumerator() => new(this);

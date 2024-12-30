@@ -87,29 +87,6 @@ namespace Kryz.RPG.Stats.Core
 			}
 		}
 
-		public StatModifier<T> GetModifier(int index)
-		{
-			(int i, int j) = FindIndices(index);
-			return statContainers[i].Stat.GetModifier(j);
-		}
-
-		public float GetModifierValue(int index)
-		{
-			return GetModifier(index).Value;
-		}
-
-		private (int, int) FindIndices(int index)
-		{
-			int i;
-			for (i = 0; i < statContainers.Length; i++)
-			{
-				int count = statContainers[i].Stat.ModifiersCount;
-				if (index < count) break;
-				index -= count;
-			}
-			return (i, index);
-		}
-
 		private int SumCounts()
 		{
 			int count = 0;
@@ -119,6 +96,21 @@ namespace Kryz.RPG.Stats.Core
 			}
 			return count;
 		}
+
+		private StatModifier<T> GetModifier(int index)
+		{
+			int i, j;
+			for (i = 0, j = index; i < statContainers.Length; i++)
+			{
+				int count = statContainers[i].Stat.ModifiersCount;
+				if (j < count) break;
+				j -= count;
+			}
+			return statContainers[i].Stat[j];
+		}
+
+		float IReadOnlyStat.this[int index] => GetModifier(index).Value;
+		public StatModifier<T> this[int index] => GetModifier(index);
 
 		public Enumerator GetEnumerator() => new(statContainers);
 		StatEnumerator<T> IReadOnlyStat<T>.GetEnumerator() => new(this);
