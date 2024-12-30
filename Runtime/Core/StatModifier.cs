@@ -25,7 +25,7 @@ namespace Kryz.RPG.Stats.Core
 
 		public bool Equals(StatModifier<T> other)
 		{
-			return this == other;
+			return Value == other.Value && Data.Equals(other.Data);
 		}
 
 		public override bool Equals(object obj)
@@ -40,12 +40,12 @@ namespace Kryz.RPG.Stats.Core
 
 		public static bool operator ==(StatModifier<T> a, StatModifier<T> b)
 		{
-			return a.Value == b.Value && a.Data.Equals(b.Data);
+			return a.Equals(b);
 		}
 
 		public static bool operator !=(StatModifier<T> a, StatModifier<T> b)
 		{
-			return !(a == b);
+			return !a.Equals(b);
 		}
 	}
 }
