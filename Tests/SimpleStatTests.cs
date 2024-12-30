@@ -214,7 +214,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		}
 
 		[Test]
-		public void StatMax_RandomModifiers_FinalEqualsMult([ValueSource(nameof(values))] float baseValue)
+		public void StatMax_RandomModifiers_FinalEqualsMax([ValueSource(nameof(values))] float baseValue)
 		{
 			// Arrange
 			SimpleStatMax<TestModifierData> stat = new(baseValue);
@@ -239,6 +239,40 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				if (stat.RemoveModifier(modifier))
 				{
 					expected = stat.Max().Value;
+				}
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta);
+				Assert.AreEqual(expected, stat.FinalValue, delta);
+			}
+		}
+
+		[Test]
+		public void StatMin_RandomModifiers_FinalEqualsMin([ValueSource(nameof(values))] float baseValue)
+		{
+			// Arrange
+			SimpleStatMax<TestModifierData> stat = new(baseValue);
+			float expected = stat.BaseValue;
+
+			// Act
+			for (int i = 0; i < numIterations; i++)
+			{
+				float modifierValue = Random.Range(1f, 100f);
+				stat.AddModifier(new StatModifier<TestModifierData>(modifierValue, default));
+				expected = Math.Max(expected, modifierValue);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta);
+				Assert.AreEqual(expected, stat.FinalValue, delta);
+			}
+
+			// Act
+			for (int i = 0; i < stat.ModifiersCount; i++)
+			{
+				StatModifier<TestModifierData> modifier = stat.GetModifier(i);
+				if (stat.RemoveModifier(modifier))
+				{
+					expected = stat.Min().Value;
 				}
 
 				// Assert
