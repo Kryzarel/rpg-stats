@@ -113,7 +113,7 @@ namespace Kryz.RPG.Stats.Core
 		public StatModifier<T> this[int index] => GetModifier(index);
 
 		public Enumerator GetEnumerator() => new(statContainers);
-		StatEnumerator<T> IReadOnlyStat<T>.GetEnumerator() => new(this);
+		IReadOnlyStat<T>.Enumerator IReadOnlyStat<T>.GetEnumerator() => new(this);
 		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}

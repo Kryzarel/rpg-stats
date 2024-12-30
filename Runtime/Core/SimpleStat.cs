@@ -89,7 +89,7 @@ namespace Kryz.RPG.Stats.Core
 		float IReadOnlyStat.this[int index] => modifiers[index].Value;
 
 		public List<StatModifier<T>>.Enumerator GetEnumerator() => modifiers.GetEnumerator();
-		StatEnumerator<T> IReadOnlyStat<T>.GetEnumerator() => new(this);
+		IReadOnlyStat<T>.Enumerator IReadOnlyStat<T>.GetEnumerator() => new(this);
 		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
 	}
