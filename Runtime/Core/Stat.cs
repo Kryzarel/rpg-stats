@@ -26,7 +26,7 @@ namespace Kryz.RPG.Stats.Core
 		public abstract void AddModifier(StatModifier<T> modifier);
 		public abstract bool RemoveModifier(StatModifier<T> modifier);
 
-		protected virtual float CalculateFinalValue(float baseValue)
+		protected float CalculateFinalValue(float baseValue)
 		{
 			float currentValue = baseValue;
 			for (int i = 0; i < statContainers.Length; i++)

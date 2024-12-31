@@ -17,14 +17,6 @@ namespace Kryz.RPG.Stats.Default
 			return statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier);
 		}
 
-		protected override float CalculateFinalValue(float baseValue)
-		{
-			float result = (baseValue + statContainers[0].Stat.FinalValue) * statContainers[1].Stat.FinalValue * statContainers[2].Stat.FinalValue;
-			result = Math.Max(result, statContainers[3].Stat.FinalValue);
-			result = Math.Min(result, statContainers[4].Stat.FinalValue);
-			return result;
-		}
-
 		public int RemoveModifiersFromSource(object source)
 		{
 			return RemoveWhere(new StatModifierMatch(source: source));
