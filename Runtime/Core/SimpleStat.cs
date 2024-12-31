@@ -60,26 +60,27 @@ namespace Kryz.RPG.Stats.Core
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
 		{
-			NonAllocList<StatModifier<T>> old = modifiers;
-			modifiers = new NonAllocList<StatModifier<T>>(modifiers.Capacity);
+			NonAllocList<StatModifier<T>> newModifiers = new(modifiers.Capacity);
 
-			int removedCount = 0;
-			for (int i = 0; i < old.Count; i++)
+			int count = modifiers.Count;
+			for (int i = 0; i < count; i++)
 			{
-				StatModifier<T> modifier = old[i];
+				StatModifier<T> modifier = modifiers[i];
 
 				if (match.IsMatch(modifier))
 				{
 					finalValue = RemoveOperation(baseValue, finalValue, modifier);
-					removedCount++;
 				}
 				else
 				{
-					modifiers.Add(modifier);
+					newModifiers.Add(modifier);
 				}
 			}
 
-			old.Dispose();
+			modifiers.Dispose();
+			modifiers = newModifiers;
+
+			int removedCount = modifiers.Count - count;
 			return removedCount;
 		}
 
