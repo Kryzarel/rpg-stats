@@ -1,6 +1,6 @@
 namespace Kryz.RPG.Stats.Default
 {
-	public enum StatModifierType
+	public enum StatModifierType : byte
 	{
 		Add,
 		Mult,

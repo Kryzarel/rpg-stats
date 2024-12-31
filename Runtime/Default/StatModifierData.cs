@@ -16,7 +16,8 @@ namespace Kryz.RPG.Stats.Default
 
 		public int CompareTo(StatModifierData other)
 		{
-			return Type.CompareTo(other.Type);
+			// Cast to the underlying type to avoid using CompareTo(object) and causing boxing
+			return ((byte)Type).CompareTo((byte)other.Type);
 		}
 
 		public bool Equals(StatModifierData other)
