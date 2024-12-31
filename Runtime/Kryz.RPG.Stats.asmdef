@@ -2,6 +2,7 @@
     "name": "Kryz.RPG.Stats",
     "rootNamespace": "Kryz.RPG.Stats",
     "references": [
+        "Kryz.Utils",
         "Kryz.Collections"
     ],
     "includePlatforms": [],
