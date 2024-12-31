@@ -37,7 +37,7 @@ namespace Kryz.RPG.Stats.Core
 			int index = modifiers.BinarySearchLeftmost(modifier, comparer);
 			if (index >= 0)
 			{
-				index = modifiers.IndexOf(modifier, index, modifiers.Count - index);
+				index = modifiers.IndexOf(modifier, index);
 				modifiers.RemoveAt(index);
 				return true;
 			}
