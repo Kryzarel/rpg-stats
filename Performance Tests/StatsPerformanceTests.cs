@@ -57,6 +57,7 @@ namespace Kryz.RPG.StatsPerfTests
 			AddRemove1();
 			AddRemove10();
 			AddRemove100();
+			AddRemove100_CheckFinalValue();
 			AddRemoveAllFromSource();
 		}
 
@@ -123,6 +124,17 @@ namespace Kryz.RPG.StatsPerfTests
 				stat.AddModifier(modifiers[i]);
 			}
 			float value = stat.FinalValue;
+		}
+
+		private void AddRemove100_CheckFinalValue()
+		{
+			for (int i = step100, count = 0; i < Length && count < 100; i += step100, count++)
+			{
+				stat.RemoveModifier(modifiers[i]);
+				float value = stat.FinalValue;
+				stat.AddModifier(modifiers[i]);
+				value = stat.FinalValue;
+			}
 		}
 
 		private void AddRemoveAllFromSource()
