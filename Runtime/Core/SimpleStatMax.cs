@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats.Core
 {
@@ -11,13 +10,13 @@ namespace Kryz.RPG.Stats.Core
 		{
 			if (modifier.Value >= currentValue)
 			{
-				modifiers.Add(modifier);
+				Add(modifier);
 			}
 			else
 			{
 				// Improves performance by inserting the modifiers sorted
-				int index = BinarySearchLeftmost(modifiers, modifier.Value);
-				modifiers.Insert(index, modifier);
+				int index = BinarySearchLeftmost(modifiers, modifier.Value, count);
+				Insert(index, modifier);
 			}
 		}
 
@@ -28,24 +27,24 @@ namespace Kryz.RPG.Stats.Core
 
 		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
-			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
+			return count > 0 ? Math.Max(modifiers[count - 1].Value, baseValue) : baseValue;
 		}
 
 		protected override float CalculateFinalValue(float baseValue, float currentValue)
 		{
-			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
+			return count > 0 ? Math.Max(modifiers[count - 1].Value, baseValue) : baseValue;
 		}
 
-		private static int BinarySearchLeftmost(IReadOnlyList<StatModifier<T>> list, float value)
+		private static int BinarySearchLeftmost(StatModifier<T>[] modifiers, float value, int count)
 		{
 			int min = 0;
-			int max = list.Count;
+			int max = count;
 
 			while (min < max)
 			{
 				int mid = (min + max) / 2;
 
-				if (list[mid].Value < value)
+				if (modifiers[mid].Value < value)
 					min = mid + 1;
 				else
 					max = mid;
