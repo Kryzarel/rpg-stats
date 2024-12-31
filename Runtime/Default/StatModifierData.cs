@@ -28,21 +28,25 @@ namespace Kryz.RPG.Stats.Default
 			return Type == other.Type && Source == other.Source;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool Equals(object obj)
 		{
 			return obj is StatModifierData other && Equals(other);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
 		{
 			return HashCode.Combine(Type, Source);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(StatModifierData a, StatModifierData b)
 		{
 			return a.Equals(b);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(StatModifierData a, StatModifierData b)
 		{
 			return !a.Equals(b);
