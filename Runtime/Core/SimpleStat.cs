@@ -6,7 +6,6 @@ namespace Kryz.RPG.Stats.Core
 {
 	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		// TODO: Consider removing this dependency so that this package could be published in isolation.
 		protected NonAllocList<StatModifier<T>> modifiers = new(16);
 
 		private float baseValue;
