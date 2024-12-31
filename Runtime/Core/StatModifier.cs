@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats.Core
 {
@@ -13,6 +14,7 @@ namespace Kryz.RPG.Stats.Core
 			Data = data;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int CompareTo(StatModifier<T> other)
 		{
 			int result = Value.CompareTo(other.Value);
@@ -23,6 +25,7 @@ namespace Kryz.RPG.Stats.Core
 			return result;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(StatModifier<T> other)
 		{
 			return Value == other.Value && Data.Equals(other.Data);

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Kryz.RPG.Stats.Core;
 
 namespace Kryz.RPG.Stats.Default
@@ -15,6 +16,7 @@ namespace Kryz.RPG.Stats.Default
 			Source = source;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsMatch(StatModifier<StatModifierData> modifier)
 		{
 			return (!ModifierValue.HasValue || ModifierValue.Value == modifier.Value) && (!Type.HasValue || Type.Value == modifier.Data.Type) && (!Source.HasValue || Source.Value == modifier.Data.Source);

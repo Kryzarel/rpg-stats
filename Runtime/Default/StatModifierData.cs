@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Kryz.RPG.Stats.Core;
 
 namespace Kryz.RPG.Stats.Default
@@ -14,12 +15,14 @@ namespace Kryz.RPG.Stats.Default
 			Source = source;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int CompareTo(StatModifierData other)
 		{
 			// Cast to the underlying type to avoid using CompareTo(object) and causing boxing
 			return ((byte)Type).CompareTo((byte)other.Type);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(StatModifierData other)
 		{
 			return Type == other.Type && Source == other.Source;
