@@ -64,7 +64,7 @@ namespace Kryz.RPG.Stats.Core
 			modifiers = new NonAllocList<StatModifier<T>>(modifiers.Capacity);
 
 			int removedCount = 0;
-			for (int i = 0; i < modifiers.Count; i++)
+			for (int i = 0; i < old.Count; i++)
 			{
 				StatModifier<T> modifier = old[i];
 
