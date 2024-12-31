@@ -68,7 +68,6 @@ namespace Kryz.RPG.Stats.Core
 			{
 				removedCount += statContainers[i].Stat.RemoveWhere(match);
 			}
-			// finalValue = CalculateFinalValue(baseValue);
 			return removedCount;
 		}
 
