@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats.Core
 {
@@ -10,13 +11,13 @@ namespace Kryz.RPG.Stats.Core
 		{
 			if (modifier.Value >= currentValue)
 			{
-				Add(modifier);
+				modifiers.Add(modifier);
 			}
 			else
 			{
 				// Improves performance by inserting the modifiers sorted
-				int index = BinarySearchLeftmost(modifiers, modifier.Value, count);
-				Insert(index, modifier);
+				int index = BinarySearchLeftmost(modifiers, modifier.Value);
+				modifiers.Insert(index, modifier);
 			}
 		}
 
@@ -27,18 +28,18 @@ namespace Kryz.RPG.Stats.Core
 
 		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
-			return count > 0 ? Math.Max(modifiers[count - 1].Value, baseValue) : baseValue;
+			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}
 
 		protected override float CalculateFinalValue(float baseValue, float currentValue)
 		{
-			return count > 0 ? Math.Max(modifiers[count - 1].Value, baseValue) : baseValue;
+			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}
 
-		private static int BinarySearchLeftmost(StatModifier<T>[] modifiers, float value, int count)
+		private static int BinarySearchLeftmost<TList>(TList modifiers, float value) where TList : IReadOnlyList<StatModifier<T>>
 		{
 			int min = 0;
-			int max = count;
+			int max = modifiers.Count;
 
 			while (min < max)
 			{
