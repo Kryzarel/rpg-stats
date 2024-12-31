@@ -54,7 +54,7 @@ namespace Kryz.RPG.Stats.Core
 			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}
 
-		protected override float CalculateFinalValue(float baseValue, float currentValue)
+		protected override float CalculateFinalValue(float baseValue)
 		{
 			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}

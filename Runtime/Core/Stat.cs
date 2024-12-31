@@ -11,7 +11,7 @@ namespace Kryz.RPG.Stats.Core
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(); } }
+		public float BaseValue { get => baseValue; set { baseValue = value; finalValue = CalculateFinalValue(baseValue); } }
 		public float FinalValue { get { CheckValueChanged(); return finalValue; } }
 		public int ModifiersCount => SumCounts();
 
@@ -35,11 +35,6 @@ namespace Kryz.RPG.Stats.Core
 				currentValue = container.Operation.Calculate(currentValue, container.Stat);
 			}
 			return currentValue;
-		}
-
-		protected void CalculateFinalValue()
-		{
-			finalValue = CalculateFinalValue(baseValue);
 		}
 
 		private void CheckValueChanged()
