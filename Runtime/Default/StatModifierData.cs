@@ -18,8 +18,8 @@ namespace Kryz.RPG.Stats.Default
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int CompareTo(StatModifierData other)
 		{
-			// Cast to the underlying type to avoid using CompareTo(object) and causing boxing
-			return ((byte)Type).CompareTo((byte)other.Type);
+			// Cast to int to avoid using CompareTo(object) and causing boxing
+			return ((int)Type).CompareTo((int)other.Type);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
