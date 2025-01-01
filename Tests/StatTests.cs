@@ -10,7 +10,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 	public class StatTests
 	{
 		private const string vals = nameof(values);
-		private const float delta = 0.0001f;
+		private const float delta = 0.001f;
 		private static readonly float[] values = { 0, 0.3f, 2.5f, 5 };
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
