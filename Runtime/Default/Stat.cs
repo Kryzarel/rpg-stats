@@ -33,11 +33,11 @@ namespace Kryz.RPG.Stats.Default
 				StatModifierType type = modifierTypes[i];
 				lists[i] = type switch
 				{
-					StatModifierType.Add => StatContainer<StatModifierData>.Create(new SimpleStatAdd<StatModifierData>(0), new AddOperation<StatModifierData>()),
-					StatModifierType.Mult => StatContainer<StatModifierData>.Create(new SimpleStatAdd<StatModifierData>(1), new MultOperation<StatModifierData>()),
-					StatModifierType.MultTotal => StatContainer<StatModifierData>.Create(new SimpleStatMult<StatModifierData>(1), new MultOperation<StatModifierData>()),
-					StatModifierType.Max => StatContainer<StatModifierData>.Create(new SimpleStatMax<StatModifierData>(0), new MaxOperation<StatModifierData>()),
-					StatModifierType.Min => StatContainer<StatModifierData>.Create(new SimpleStatMin<StatModifierData>(float.MaxValue), new MinOperation<StatModifierData>()),
+					StatModifierType.Add => new StatContainerAdd<StatModifierData, SimpleStatAdd<StatModifierData>>(new SimpleStatAdd<StatModifierData>(0)),
+					StatModifierType.Mult => new StatContainerMult<StatModifierData, SimpleStatAdd<StatModifierData>>(new SimpleStatAdd<StatModifierData>(1)),
+					StatModifierType.MultTotal => new StatContainerMult<StatModifierData, SimpleStatMult<StatModifierData>>(new SimpleStatMult<StatModifierData>(1)),
+					StatModifierType.Max => new StatContainerMax<StatModifierData, SimpleStatMax<StatModifierData>>(new SimpleStatMax<StatModifierData>(0)),
+					StatModifierType.Min => new StatContainerMin<StatModifierData, SimpleStatMin<StatModifierData>>(new SimpleStatMin<StatModifierData>(float.MaxValue)),
 					_ => throw new NotImplementedException(),
 				};
 			}
