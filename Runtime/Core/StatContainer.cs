@@ -1,6 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
-
 namespace Kryz.RPG.Stats.Core
 {
 	public abstract class StatContainer<T> where T : struct, IStatModifierData<T>
