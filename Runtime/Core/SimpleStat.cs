@@ -21,8 +21,8 @@ namespace Kryz.RPG.Stats.Core
 			finalValue = CalculateFinalValue(baseValue);
 		}
 
-		protected virtual void Add(float baseValue, float currentValue, StatModifier<T> modifier) => modifiers.Add(modifier);
-		protected virtual bool Remove(float baseValue, float currentValue, StatModifier<T> modifier) => modifiers.Remove(modifier);
+		protected virtual void Add(StatModifier<T> modifier) => modifiers.Add(modifier);
+		protected virtual bool Remove(StatModifier<T> modifier) => modifiers.Remove(modifier);
 
 		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
@@ -39,13 +39,13 @@ namespace Kryz.RPG.Stats.Core
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
-			Add(baseValue, finalValue, modifier);
+			Add(modifier);
 			finalValue = AddOperation(baseValue, finalValue, modifier);
 		}
 
 		public bool RemoveModifier(StatModifier<T> modifier)
 		{
-			if (Remove(baseValue, finalValue, modifier))
+			if (Remove(modifier))
 			{
 				finalValue = RemoveOperation(baseValue, finalValue, modifier);
 				return true;

@@ -20,19 +20,14 @@ namespace Kryz.RPG.Stats.Core
 
 		public SimpleStatMin(float baseValue = float.MaxValue) : base(baseValue) { }
 
-		protected override void Add(float baseValue, float currentValue, StatModifier<T> modifier)
+		protected override void Add(StatModifier<T> modifier)
 		{
-			if (modifier.Value <= currentValue)
-			{
-				modifiers.Add(modifier);
-				return;
-			}
 			// Improves performance by inserting the modifiers sorted
 			int index = modifiers.BinarySearchLeftmost(modifier, comparer);
 			modifiers.Insert(index, modifier);
 		}
 
-		protected override bool Remove(float baseValue, float currentValue, StatModifier<T> modifier)
+		protected override bool Remove(StatModifier<T> modifier)
 		{
 			int index = modifiers.BinarySearchLeftmost(modifier, comparer);
 			if (index >= 0)
