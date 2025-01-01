@@ -38,7 +38,10 @@ namespace Kryz.RPG.Stats.Core
 			if (index >= 0)
 			{
 				index = modifiers.IndexOf(modifier, index);
-				modifiers.RemoveAt(index);
+				if (index >= 0)
+				{
+					modifiers.RemoveAt(index);
+				}
 				return true;
 			}
 			return false;
