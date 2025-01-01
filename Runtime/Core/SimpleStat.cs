@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Kryz.Collections;
@@ -53,7 +54,7 @@ namespace Kryz.RPG.Stats.Core
 			return false;
 		}
 
-		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
+		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
 			NonAllocList<StatModifier<T>> newModifiers = new(modifiers.Capacity);
 
@@ -62,7 +63,7 @@ namespace Kryz.RPG.Stats.Core
 			{
 				StatModifier<T> modifier = modifiers[i];
 
-				if (match.IsMatch(modifier))
+				if (match.Equals(modifier))
 				{
 					finalValue = RemoveOperation(baseValue, finalValue, modifier);
 				}

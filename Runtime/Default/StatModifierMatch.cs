@@ -1,9 +1,10 @@
+using System;
 using System.Runtime.CompilerServices;
 using Kryz.RPG.Stats.Core;
 
 namespace Kryz.RPG.Stats.Default
 {
-	public readonly struct StatModifierMatch : IStatModifierMatch<StatModifierData>
+	public readonly struct StatModifierMatch : IEquatable<StatModifier<StatModifierData>>
 	{
 		public readonly ValueContainer<float> ModifierValue;
 		public readonly ValueContainer<StatModifierType> Type;
@@ -17,7 +18,7 @@ namespace Kryz.RPG.Stats.Default
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool IsMatch(StatModifier<StatModifierData> modifier)
+		public bool Equals(StatModifier<StatModifierData> modifier)
 		{
 			return (!ModifierValue.HasValue || ModifierValue.Value == modifier.Value) && (!Type.HasValue || Type.Value == modifier.Data.Type) && (!Source.HasValue || Source.Value == modifier.Data.Source);
 		}

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -55,7 +56,7 @@ namespace Kryz.RPG.Stats.Core
 			}
 		}
 
-		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>
+		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
 			int removedCount = 0;
 			for (int i = 0; i < statContainers.Length; i++)

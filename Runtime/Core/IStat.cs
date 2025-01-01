@@ -1,3 +1,5 @@
+using System;
+
 namespace Kryz.RPG.Stats.Core
 {
 	public interface IStat : IReadOnlyStat
@@ -12,6 +14,6 @@ namespace Kryz.RPG.Stats.Core
 	{
 		void AddModifier(StatModifier<T> modifier);
 		bool RemoveModifier(StatModifier<T> modifier);
-		int RemoveWhere<TMatch>(TMatch match) where TMatch : IStatModifierMatch<T>;
+		int RemoveWhere<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>;
 	}
 }
