@@ -9,9 +9,9 @@ namespace Kryz.RPG.Stats.Tests.Editor
 {
 	public class StatTests
 	{
-		private const string vals = nameof(values);
+		private const string vals = nameof(baseValues);
 		private const float delta = 0.001f;
-		private static readonly float[] values = { 0, 0.3f, 2.5f, 5 };
+		private static readonly float[] baseValues = { 0, 0.3f, 2.5f, 5 };
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
 		[Test]
@@ -168,7 +168,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		public void StatAdd_RandomModifiers_CorrectCalc([ValueSource(vals)] float baseValue)
 		{
 			// Arrange
-			const int numIterations = 1000;
+			const int numIterations = 1_000;
 			Stat stat = new(baseValue);
 			FieldInfo statContainersField = typeof(Stat).GetField("statContainers", BindingFlags.Instance | BindingFlags.NonPublic);
 			StatContainer<StatModifierData>[] containers = (StatContainer<StatModifierData>[])statContainersField.GetValue(stat);
@@ -176,7 +176,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			// Act
 			for (int i = 0; i < numIterations; i++)
 			{
-				float modifierValue = Random.Range(-100f, 100f);
+				float modifierValue = (float)Math.Round((decimal)Random.Range(-100f, 100f), 3);
 				StatModifierType modifierType = modifierTypes[Random.Range(0, modifierTypes.Length)];
 				stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(modifierType)));
 
