@@ -7,7 +7,8 @@ namespace Kryz.RPG.Stats.Core
 {
 	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		protected NonAllocList<StatModifier<T>> modifiers = new(16);
+		protected PooledList<StatModifier<T>> modifiers = new();
+		protected PooledList<StatModifier<T>> aux = new();
 
 		private float baseValue;
 		private float finalValue;
@@ -56,10 +57,10 @@ namespace Kryz.RPG.Stats.Core
 
 		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
-			NonAllocList<StatModifier<T>> newModifiers = new(modifiers.Capacity);
-
 			int count = modifiers.Count;
-			for (int i = 0; i < count; i++)
+			aux.EnsureCapacity(count);
+
+			for (int i = count - 1; i >= 0; i--)
 			{
 				StatModifier<T> modifier = modifiers[i];
 
@@ -69,12 +70,12 @@ namespace Kryz.RPG.Stats.Core
 				}
 				else
 				{
-					newModifiers.Add(modifier);
+					aux.Add(modifier);
 				}
 			}
 
-			modifiers.Dispose();
-			modifiers = newModifiers;
+			(modifiers, aux) = (aux, modifiers);
+			aux.Clear();
 
 			int removedCount = modifiers.Count - count;
 			return removedCount;
@@ -88,14 +89,14 @@ namespace Kryz.RPG.Stats.Core
 
 		public void ClearModifiers()
 		{
-			finalValue = baseValue;
 			modifiers.Clear();
+			finalValue = baseValue;
 		}
 
 		public StatModifier<T> this[int index] => modifiers[index];
 		float IReadOnlyStat.this[int index] => modifiers[index].Value;
 
-		public NonAllocList<StatModifier<T>>.Enumerator GetEnumerator() => modifiers.GetEnumerator();
+		public PooledList<StatModifier<T>>.Enumerator GetEnumerator() => modifiers.GetEnumerator();
 		IReadOnlyStat<T>.Enumerator IReadOnlyStat<T>.GetEnumerator() => new(this);
 		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
