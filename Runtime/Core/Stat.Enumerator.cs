@@ -7,7 +7,7 @@ namespace Kryz.RPG.Stats.Core
 	{
 		public struct Enumerator : IEnumerator<StatModifier<T>>
 		{
-			private readonly StatContainer<T>[] statContainers;
+			private readonly IStat<T>[] stats;
 
 			private int index;
 			private int containerIndex;
@@ -16,9 +16,9 @@ namespace Kryz.RPG.Stats.Core
 			public readonly StatModifier<T> Current => current;
 			readonly object IEnumerator.Current => current;
 
-			public Enumerator(StatContainer<T>[] statContainers)
+			public Enumerator(IStat<T>[] stats)
 			{
-				this.statContainers = statContainers;
+				this.stats = stats;
 				index = 0;
 				containerIndex = 0;
 				current = default;
@@ -26,9 +26,9 @@ namespace Kryz.RPG.Stats.Core
 
 			public bool MoveNext()
 			{
-				while (containerIndex < statContainers.Length)
+				while (containerIndex < stats.Length)
 				{
-					IStat<T> stat = statContainers[containerIndex].Stat;
+					IStat<T> stat = stats[containerIndex];
 					if (index < stat.ModifiersCount)
 					{
 						current = stat[index];

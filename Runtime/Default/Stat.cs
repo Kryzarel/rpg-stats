@@ -5,16 +5,16 @@ namespace Kryz.RPG.Stats.Default
 {
 	public sealed class Stat : Stat<StatModifierData>
 	{
-		public Stat(float baseValue = 0) : base(baseValue, GetModifierLists()) { }
+		public Stat(float baseValue = 0) : base(baseValue, GetInnerStats()) { }
 
 		public override void AddModifier(StatModifier<StatModifierData> modifier)
 		{
-			statContainers[(int)modifier.Data.Type].Stat.AddModifier(modifier);
+			innerStats[(int)modifier.Data.Type].AddModifier(modifier);
 		}
 
 		public override bool RemoveModifier(StatModifier<StatModifierData> modifier)
 		{
-			return statContainers[(int)modifier.Data.Type].Stat.RemoveModifier(modifier);
+			return innerStats[(int)modifier.Data.Type].RemoveModifier(modifier);
 		}
 
 		public int RemoveModifiersFromSource(object source)
@@ -22,26 +22,35 @@ namespace Kryz.RPG.Stats.Default
 			return RemoveAll(new StatModifierMatch(source: source));
 		}
 
-		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
-
-		private static StatContainer<StatModifierData>[] GetModifierLists()
+		protected override float CalculateFinalValue(float baseValue)
 		{
-			var lists = new StatContainer<StatModifierData>[modifierTypes.Length];
+			float finalValue = baseValue;
+			finalValue += innerStats[(int)StatModifierType.Add].FinalValue;
+			finalValue *= innerStats[(int)StatModifierType.Mult].FinalValue;
+			finalValue *= innerStats[(int)StatModifierType.MultTotal].FinalValue;
+			finalValue = Math.Max(finalValue, innerStats[(int)StatModifierType.Max].FinalValue);
+			finalValue = Math.Min(finalValue, innerStats[(int)StatModifierType.Min].FinalValue);
+			return finalValue;
+		}
+
+		private static SimpleStat<StatModifierData>[] GetInnerStats()
+		{
+			StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
+			SimpleStat<StatModifierData>[] stats = new SimpleStat<StatModifierData>[modifierTypes.Length];
 
 			for (int i = 0; i < modifierTypes.Length; i++)
 			{
-				StatModifierType type = modifierTypes[i];
-				lists[i] = type switch
+				stats[i] = modifierTypes[i] switch
 				{
-					StatModifierType.Add => new StatContainerAdd<StatModifierData, SimpleStatAdd<StatModifierData>>(new SimpleStatAdd<StatModifierData>(0)),
-					StatModifierType.Mult => new StatContainerMult<StatModifierData, SimpleStatAdd<StatModifierData>>(new SimpleStatAdd<StatModifierData>(1)),
-					StatModifierType.MultTotal => new StatContainerMult<StatModifierData, SimpleStatMult<StatModifierData>>(new SimpleStatMult<StatModifierData>(1)),
-					StatModifierType.Max => new StatContainerMax<StatModifierData, SimpleStatMax<StatModifierData>>(new SimpleStatMax<StatModifierData>(0)),
-					StatModifierType.Min => new StatContainerMin<StatModifierData, SimpleStatMin<StatModifierData>>(new SimpleStatMin<StatModifierData>(float.MaxValue)),
+					StatModifierType.Add => new SimpleStatAdd<StatModifierData>(0),
+					StatModifierType.Mult => new SimpleStatAdd<StatModifierData>(1),
+					StatModifierType.MultTotal => new SimpleStatMult<StatModifierData>(1),
+					StatModifierType.Max => new SimpleStatMax<StatModifierData>(0),
+					StatModifierType.Min => new SimpleStatMin<StatModifierData>(float.MaxValue),
 					_ => throw new NotImplementedException(),
 				};
 			}
-			return lists;
+			return stats;
 		}
 	}
 }

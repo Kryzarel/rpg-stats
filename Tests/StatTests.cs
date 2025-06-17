@@ -170,8 +170,8 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			// Arrange
 			const int numIterations = 1_000;
 			Stat stat = new(baseValue);
-			FieldInfo statContainersField = typeof(Stat).GetField("statContainers", BindingFlags.Instance | BindingFlags.NonPublic);
-			StatContainer<StatModifierData>[] containers = (StatContainer<StatModifierData>[])statContainersField.GetValue(stat);
+			FieldInfo statContainersField = typeof(Stat).GetField("innerStats", BindingFlags.Instance | BindingFlags.NonPublic);
+			IStat<StatModifierData>[] containers = (IStat<StatModifierData>[])statContainersField.GetValue(stat);
 
 			// Act
 			for (int i = 0; i < numIterations; i++)
@@ -180,9 +180,9 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				StatModifierType modifierType = modifierTypes[Random.Range(0, modifierTypes.Length)];
 				stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(modifierType)));
 
-				float expected = (baseValue + containers[0].Stat.FinalValue) * containers[1].Stat.FinalValue * containers[2].Stat.FinalValue;
-				expected = Math.Max(expected, containers[3].Stat.FinalValue);
-				expected = Math.Min(expected, containers[4].Stat.FinalValue);
+				float expected = (baseValue + containers[0].FinalValue) * containers[1].FinalValue * containers[2].FinalValue;
+				expected = Math.Max(expected, containers[3].FinalValue);
+				expected = Math.Min(expected, containers[4].FinalValue);
 
 				// Assert
 				Assert.AreEqual(baseValue, stat.BaseValue, delta);
@@ -195,9 +195,9 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				StatModifier<StatModifierData> modifier = stat[i];
 				stat.RemoveModifier(modifier);
 
-				float expected = (baseValue + containers[0].Stat.FinalValue) * containers[1].Stat.FinalValue * containers[2].Stat.FinalValue;
-				expected = Math.Max(expected, containers[3].Stat.FinalValue);
-				expected = Math.Min(expected, containers[4].Stat.FinalValue);
+				float expected = (baseValue + containers[0].FinalValue) * containers[1].FinalValue * containers[2].FinalValue;
+				expected = Math.Max(expected, containers[3].FinalValue);
+				expected = Math.Min(expected, containers[4].FinalValue);
 
 				// Assert
 				Assert.AreEqual(baseValue, stat.BaseValue, delta);
