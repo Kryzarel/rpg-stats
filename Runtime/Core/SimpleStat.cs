@@ -7,19 +7,19 @@ namespace Kryz.RPG.Stats.Core
 {
 	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		protected PooledList<StatModifier<T>> modifiers = PooledList<StatModifier<T>>.Rent();
+		protected readonly PooledList<StatModifier<T>> modifiers = new();
 
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set { baseValue = value; finalValue = CalculateFinalValue(baseValue); } }
+		public float BaseValue { get => baseValue; set { float old = baseValue; baseValue = value; finalValue = ChangeBaseValue(old, baseValue, finalValue); } }
 		public float FinalValue => finalValue;
 		public int ModifiersCount => modifiers.Count;
 
 		protected SimpleStat(float baseValue = 0)
 		{
 			this.baseValue = baseValue;
-			finalValue = CalculateFinalValue(baseValue);
+			finalValue = baseValue;
 		}
 
 		protected virtual void Add(StatModifier<T> modifier) => modifiers.Add(modifier);
@@ -28,14 +28,14 @@ namespace Kryz.RPG.Stats.Core
 		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 
-		protected virtual float CalculateFinalValue(float baseValue)
+		protected virtual float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
 		{
-			float currentValue = baseValue;
+			float finalValue = baseValue;
 			for (int i = 0; i < modifiers.Count; i++)
 			{
-				currentValue = AddOperation(baseValue, currentValue, modifiers[i]);
+				finalValue = AddOperation(baseValue, finalValue, modifiers[i]);
 			}
-			return currentValue;
+			return finalValue;
 		}
 
 		public void AddModifier(StatModifier<T> modifier)
@@ -56,28 +56,36 @@ namespace Kryz.RPG.Stats.Core
 
 		public int RemoveAll<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
 		{
+			int freeIndex = 0; // the first free slot in the array
 			int count = modifiers.Count;
-			PooledList<StatModifier<T>> aux = PooledList<StatModifier<T>>.Rent(count);
 
-			for (int i = 0; i < count; i++)
+			// Find the first item which needs to be removed.
+			while (freeIndex < count && !match.Equals(modifiers[freeIndex])) freeIndex++;
+			if (freeIndex >= count) return 0;
+
+			int current = freeIndex + 1;
+			while (current < count)
 			{
-				StatModifier<T> modifier = modifiers[i];
-
-				if (match.Equals(modifier))
+				// Find the first item which needs to be kept.
+				while (current < count)
 				{
+					StatModifier<T> modifier = modifiers[current];
+					if (!match.Equals(modifier)) break;
+
+					current++;
 					finalValue = RemoveOperation(baseValue, finalValue, modifier);
 				}
-				else
+
+				if (current < count)
 				{
-					aux.Add(modifier);
+					// copy item to the free slot.
+					modifiers[freeIndex++] = modifiers[current++];
 				}
 			}
 
-			(modifiers, aux) = (aux, modifiers);
-			aux.Dispose();
-
-			int removedCount = modifiers.Count - count;
-			return removedCount;
+			int result = count - freeIndex;
+			modifiers.RemoveRange(freeIndex, result);
+			return result;
 		}
 
 		public void Clear()

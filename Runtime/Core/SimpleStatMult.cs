@@ -13,5 +13,20 @@ namespace Kryz.RPG.Stats.Core
 		{
 			return currentValue / (1 + modifier.Value);
 		}
+
+		protected override float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
+		{
+			if (newBaseValue == 0)
+			{
+				return 0;
+			}
+
+			if (oldBaseValue == 0 || currentValue == 0)
+			{
+				return base.ChangeBaseValue(oldBaseValue, newBaseValue, currentValue);
+			}
+
+			return currentValue / oldBaseValue * newBaseValue;
+		}
 	}
 }
