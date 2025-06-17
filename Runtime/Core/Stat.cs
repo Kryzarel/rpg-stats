@@ -56,12 +56,12 @@ namespace Kryz.RPG.Stats.Core
 			}
 		}
 
-		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
+		public int RemoveAll<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
 			int removedCount = 0;
 			for (int i = 0; i < statContainers.Length; i++)
 			{
-				removedCount += statContainers[i].Stat.RemoveWhere(match);
+				removedCount += statContainers[i].Stat.RemoveAll(match);
 			}
 			return removedCount;
 		}

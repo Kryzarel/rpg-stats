@@ -7,8 +7,7 @@ namespace Kryz.RPG.Stats.Core
 {
 	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		protected PooledList<StatModifier<T>> modifiers = new();
-		protected PooledList<StatModifier<T>> aux = new();
+		protected PooledList<StatModifier<T>> modifiers = PooledList<StatModifier<T>>.Rent();
 
 		private float baseValue;
 		private float finalValue;
@@ -55,12 +54,12 @@ namespace Kryz.RPG.Stats.Core
 			return false;
 		}
 
-		public int RemoveWhere<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
+		public int RemoveAll<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
 		{
 			int count = modifiers.Count;
-			aux.EnsureCapacity(count);
+			PooledList<StatModifier<T>> aux = PooledList<StatModifier<T>>.Rent(count);
 
-			for (int i = count - 1; i >= 0; i--)
+			for (int i = 0; i < count; i++)
 			{
 				StatModifier<T> modifier = modifiers[i];
 
@@ -75,7 +74,7 @@ namespace Kryz.RPG.Stats.Core
 			}
 
 			(modifiers, aux) = (aux, modifiers);
-			aux.Clear();
+			aux.Dispose();
 
 			int removedCount = modifiers.Count - count;
 			return removedCount;

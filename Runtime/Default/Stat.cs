@@ -19,7 +19,7 @@ namespace Kryz.RPG.Stats.Default
 
 		public int RemoveModifiersFromSource(object source)
 		{
-			return RemoveWhere(new StatModifierMatch(source: source));
+			return RemoveAll(new StatModifierMatch(source: source));
 		}
 
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
