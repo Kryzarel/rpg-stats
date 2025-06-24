@@ -12,7 +12,7 @@ namespace Kryz.RPG.Stats.Core
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set { baseValue = value; finalValue = CalculateFinalValue(baseValue); } }
+		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(changed: true); } }
 		public float FinalValue { get { CalculateFinalValue(); return finalValue; } }
 		public int ModifiersCount => SumCounts();
 
@@ -28,9 +28,8 @@ namespace Kryz.RPG.Stats.Core
 		public abstract bool RemoveModifier(StatModifier<T> modifier);
 		protected abstract float CalculateFinalValue(float baseValue);
 
-		private void CalculateFinalValue()
+		private void CalculateFinalValue(bool changed = false)
 		{
-			bool changed = false;
 			for (int i = 0; i < cachedValues.Length; i++)
 			{
 				float value = innerStats[i].FinalValue;
@@ -65,11 +64,11 @@ namespace Kryz.RPG.Stats.Core
 
 		public void ClearModifiers()
 		{
-			finalValue = baseValue;
 			for (int i = 0; i < innerStats.Length; i++)
 			{
 				innerStats[i].ClearModifiers();
 			}
+			CalculateFinalValue(changed: true);
 		}
 
 		private int SumCounts()
