@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Kryz.Collections;
+using Kryz.Utils;
 
 namespace Kryz.RPG.Stats.Core
 {
