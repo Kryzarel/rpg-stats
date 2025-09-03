@@ -10,7 +10,7 @@ namespace Kryz.RPG.Stats.Core
 		protected override void Add(StatModifier<T> modifier)
 		{
 			// Improves performance by inserting the modifiers sorted
-			int index = modifiers.BinarySearch(modifier, new StatModifierComparer<T>());
+			int index = modifiers.BinarySearch(modifier, StatModifierComparer<T>.Default);
 			if (index < 0) index = ~index;
 
 			modifiers.Insert(index, modifier);
@@ -18,7 +18,7 @@ namespace Kryz.RPG.Stats.Core
 
 		protected override bool Remove(StatModifier<T> modifier)
 		{
-			int index = modifiers.BinarySearch(modifier, new StatModifierComparer<T>());
+			int index = modifiers.BinarySearch(modifier, StatModifierComparer<T>.Default);
 			if (index < 0) return false;
 
 			modifiers.RemoveAt(index);
