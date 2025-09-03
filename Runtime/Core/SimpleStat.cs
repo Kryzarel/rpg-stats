@@ -27,16 +27,7 @@ namespace Kryz.RPG.Stats.Core
 
 		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
-
-		protected virtual float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
-		{
-			float finalValue = baseValue;
-			for (int i = 0; i < modifiers.Count; i++)
-			{
-				finalValue = AddOperation(baseValue, finalValue, modifiers[i]);
-			}
-			return finalValue;
-		}
+		protected abstract float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue);
 
 		public void AddModifier(StatModifier<T> modifier)
 		{

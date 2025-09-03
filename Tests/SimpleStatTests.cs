@@ -23,7 +23,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 
 		private const int numIterations = 100;
 		private const float delta = 0.0001f;
-		private static readonly float[] values = { 0, 0.3f, 2.5f, 5 };
+		private static readonly float[] values = { -1, 0, 0.3f, 1, 2.5f, 5 };
 		private static readonly float rangeMin = 0.1f;
 		private static readonly float rangeMax = 10f;
 
@@ -103,6 +103,37 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			// Assert
 			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
 			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta);
+		}
+
+		[Test]
+		public void StatMult_BRUH([ValueSource(nameof(values))] float baseValue)
+		{
+			// Arrange
+			SimpleStatMult<TestModifierData> stat = new(baseValue);
+
+			foreach (float modifierValue in values)
+			{
+				// Arrange
+				StatModifier<TestModifierData> modifier = new(modifierValue, default);
+
+				// Act
+				stat.AddModifier(modifier);
+
+				// Assert
+				Assert.AreEqual(baseValue, stat.BaseValue, delta);
+				Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta);
+
+				// Act
+				stat.RemoveModifier(modifier);
+				Assert.AreEqual(baseValue, stat.BaseValue, delta);
+
+				float expected = stat.BaseValue;
+				for (int i = 0; i < stat.ModifiersCount; i++)
+				{
+					expected *= 1 + stat[i].Value;
+				}
+				Assert.AreEqual(expected, stat.FinalValue, delta);
+			}
 		}
 
 		[Test]
