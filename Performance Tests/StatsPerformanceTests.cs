@@ -26,14 +26,19 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void Awake()
 		{
+			int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
+			int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModifierTypeLegacy)).Length;
+
 			for (int i = 0; i < Length; i++)
 			{
 				float value = Random.Range(-100, 100 + 1);
-				int listIndex = Random.Range(0, 4);
 				object source = i % 2 == 0 ? source1 : source2;
 
-				StatModifierLegacy modifier_legacy = new(value, (StatModifierTypeLegacy)listIndex, source);
-				StatModifier<StatModifierData> modifier = new(value, new((StatModifierType)listIndex, source));
+				StatModifierTypeLegacy modTypeLegacy = (StatModifierTypeLegacy)(i % modTypeLegacyCount);
+				StatModifierLegacy modifier_legacy = new(value, modTypeLegacy, source);
+
+				StatModifierType modType = (StatModifierType)(i % modTypeCount);
+				StatModifier<StatModifierData> modifier = new(value, new(modType, source));
 
 				modifiers_legacy[i] = modifier_legacy;
 				modifiers[i] = modifier;
