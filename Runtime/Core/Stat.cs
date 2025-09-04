@@ -1,12 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Kryz.RPG.Stats.Core
 {
-	public abstract partial class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
+	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		protected readonly IStat<T>[] innerStats;
+		protected readonly IStat<T>[] stats;
 		private readonly float[] cachedValues;
 
 		private float baseValue;
@@ -14,12 +13,19 @@ namespace Kryz.RPG.Stats.Core
 
 		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(changed: true); } }
 		public float FinalValue { get { CalculateFinalValue(); return finalValue; } }
-		public int ModifiersCount => SumCounts();
 
-		protected Stat(float baseValue = 0, params IStat<T>[] innerStats)
+		public IReadOnlyList<IStat<T>> Stats => stats;
+
+		IReadOnlyList<IStat> IStat.Stats => stats;
+		IReadOnlyList<IReadOnlyStat<T>> IReadOnlyStat<T>.Stats => stats;
+		IReadOnlyList<IReadOnlyStat> IReadOnlyStat.Stats => stats;
+
+		IReadOnlyList<StatModifier<T>> IReadOnlyStat<T>.Modifiers => Array.Empty<StatModifier<T>>();
+
+		protected Stat(float baseValue = 0, params IStat<T>[] stats)
 		{
-			cachedValues = new float[innerStats.Length];
-			this.innerStats = innerStats;
+			cachedValues = new float[stats.Length];
+			this.stats = stats;
 			this.baseValue = baseValue;
 			CalculateFinalValue();
 		}
@@ -32,7 +38,7 @@ namespace Kryz.RPG.Stats.Core
 		{
 			for (int i = 0; i < cachedValues.Length; i++)
 			{
-				float value = innerStats[i].FinalValue;
+				float value = stats[i].FinalValue;
 				if (cachedValues[i] != value)
 				{
 					cachedValues[i] = value;
@@ -49,9 +55,9 @@ namespace Kryz.RPG.Stats.Core
 		public int RemoveAll<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
 			int removedCount = 0;
-			for (int i = 0; i < innerStats.Length; i++)
+			for (int i = 0; i < stats.Length; i++)
 			{
-				removedCount += innerStats[i].RemoveAll(match);
+				removedCount += stats[i].RemoveAll(match);
 			}
 			return removedCount;
 		}
@@ -64,41 +70,11 @@ namespace Kryz.RPG.Stats.Core
 
 		public void ClearModifiers()
 		{
-			for (int i = 0; i < innerStats.Length; i++)
+			for (int i = 0; i < stats.Length; i++)
 			{
-				innerStats[i].ClearModifiers();
+				stats[i].ClearModifiers();
 			}
 			CalculateFinalValue(changed: true);
 		}
-
-		private int SumCounts()
-		{
-			int count = 0;
-			for (int i = 0; i < innerStats.Length; i++)
-			{
-				count += innerStats[i].ModifiersCount;
-			}
-			return count;
-		}
-
-		private StatModifier<T> GetModifier(int index)
-		{
-			int i, j;
-			for (i = 0, j = index; i < innerStats.Length; i++)
-			{
-				int count = innerStats[i].ModifiersCount;
-				if (j < count) break;
-				j -= count;
-			}
-			return innerStats[i][j];
-		}
-
-		float IReadOnlyStat.this[int index] => GetModifier(index).Value;
-		public StatModifier<T> this[int index] => GetModifier(index);
-
-		public Enumerator GetEnumerator() => new(innerStats);
-		IReadOnlyStat<T>.Enumerator IReadOnlyStat<T>.GetEnumerator() => new(this);
-		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}
 }

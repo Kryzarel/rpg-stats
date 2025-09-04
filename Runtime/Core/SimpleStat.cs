@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Kryz.Utils;
 
@@ -12,9 +11,15 @@ namespace Kryz.RPG.Stats.Core
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set { float old = baseValue; baseValue = value; finalValue = ChangeBaseValue(old, baseValue, finalValue); } }
+		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
 		public float FinalValue => finalValue;
-		public int ModifiersCount => modifiers.Count;
+
+		public IReadOnlyList<StatModifier<T>> Modifiers => modifiers;
+
+		IReadOnlyList<IStat<T>> IStat<T>.Stats => Array.Empty<IStat<T>>();
+		IReadOnlyList<IStat> IStat.Stats => Array.Empty<IStat<T>>();
+		IReadOnlyList<IReadOnlyStat<T>> IReadOnlyStat<T>.Stats => Array.Empty<IStat<T>>();
+		IReadOnlyList<IReadOnlyStat> IReadOnlyStat.Stats => Array.Empty<IStat<T>>();
 
 		protected SimpleStat(float baseValue = 0)
 		{
@@ -91,12 +96,11 @@ namespace Kryz.RPG.Stats.Core
 			finalValue = baseValue;
 		}
 
-		public StatModifier<T> this[int index] => modifiers[index];
-		float IReadOnlyStat.this[int index] => modifiers[index].Value;
-
-		public PooledList<StatModifier<T>>.Enumerator GetEnumerator() => modifiers.GetEnumerator();
-		IReadOnlyStat<T>.Enumerator IReadOnlyStat<T>.GetEnumerator() => new(this);
-		IEnumerator<StatModifier<T>> IEnumerable<StatModifier<T>>.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => ((IReadOnlyStat<T>)this).GetEnumerator();
+		private void SetBaseValue(float value)
+		{
+			float old = baseValue;
+			baseValue = value;
+			finalValue = ChangeBaseValue(old, baseValue, finalValue);
+		}
 	}
 }

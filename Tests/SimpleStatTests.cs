@@ -128,9 +128,9 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				Assert.AreEqual(baseValue, stat.BaseValue, delta);
 
 				float expected = stat.BaseValue;
-				for (int i = 0; i < stat.ModifiersCount; i++)
+				for (int i = 0; i < stat.Modifiers.Count; i++)
 				{
-					expected *= 1 + stat[i].Value;
+					expected *= 1 + stat.Modifiers[i].Value;
 				}
 				Assert.AreEqual(expected, stat.FinalValue, delta);
 			}
@@ -198,10 +198,10 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			}
 
 			// Act
-			for (int i = 0; i < stat.ModifiersCount; i++)
+			for (int i = 0; i < stat.Modifiers.Count; i++)
 			{
-				int index = Random.Range(0, stat.ModifiersCount);
-				StatModifier<TestModifierData> modifier = stat[index];
+				int index = Random.Range(0, stat.Modifiers.Count);
+				StatModifier<TestModifierData> modifier = stat.Modifiers[index];
 
 				if (!stat.RemoveModifier(modifier))
 				{
@@ -236,10 +236,10 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			}
 
 			// Act
-			for (int i = 0; i < stat.ModifiersCount; i++)
+			for (int i = 0; i < stat.Modifiers.Count; i++)
 			{
-				int index = Random.Range(0, stat.ModifiersCount);
-				StatModifier<TestModifierData> modifier = stat[index];
+				int index = Random.Range(0, stat.Modifiers.Count);
+				StatModifier<TestModifierData> modifier = stat.Modifiers[index];
 
 				if (!stat.RemoveModifier(modifier))
 				{
@@ -274,17 +274,17 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			}
 
 			// Act
-			for (int i = 0; i < stat.ModifiersCount; i++)
+			for (int i = 0; i < stat.Modifiers.Count; i++)
 			{
-				int index = Random.Range(0, stat.ModifiersCount);
-				StatModifier<TestModifierData> modifier = stat[index];
+				int index = Random.Range(0, stat.Modifiers.Count);
+				StatModifier<TestModifierData> modifier = stat.Modifiers[index];
 
 				if (!stat.RemoveModifier(modifier))
 				{
 					Assert.Fail("Failed to remove modifier");
 				}
 
-				StatModifier<TestModifierData> modifierMax = stat.Max();
+				StatModifier<TestModifierData> modifierMax = stat.Modifiers.Max();
 				expected = Math.Max(modifierMax.Value, baseValue);
 
 				// Assert
@@ -313,17 +313,17 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			}
 
 			// Act
-			for (int i = 0; i < stat.ModifiersCount; i++)
+			for (int i = 0; i < stat.Modifiers.Count; i++)
 			{
-				int index = Random.Range(0, stat.ModifiersCount);
-				StatModifier<TestModifierData> modifier = stat[index];
+				int index = Random.Range(0, stat.Modifiers.Count);
+				StatModifier<TestModifierData> modifier = stat.Modifiers[index];
 
 				if (!stat.RemoveModifier(modifier))
 				{
 					Assert.Fail("Failed to remove modifier");
 				}
 
-				StatModifier<TestModifierData> modifierMin = stat.Min();
+				StatModifier<TestModifierData> modifierMin = stat.Modifiers.Min();
 				expected = Math.Min(modifierMin.Value, baseValue);
 
 				// Assert

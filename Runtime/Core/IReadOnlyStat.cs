@@ -7,13 +7,13 @@ namespace Kryz.RPG.Stats.Core
 		float BaseValue { get; }
 		float FinalValue { get; }
 
-		int ModifiersCount { get; }
-		float this[int index] { get; }
+		IReadOnlyList<IReadOnlyStat> Stats { get; }
 	}
 
-	public partial interface IReadOnlyStat<T> : IReadOnlyStat, IEnumerable<StatModifier<T>> where T : struct, IStatModifierData<T>
+	public interface IReadOnlyStat<T> : IReadOnlyStat where T : struct, IStatModifierData<T>
 	{
-		new StatModifier<T> this[int index] { get; }
-		new Enumerator GetEnumerator();
+		new IReadOnlyList<IReadOnlyStat<T>> Stats { get; }
+
+		IReadOnlyList<StatModifier<T>> Modifiers { get; }
 	}
 }

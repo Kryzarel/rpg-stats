@@ -9,12 +9,12 @@ namespace Kryz.RPG.Stats.Default
 
 		public override void AddModifier(StatModifier<StatModifierData> modifier)
 		{
-			innerStats[(int)modifier.Data.Type].AddModifier(modifier);
+			stats[(int)modifier.Data.Type].AddModifier(modifier);
 		}
 
 		public override bool RemoveModifier(StatModifier<StatModifierData> modifier)
 		{
-			return innerStats[(int)modifier.Data.Type].RemoveModifier(modifier);
+			return stats[(int)modifier.Data.Type].RemoveModifier(modifier);
 		}
 
 		public int RemoveModifiersFromSource(object source)
@@ -25,11 +25,11 @@ namespace Kryz.RPG.Stats.Default
 		protected override float CalculateFinalValue(float baseValue)
 		{
 			float finalValue = baseValue;
-			finalValue += innerStats[(int)StatModifierType.Add].FinalValue;
-			finalValue *= innerStats[(int)StatModifierType.Mult].FinalValue;
-			finalValue *= innerStats[(int)StatModifierType.MultTotal].FinalValue;
-			finalValue = Math.Max(finalValue, innerStats[(int)StatModifierType.Max].FinalValue);
-			finalValue = Math.Min(finalValue, innerStats[(int)StatModifierType.Min].FinalValue);
+			finalValue += stats[(int)StatModifierType.Add].FinalValue;
+			finalValue *= stats[(int)StatModifierType.Mult].FinalValue;
+			finalValue *= stats[(int)StatModifierType.MultTotal].FinalValue;
+			finalValue = Math.Max(finalValue, stats[(int)StatModifierType.Max].FinalValue);
+			finalValue = Math.Min(finalValue, stats[(int)StatModifierType.Min].FinalValue);
 			return finalValue;
 		}
 

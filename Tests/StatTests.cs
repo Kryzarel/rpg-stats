@@ -1,5 +1,5 @@
 using System;
-using System.Reflection;
+using System.Collections.Generic;
 using Kryz.RPG.Stats.Core;
 using Kryz.RPG.Stats.Default;
 using NUnit.Framework;
@@ -170,8 +170,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			// Arrange
 			const int numIterations = 1_000;
 			Stat stat = new(baseValue);
-			FieldInfo statContainersField = typeof(Stat).GetField("innerStats", BindingFlags.Instance | BindingFlags.NonPublic);
-			IStat<StatModifierData>[] containers = (IStat<StatModifierData>[])statContainersField.GetValue(stat);
+			IReadOnlyList<IStat<StatModifierData>> innerStats = stat.Stats;
 
 			// Act
 			for (int i = 0; i < numIterations; i++)
@@ -180,9 +179,9 @@ namespace Kryz.RPG.Stats.Tests.Editor
 				StatModifierType modifierType = modifierTypes[Random.Range(0, modifierTypes.Length)];
 				stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(modifierType)));
 
-				float expected = (baseValue + containers[0].FinalValue) * containers[1].FinalValue * containers[2].FinalValue;
-				expected = Math.Max(expected, containers[3].FinalValue);
-				expected = Math.Min(expected, containers[4].FinalValue);
+				float expected = (baseValue + innerStats[0].FinalValue) * innerStats[1].FinalValue * innerStats[2].FinalValue;
+				expected = Math.Max(expected, innerStats[3].FinalValue);
+				expected = Math.Min(expected, innerStats[4].FinalValue);
 
 				// Assert
 				Assert.AreEqual(baseValue, stat.BaseValue, delta);
@@ -190,18 +189,23 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			}
 
 			// Act
-			for (int i = 0; i < stat.ModifiersCount; i++)
+			for (int i = 0; i < innerStats.Count; i++)
 			{
-				StatModifier<StatModifierData> modifier = stat[i];
-				stat.RemoveModifier(modifier);
+				IStat<StatModifierData> s = innerStats[i];
 
-				float expected = (baseValue + containers[0].FinalValue) * containers[1].FinalValue * containers[2].FinalValue;
-				expected = Math.Max(expected, containers[3].FinalValue);
-				expected = Math.Min(expected, containers[4].FinalValue);
+				for (int j = 0; j < s.Modifiers.Count; j++)
+				{
+					StatModifier<StatModifierData> modifier = s.Modifiers[j];
+					stat.RemoveModifier(modifier);
 
-				// Assert
-				Assert.AreEqual(baseValue, stat.BaseValue, delta);
-				Assert.AreEqual(expected, stat.FinalValue, delta);
+					float expected = (baseValue + innerStats[0].FinalValue) * innerStats[1].FinalValue * innerStats[2].FinalValue;
+					expected = Math.Max(expected, innerStats[3].FinalValue);
+					expected = Math.Min(expected, innerStats[4].FinalValue);
+
+					// Assert
+					Assert.AreEqual(baseValue, stat.BaseValue, delta);
+					Assert.AreEqual(expected, stat.FinalValue, delta);
+				}
 			}
 		}
 	}
