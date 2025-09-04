@@ -1,18 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats.Core
 {
 	public abstract class Stat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
 		protected readonly IStat<T>[] stats;
-		private readonly float[] cachedValues;
 
+		private bool isDirty;
 		private float baseValue;
 		private float finalValue;
 
-		public float BaseValue { get => baseValue; set { baseValue = value; CalculateFinalValue(changed: true); } }
-		public float FinalValue { get { CalculateFinalValue(); return finalValue; } }
+		public event Action? OnValueChanged;
+
+		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
+		public float FinalValue => GetFinalValue();
 
 		public IReadOnlyList<IStat<T>> Stats => stats;
 
@@ -24,33 +27,20 @@ namespace Kryz.RPG.Stats.Core
 
 		protected Stat(float baseValue = 0, params IStat<T>[] stats)
 		{
-			cachedValues = new float[stats.Length];
+			isDirty = false;
 			this.stats = stats;
 			this.baseValue = baseValue;
-			CalculateFinalValue();
+			finalValue = CalculateFinalValue(baseValue);
+
+			for (int i = 0; i < stats.Length; i++)
+			{
+				stats[i].OnValueChanged += OnChanged;
+			}
 		}
 
 		public abstract void AddModifier(StatModifier<T> modifier);
 		public abstract bool RemoveModifier(StatModifier<T> modifier);
 		protected abstract float CalculateFinalValue(float baseValue);
-
-		private void CalculateFinalValue(bool changed = false)
-		{
-			for (int i = 0; i < cachedValues.Length; i++)
-			{
-				float value = stats[i].FinalValue;
-				if (cachedValues[i] != value)
-				{
-					cachedValues[i] = value;
-					changed = true;
-				}
-			}
-
-			if (changed)
-			{
-				finalValue = CalculateFinalValue(baseValue);
-			}
-		}
 
 		public int RemoveAll<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
@@ -68,7 +58,34 @@ namespace Kryz.RPG.Stats.Core
 			{
 				stats[i].Clear();
 			}
-			CalculateFinalValue(changed: true);
+		}
+
+		private void OnChanged()
+		{
+			isDirty = true;
+			OnValueChanged?.Invoke();
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void SetBaseValue(float value)
+		{
+			if (baseValue != value)
+			{
+				isDirty = true;
+				baseValue = value;
+				OnValueChanged?.Invoke();
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private float GetFinalValue()
+		{
+			if (isDirty)
+			{
+				isDirty = false;
+				finalValue = CalculateFinalValue(baseValue);
+			}
+			return finalValue;
 		}
 	}
 }

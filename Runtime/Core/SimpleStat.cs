@@ -11,6 +11,8 @@ namespace Kryz.RPG.Stats.Core
 		private float baseValue;
 		private float finalValue;
 
+		public event Action? OnValueChanged;
+
 		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
 		public float FinalValue => finalValue;
 
@@ -37,14 +39,27 @@ namespace Kryz.RPG.Stats.Core
 		public void AddModifier(StatModifier<T> modifier)
 		{
 			Add(modifier);
+
+			float previousValue = finalValue;
 			finalValue = AddOperation(baseValue, finalValue, modifier);
+
+			if (finalValue != previousValue)
+			{
+				OnValueChanged?.Invoke();
+			}
 		}
 
 		public bool RemoveModifier(StatModifier<T> modifier)
 		{
 			if (Remove(modifier))
 			{
+				float previousValue = finalValue;
 				finalValue = RemoveOperation(baseValue, finalValue, modifier);
+
+				if (finalValue != previousValue)
+				{
+					OnValueChanged?.Invoke();
+				}
 				return true;
 			}
 			return false;
@@ -58,6 +73,8 @@ namespace Kryz.RPG.Stats.Core
 			// Find the first item which needs to be removed.
 			while (freeIndex < count && !match.Equals(modifiers[freeIndex])) freeIndex++;
 			if (freeIndex >= count) return 0;
+
+			float previousValue = finalValue;
 
 			int current = freeIndex + 1;
 			while (current < count)
@@ -81,20 +98,39 @@ namespace Kryz.RPG.Stats.Core
 
 			int result = count - freeIndex;
 			modifiers.RemoveRange(freeIndex, result);
+
+			if (finalValue != previousValue)
+			{
+				OnValueChanged?.Invoke();
+			}
 			return result;
 		}
 
 		public void Clear()
 		{
 			modifiers.Clear();
+
+			float previousValue = finalValue;
 			finalValue = baseValue;
+
+			if (finalValue != previousValue)
+			{
+				OnValueChanged?.Invoke();
+			}
 		}
 
 		private void SetBaseValue(float value)
 		{
-			float old = baseValue;
+			float previousBaseValue = baseValue;
 			baseValue = value;
-			finalValue = ChangeBaseValue(old, baseValue, finalValue);
+
+			float previousValue = finalValue;
+			finalValue = ChangeBaseValue(previousBaseValue, baseValue, finalValue);
+
+			if (finalValue != previousValue)
+			{
+				OnValueChanged?.Invoke();
+			}
 		}
 	}
 }
