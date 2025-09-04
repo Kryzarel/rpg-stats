@@ -9,8 +9,10 @@ namespace Kryz.RPG.Stats.Core
 
 		new float BaseValue { get; set; }
 
+		/// <summary>
+		/// Remove all modifiers from this stat and from all nested stats.
+		/// </summary>
 		void Clear();
-		void ClearModifiers();
 	}
 
 	public interface IStat<T> : IStat, IReadOnlyStat<T> where T : struct, IStatModifierData<T>
