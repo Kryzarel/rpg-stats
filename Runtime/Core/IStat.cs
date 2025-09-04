@@ -5,8 +5,9 @@ namespace Kryz.RPG.Stats.Core
 {
 	public interface IStat : IReadOnlyStat
 	{
-		new float BaseValue { get; set; }
 		new IReadOnlyList<IStat> Stats { get; }
+
+		new float BaseValue { get; set; }
 
 		void Clear();
 		void ClearModifiers();
