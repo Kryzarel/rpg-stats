@@ -30,10 +30,13 @@ namespace Kryz.CharacterStats
 		protected readonly List<StatModifier> statModifiers;
 		public readonly ReadOnlyCollection<StatModifier> StatModifiers;
 
+		private readonly Comparison<StatModifier> comparer;
+
 		public CharacterStat()
 		{
 			statModifiers = new List<StatModifier>();
 			StatModifiers = statModifiers.AsReadOnly();
+			comparer = CompareModifierOrder;
 		}
 
 		public CharacterStat(float baseValue) : this()
@@ -83,7 +86,7 @@ namespace Kryz.CharacterStats
 			float finalValue = BaseValue;
 			float sumPercentAdd = 0;
 
-			statModifiers.Sort(CompareModifierOrder);
+			statModifiers.Sort(comparer);
 
 			for (int i = 0; i < statModifiers.Count; i++)
 			{
