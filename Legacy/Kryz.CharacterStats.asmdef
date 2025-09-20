@@ -1,6 +1,6 @@
 {
-    "name": "Kryz.RPG.StatsLegacy",
-    "rootNamespace": "Kryz.RPG.StatsLegacy",
+    "name": "Kryz.CharacterStats",
+    "rootNamespace": "Kryz.CharacterStats",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

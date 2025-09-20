@@ -1,156 +1,204 @@
+using Kryz.CharacterStats;
 using Kryz.RPG.Stats.Core;
 using Kryz.RPG.Stats.Default;
 using UnityEngine;
-
-using StatLegacy = Kryz.RPG.StatsLegacy.Stat;
-using StatModifierLegacy = Kryz.RPG.StatsLegacy.StatModifier;
-using StatModifierTypeLegacy = Kryz.RPG.StatsLegacy.StatModifierType;
 
 namespace Kryz.RPG.StatsPerfTests
 {
 	public class StatsPerformanceTests : MonoBehaviour
 	{
 		private const int Length = 1000;
-		private readonly StatModifierLegacy[] modifiers_legacy = new StatModifierLegacy[Length];
+
+		private readonly StatModifier[] modifiersLegacy = new StatModifier[Length];
 		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[Length];
 
-		private readonly StatLegacy stat_legacy = new(10);
+		private readonly CharacterStat statLegacy = new(10);
 		private readonly Stat stat = new(10);
 
 		private readonly object source1 = new();
 		private readonly object source2 = new();
 
-		private int step1;
-		private int step10;
-		private int step100;
-
 		private void Awake()
 		{
-			int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
-			int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModifierTypeLegacy)).Length;
+			// int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
+			// int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
+			int modTypeLegacyCount = 3;
+			int modTypeCount = 3;
 
 			for (int i = 0; i < Length; i++)
 			{
-				float value = Random.Range(-100, 100 + 1);
+				float value = i;
 				object source = i % 2 == 0 ? source1 : source2;
 
-				StatModifierTypeLegacy modTypeLegacy = (StatModifierTypeLegacy)(i % modTypeLegacyCount);
-				StatModifierLegacy modifier_legacy = new(value, modTypeLegacy, source);
+				StatModType modTypeLegacy = (StatModType)(i % modTypeLegacyCount);
+				StatModifier modifierlegacy = new(value, modTypeLegacy, source);
 
 				StatModifierType modType = (StatModifierType)(i % modTypeCount);
 				StatModifier<StatModifierData> modifier = new(value, new(modType, source));
 
-				modifiers_legacy[i] = modifier_legacy;
+				modifiersLegacy[i] = modifierlegacy;
 				modifiers[i] = modifier;
-
-				stat_legacy.AddModifier(modifier_legacy);
-				stat.AddModifier(modifier);
 			}
+
+			// for (int i = 0; i < 1000; i++)
+			// {
+			// 	statLegacy.AddModifier(new StatModifier(2, StatModType.Flat));
+			// 	stat.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
+			// }
 		}
 
 		private void Update()
 		{
-			step1 = Random.Range(0, Length / 1);
-			step10 = Random.Range(0, Length / 10);
-			step100 = Random.Range(0, Length / 100);
-
-			AddRemove1_Legacy();
-			AddRemove10_Legacy();
-			AddRemove100_Legacy();
-			AddRemoveAllFromSource_Legacy();
-
-			AddRemove1();
-			AddRemove10();
-			AddRemove100();
-			AddRemove100_CheckFinalValue();
-			AddRemoveAllFromSource();
-		}
-
-		private void AddRemove1_Legacy()
-		{
-			stat_legacy.RemoveModifier(modifiers_legacy[step1]);
-			stat_legacy.AddModifier(modifiers_legacy[step1]);
-			float value = stat_legacy.FinalValue;
-		}
-
-		private void AddRemove10_Legacy()
-		{
-			for (int i = step10, count = 0; i < Length && count < 10; i += step10, count++)
+			for (int i = 0; i < 10; i++)
 			{
-				stat_legacy.RemoveModifier(modifiers_legacy[i]);
-				stat_legacy.AddModifier(modifiers_legacy[i]);
+				// Legacy
+				AddLegacy10();
+				RemoveLegacy10();
+
+				AddLegacy100();
+				RemoveLegacy100();
+
+				// AddLegacy1000();
+				// RemoveLegacy1000();
+
+				// AddLegacy1000();
+				// RemoveFromSourceLegacy();
+
+				// New
+				Add10();
+				Remove10();
+
+				Add100();
+				Remove100();
+
+				// Add1000();
+				// Remove1000();
+
+				// Add1000();
+				// RemoveFromSource();
 			}
-			float value = stat_legacy.FinalValue;
 		}
 
-		private void AddRemove100_Legacy()
+		private float AddLegacy10()
 		{
-			for (int i = step100, count = 0; i < Length && count < 100; i += step100, count++)
+			for (int i = 0; i < 10; i++)
 			{
-				stat_legacy.RemoveModifier(modifiers_legacy[i]);
-				stat_legacy.AddModifier(modifiers_legacy[i]);
+				statLegacy.AddModifier(modifiersLegacy[i]);
 			}
-			float value = stat_legacy.FinalValue;
+			return statLegacy.Value;
 		}
 
-		private void AddRemoveAllFromSource_Legacy()
+		private float AddLegacy100()
 		{
-			stat_legacy.RemoveModifiersFromSource(source1);
-			stat_legacy.RemoveModifiersFromSource(source2);
-			for (int i = 0; i < Length; i++)
+			for (int i = 0; i < 100; i++)
 			{
-				stat_legacy.AddModifier(modifiers_legacy[i]);
+				statLegacy.AddModifier(modifiersLegacy[i]);
 			}
-			float value = stat_legacy.FinalValue;
+			return statLegacy.Value;
 		}
 
-		private void AddRemove1()
+		private float AddLegacy1000()
 		{
-			stat.RemoveModifier(modifiers[step1]);
-			stat.AddModifier(modifiers[step1]);
-			float value = stat.FinalValue;
-		}
-
-		private void AddRemove10()
-		{
-			for (int i = step10, count = 0; i < Length && count < 10; i += step10, count++)
+			for (int i = 0; i < 1000; i++)
 			{
-				stat.RemoveModifier(modifiers[i]);
+				statLegacy.AddModifier(modifiersLegacy[i]);
+			}
+			return statLegacy.Value;
+		}
+
+		private float RemoveLegacy10()
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				statLegacy.RemoveModifier(modifiersLegacy[i]);
+			}
+			return statLegacy.Value;
+		}
+
+		private float RemoveLegacy100()
+		{
+			for (int i = 0; i < 100; i++)
+			{
+				statLegacy.RemoveModifier(modifiersLegacy[i]);
+			}
+			return statLegacy.Value;
+		}
+
+		private float RemoveLegacy1000()
+		{
+			for (int i = 0; i < 1000; i++)
+			{
+				statLegacy.RemoveModifier(modifiersLegacy[i]);
+			}
+			return statLegacy.Value;
+		}
+
+		private float RemoveFromSourceLegacy()
+		{
+			statLegacy.RemoveAllModifiersFromSource(source1);
+			statLegacy.RemoveAllModifiersFromSource(source2);
+			return statLegacy.Value;
+		}
+
+		private float Add10()
+		{
+			for (int i = 0; i < 10; i++)
+			{
 				stat.AddModifier(modifiers[i]);
 			}
-			float value = stat.FinalValue;
+			return stat.FinalValue;
 		}
 
-		private void AddRemove100()
+		private float Add100()
 		{
-			for (int i = step100, count = 0; i < Length && count < 100; i += step100, count++)
+			for (int i = 0; i < 100; i++)
 			{
-				stat.RemoveModifier(modifiers[i]);
 				stat.AddModifier(modifiers[i]);
 			}
-			float value = stat.FinalValue;
+			return stat.FinalValue;
 		}
 
-		private void AddRemove100_CheckFinalValue()
+		private float Add1000()
 		{
-			for (int i = step100, count = 0; i < Length && count < 100; i += step100, count++)
+			for (int i = 0; i < 1000; i++)
+			{
+				stat.AddModifier(modifiers[i]);
+			}
+			return stat.FinalValue;
+		}
+
+		private float Remove10()
+		{
+			for (int i = 0; i < 10; i++)
 			{
 				stat.RemoveModifier(modifiers[i]);
-				float value = stat.FinalValue;
-				stat.AddModifier(modifiers[i]);
-				value = stat.FinalValue;
 			}
+			return stat.FinalValue;
 		}
 
-		private void AddRemoveAllFromSource()
+		private float Remove100()
+		{
+			for (int i = 0; i < 100; i++)
+			{
+				stat.RemoveModifier(modifiers[i]);
+			}
+			return stat.FinalValue;
+		}
+
+		private float Remove1000()
+		{
+			for (int i = 0; i < 1000; i++)
+			{
+				stat.RemoveModifier(modifiers[i]);
+			}
+			return stat.FinalValue;
+		}
+
+		private float RemoveFromSource()
 		{
 			stat.RemoveModifiersFromSource(source1);
 			stat.RemoveModifiersFromSource(source2);
-			for (int i = 0; i < Length; i++)
-			{
-				stat.AddModifier(modifiers[i]);
-			}
-			float value = stat.FinalValue;
+			return stat.FinalValue;
 		}
 	}
 }

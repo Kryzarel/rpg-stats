@@ -1,73 +1,31 @@
-using System;
-
-namespace Kryz.RPG.StatsLegacy
+namespace Kryz.CharacterStats
 {
-	public readonly struct StatModifier : IStatModifier, IComparable<StatModifier>, IEquatable<StatModifier>
+	public enum StatModType
+	{
+		Flat = 100,
+		PercentAdd = 200,
+		PercentMult = 300,
+	}
+
+	public class StatModifier
 	{
 		public readonly float Value;
-		public readonly StatModifierType Type;
-		public readonly int Priority;
-		public readonly object? Source;
+		public readonly StatModType Type;
+		public readonly int Order;
+		public readonly object Source;
 
-		object? IStatModifier.Source => Source;
-
-		public StatModifier(float value, StatModifierType type, object? source = null) : this(value, type, GetDefaultPriority(type), source) { }
-
-		public StatModifier(float value, StatModifierType type, int priority, object? source = null)
+		public StatModifier(float value, StatModType type, int order, object source)
 		{
 			Value = value;
 			Type = type;
-			Priority = priority;
+			Order = order;
 			Source = source;
 		}
 
-		private static int GetDefaultPriority(StatModifierType type) => type switch
-		{
-			StatModifierType.Add => 100,
-			StatModifierType.MultiplyBase => 200,
-			StatModifierType.MultiplyTotal => 300,
-			StatModifierType.Override => 900,
-			_ => 0,
-		};
+		public StatModifier(float value, StatModType type) : this(value, type, (int)type, null) { }
 
-		public int CompareTo(StatModifier other)
-		{
-			int result = Priority.CompareTo(other.Priority);
-			if (result == 0)
-			{
-				// Cast to int to avoid boxing
-				result = ((int)Type).CompareTo((int)other.Type);
-			}
-			if (result == 0)
-			{
-				result = Value.CompareTo(other.Value);
-			}
-			return result;
-		}
+		public StatModifier(float value, StatModType type, int order) : this(value, type, order, null) { }
 
-		public bool Equals(StatModifier other)
-		{
-			return other == this;
-		}
-
-		public override bool Equals(object obj)
-		{
-			return obj is StatModifier modifier && modifier == this;
-		}
-
-		public override int GetHashCode()
-		{
-			return HashCode.Combine(Value, Type, Priority, Source);
-		}
-
-		public static bool operator ==(StatModifier a, StatModifier b)
-		{
-			return a.Value == b.Value && a.Type == b.Type && a.Priority == b.Priority && a.Source == b.Source;
-		}
-
-		public static bool operator !=(StatModifier a, StatModifier b)
-		{
-			return !(a == b);
-		}
+		public StatModifier(float value, StatModType type, object source) : this(value, type, (int)type, source) { }
 	}
 }
