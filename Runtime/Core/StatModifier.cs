@@ -8,10 +8,13 @@ namespace Kryz.RPG.Stats.Core
 		public readonly float Value;
 		public readonly T Data;
 
+		private readonly int hashCode;
+
 		public StatModifier(float value, T data)
 		{
 			Value = value;
 			Data = data;
+			hashCode = HashCode.Combine(Value, Data);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -40,7 +43,7 @@ namespace Kryz.RPG.Stats.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Value, Data);
+			return hashCode;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

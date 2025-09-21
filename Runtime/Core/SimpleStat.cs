@@ -6,7 +6,7 @@ namespace Kryz.RPG.Stats.Core
 {
 	public abstract class SimpleStat<T> : IStat<T> where T : struct, IStatModifierData<T>
 	{
-		protected readonly PooledList<StatModifier<T>> modifiers = new();
+		private readonly Dictionary<StatModifier<T>, int> modifiers = new();
 
 		private float baseValue;
 		private float finalValue;
@@ -16,7 +16,7 @@ namespace Kryz.RPG.Stats.Core
 		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
 		public float FinalValue => finalValue;
 
-		public IReadOnlyList<StatModifier<T>> Modifiers => modifiers;
+		public IReadOnlyList<StatModifier<T>> Modifiers => Array.Empty<StatModifier<T>>();
 
 		IReadOnlyList<IStat<T>> IStat<T>.Stats => Array.Empty<IStat<T>>();
 		IReadOnlyList<IStat> IStat.Stats => Array.Empty<IStat<T>>();
@@ -29,12 +29,53 @@ namespace Kryz.RPG.Stats.Core
 			finalValue = baseValue;
 		}
 
-		protected virtual void Add(StatModifier<T> modifier) => modifiers.Add(modifier);
-		protected virtual bool Remove(StatModifier<T> modifier) => modifiers.Remove(modifier);
+		protected virtual void Add(StatModifier<T> modifier)
+		{
+			modifiers.TryGetValue(modifier, out int count);
+			modifiers[modifier] = count + 1;
+		}
+
+		protected virtual bool Remove(StatModifier<T> modifier)
+		{
+			if (modifiers.TryGetValue(modifier, out int count))
+			{
+				if (count > 1)
+				{
+					modifiers[modifier] = count - 1;
+					return true;
+				}
+				return modifiers.Remove(modifier);
+			}
+			return false;
+		}
+
+		protected virtual int RemoveAll<TEquatable>(float baseValue, float currentValue, TEquatable match, out float finalValue) where TEquatable : IEquatable<StatModifier<T>>
+		{
+			using PooledList<StatModifier<T>> keys = PooledList<StatModifier<T>>.Rent(modifiers.Count);
+			keys.AddRange(modifiers.Keys);
+			int removedCount = 0;
+
+			for (int i = 0; i < keys.Count; i++)
+			{
+				StatModifier<T> mod = keys[i];
+				if (match.Equals(mod) && modifiers.Remove(mod, out int count))
+				{
+					removedCount += count;
+
+					for (int j = 0; j < count; j++)
+					{
+						currentValue = RemoveOperation(baseValue, currentValue, mod);
+					}
+				}
+			}
+
+			finalValue = currentValue;
+			return removedCount;
+		}
 
 		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
 		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
-		protected abstract float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue);
+		protected abstract float SetBaseValue(float oldBaseValue, float newBaseValue, float currentValue);
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
@@ -65,45 +106,16 @@ namespace Kryz.RPG.Stats.Core
 			return false;
 		}
 
-		public int RemoveAll<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
+		public int RemoveAllModifiers<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
 		{
-			int freeIndex = 0; // the first free slot in the array
-			int count = modifiers.Count;
-
-			// Find the first item which needs to be removed.
-			while (freeIndex < count && !match.Equals(modifiers[freeIndex])) freeIndex++;
-			if (freeIndex >= count) return 0;
-
 			float previousValue = finalValue;
-
-			int current = freeIndex + 1;
-			while (current < count)
-			{
-				// Find the first item which needs to be kept.
-				while (current < count)
-				{
-					StatModifier<T> modifier = modifiers[current];
-					if (!match.Equals(modifier)) break;
-
-					current++;
-					finalValue = RemoveOperation(baseValue, finalValue, modifier);
-				}
-
-				if (current < count)
-				{
-					// copy item to the free slot.
-					modifiers[freeIndex++] = modifiers[current++];
-				}
-			}
-
-			int result = count - freeIndex;
-			modifiers.RemoveRange(freeIndex, result);
+			int removedCount = RemoveAll(baseValue, finalValue, match, out finalValue);
 
 			if (finalValue != previousValue)
 			{
 				OnValueChanged?.Invoke();
 			}
-			return result;
+			return removedCount;
 		}
 
 		public void Clear()
@@ -125,7 +137,7 @@ namespace Kryz.RPG.Stats.Core
 			baseValue = value;
 
 			float previousValue = finalValue;
-			finalValue = ChangeBaseValue(previousBaseValue, baseValue, finalValue);
+			finalValue = SetBaseValue(previousBaseValue, baseValue, finalValue);
 
 			if (finalValue != previousValue)
 			{

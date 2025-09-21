@@ -5,6 +5,8 @@ namespace Kryz.RPG.Stats.Core
 {
 	public class SimpleStatMax<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
+		private readonly PooledList<StatModifier<T>> modifiers = new();
+
 		public SimpleStatMax(float baseValue = 0) : base(baseValue) { }
 
 		protected override void Add(StatModifier<T> modifier)
@@ -25,6 +27,17 @@ namespace Kryz.RPG.Stats.Core
 			return true;
 		}
 
+		protected override int RemoveAll<TEquatable>(float baseValue, float currentValue, TEquatable match, out float finalValue)
+		{
+			finalValue = currentValue;
+			int removedCount = modifiers.RemoveAll(match);
+			if (removedCount > 0)
+			{
+				finalValue = modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
+			}
+			return removedCount;
+		}
+
 		protected override float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier)
 		{
 			return modifier.Value >= currentValue ? modifier.Value : currentValue;
@@ -35,7 +48,7 @@ namespace Kryz.RPG.Stats.Core
 			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
 		}
 
-		protected override float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
+		protected override float SetBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
 		{
 			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, newBaseValue) : newBaseValue;
 		}

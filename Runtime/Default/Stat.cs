@@ -19,7 +19,7 @@ namespace Kryz.RPG.Stats.Default
 
 		public int RemoveModifiersFromSource(object source)
 		{
-			return RemoveAll(new StatModifierMatch(source: source));
+			return RemoveAllModifiers(new StatModifierMatch(source: source));
 		}
 
 		protected override float CalculateFinalValue(float baseValue)

@@ -42,12 +42,12 @@ namespace Kryz.RPG.Stats.Core
 		public abstract bool RemoveModifier(StatModifier<T> modifier);
 		protected abstract float CalculateFinalValue(float baseValue);
 
-		public int RemoveAll<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
+		public int RemoveAllModifiers<TMatch>(TMatch match) where TMatch : IEquatable<StatModifier<T>>
 		{
 			int removedCount = 0;
 			for (int i = 0; i < stats.Length; i++)
 			{
-				removedCount += stats[i].RemoveAll(match);
+				removedCount += stats[i].RemoveAllModifiers(match);
 			}
 			return removedCount;
 		}

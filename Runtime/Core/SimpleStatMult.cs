@@ -51,7 +51,7 @@ namespace Kryz.RPG.Stats.Core
 			return zeroesCount > 0 ? 0 : nonZeroValue;
 		}
 
-		protected override float ChangeBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
+		protected override float SetBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
 		{
 			if (oldBaseValue == 0)
 			{

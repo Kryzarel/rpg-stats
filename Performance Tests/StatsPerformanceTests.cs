@@ -20,9 +20,8 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void Awake()
 		{
-			// int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
+			int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
 			// int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
-			int modTypeLegacyCount = 3;
 			int modTypeCount = 3;
 
 			for (int i = 0; i < Length; i++)
@@ -40,11 +39,11 @@ namespace Kryz.RPG.StatsPerfTests
 				modifiers[i] = modifier;
 			}
 
-			// for (int i = 0; i < 1000; i++)
-			// {
-			// 	statLegacy.AddModifier(new StatModifier(2, StatModType.Flat));
-			// 	stat.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
-			// }
+			for (int i = 0; i < 100; i++)
+			{
+				statLegacy.AddModifier(new StatModifier(2, StatModType.Flat));
+				stat.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
+			}
 		}
 
 		private void Update()
@@ -62,7 +61,8 @@ namespace Kryz.RPG.StatsPerfTests
 				// RemoveLegacy1000();
 
 				// AddLegacy1000();
-				// RemoveFromSourceLegacy();
+				AddLegacy100();
+				RemoveFromSourceLegacy();
 
 				// New
 				Add10();
@@ -75,7 +75,8 @@ namespace Kryz.RPG.StatsPerfTests
 				// Remove1000();
 
 				// Add1000();
-				// RemoveFromSource();
+				Add100();
+				RemoveFromSource();
 			}
 		}
 

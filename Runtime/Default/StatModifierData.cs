@@ -9,10 +9,13 @@ namespace Kryz.RPG.Stats.Default
 		public readonly StatModifierType Type;
 		public readonly object? Source;
 
+		private readonly int hashCode;
+
 		public StatModifierData(StatModifierType type, object? source = default)
 		{
 			Type = type;
 			Source = source;
+			hashCode = HashCode.Combine(Type, Source);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,7 +40,7 @@ namespace Kryz.RPG.Stats.Default
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Type, Source);
+			return hashCode;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

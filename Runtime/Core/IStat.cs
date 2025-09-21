@@ -21,6 +21,6 @@ namespace Kryz.RPG.Stats.Core
 
 		void AddModifier(StatModifier<T> modifier);
 		bool RemoveModifier(StatModifier<T> modifier);
-		int RemoveAll<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>;
+		int RemoveAllModifiers<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>;
 	}
 }
