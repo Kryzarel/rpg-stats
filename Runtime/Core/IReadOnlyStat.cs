@@ -17,6 +17,8 @@ namespace Kryz.RPG.Stats.Core
 	{
 		new IReadOnlyList<IReadOnlyStat<T>> Stats { get; }
 
-		IReadOnlyList<StatModifier<T>> Modifiers { get; }
+		int ModifiersCount { get; }
+
+		void GetModifiers(IList<StatModifier<T>> results);
 	}
 }

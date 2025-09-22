@@ -16,14 +16,13 @@ namespace Kryz.RPG.Stats.Core
 
 		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
 		public float FinalValue => GetFinalValue();
+		public int ModifiersCount => GetModifiersCount();
 
 		public IReadOnlyList<IStat<T>> Stats => stats;
 
 		IReadOnlyList<IStat> IStat.Stats => stats;
 		IReadOnlyList<IReadOnlyStat<T>> IReadOnlyStat<T>.Stats => stats;
 		IReadOnlyList<IReadOnlyStat> IReadOnlyStat.Stats => stats;
-
-		IReadOnlyList<StatModifier<T>> IReadOnlyStat<T>.Modifiers => Array.Empty<StatModifier<T>>();
 
 		protected Stat(float baseValue = 0, params IStat<T>[] stats)
 		{
@@ -32,10 +31,51 @@ namespace Kryz.RPG.Stats.Core
 			this.baseValue = baseValue;
 			finalValue = CalculateFinalValue(baseValue);
 
+			Action onChangedDelegate = OnChanged;
+
 			for (int i = 0; i < stats.Length; i++)
 			{
-				stats[i].OnValueChanged += OnChanged;
+				stats[i].OnValueChanged += onChangedDelegate;
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void SetBaseValue(float value)
+		{
+			if (baseValue != value)
+			{
+				isDirty = true;
+				baseValue = value;
+				OnValueChanged?.Invoke();
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private float GetFinalValue()
+		{
+			if (isDirty)
+			{
+				isDirty = false;
+				finalValue = CalculateFinalValue(baseValue);
+			}
+			return finalValue;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int GetModifiersCount()
+		{
+			int count = 0;
+			for (int i = 0; i < stats.Length; i++)
+			{
+				count += stats[i].ModifiersCount;
+			}
+			return count;
+		}
+
+		private void OnChanged()
+		{
+			isDirty = true;
+			OnValueChanged?.Invoke();
 		}
 
 		public abstract void AddModifier(StatModifier<T> modifier);
@@ -60,32 +100,12 @@ namespace Kryz.RPG.Stats.Core
 			}
 		}
 
-		private void OnChanged()
+		public void GetModifiers(IList<StatModifier<T>> results)
 		{
-			isDirty = true;
-			OnValueChanged?.Invoke();
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void SetBaseValue(float value)
-		{
-			if (baseValue != value)
+			for (int i = 0; i < stats.Length; i++)
 			{
-				isDirty = true;
-				baseValue = value;
-				OnValueChanged?.Invoke();
+				stats[i].GetModifiers(results);
 			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float GetFinalValue()
-		{
-			if (isDirty)
-			{
-				isDirty = false;
-				finalValue = CalculateFinalValue(baseValue);
-			}
-			return finalValue;
 		}
 	}
 }

@@ -11,8 +11,11 @@ namespace Kryz.RPG.Stats.Tests.Editor
 	{
 		private const string vals = nameof(baseValues);
 		private const float delta = 0.01f;
+
 		private static readonly float[] baseValues = { 0, 0.3f, 2.5f, 5 };
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
+
+		private readonly List<StatModifier<StatModifierData>> modifiers = new();
 
 		[Test]
 		public void Stat_NoModifiers_FinalEqualsBase([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2)
@@ -193,9 +196,12 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			{
 				IStat<StatModifierData> s = innerStats[i];
 
-				for (int j = 0; j < s.Modifiers.Count; j++)
+				modifiers.Clear();
+				s.GetModifiers(modifiers);
+
+				for (int j = 0; j < modifiers.Count; j++)
 				{
-					StatModifier<StatModifierData> modifier = s.Modifiers[j];
+					StatModifier<StatModifierData> modifier = modifiers[j];
 					stat.RemoveModifier(modifier);
 
 					float expected = (baseValue + innerStats[0].FinalValue) * innerStats[1].FinalValue * innerStats[2].FinalValue;

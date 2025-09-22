@@ -12,13 +12,13 @@ namespace Kryz.RPG.Stats.Core
 		private bool isDirty;
 		private float baseValue;
 		private float finalValue;
+		private int modifiersCount;
 
 		public event Action? OnValueChanged;
 
 		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
 		public float FinalValue => GetFinalValue();
-
-		public IReadOnlyList<StatModifier<T>> Modifiers => Array.Empty<StatModifier<T>>();
+		public int ModifiersCount => modifiersCount;
 
 		IReadOnlyList<IStat<T>> IStat<T>.Stats => Array.Empty<IStat<T>>();
 		IReadOnlyList<IStat> IStat.Stats => Array.Empty<IStat<T>>();
@@ -35,12 +35,15 @@ namespace Kryz.RPG.Stats.Core
 		{
 			modifiers.TryGetValue(modifier, out int count);
 			modifiers[modifier] = count + 1;
+			modifiersCount++;
 		}
 
 		private bool Remove(StatModifier<T> modifier)
 		{
 			if (modifiers.TryGetValue(modifier, out int count))
 			{
+				modifiersCount--;
+
 				if (count > 1)
 				{
 					modifiers[modifier] = count - 1;
@@ -49,6 +52,40 @@ namespace Kryz.RPG.Stats.Core
 				return modifiers.Remove(modifier);
 			}
 			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void SetBaseValue(float value)
+		{
+			bool newIsDirty = SetBaseValue(value, baseValue, finalValue, out float newFinalValue);
+
+			baseValue = value;
+
+			if (newIsDirty || finalValue != newFinalValue)
+			{
+				isDirty |= newIsDirty;
+				finalValue = newFinalValue;
+				OnValueChanged?.Invoke();
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private float GetFinalValue()
+		{
+			if (isDirty)
+			{
+				isDirty = false;
+
+				finalValue = baseValue;
+				foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
+				{
+					for (int i = 0; i < item.Value; i++)
+					{
+						AddOperation(item.Key, baseValue, finalValue, out finalValue);
+					}
+				}
+			}
+			return finalValue;
 		}
 
 		protected abstract bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
@@ -131,38 +168,15 @@ namespace Kryz.RPG.Stats.Core
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void SetBaseValue(float value)
+		public void GetModifiers(IList<StatModifier<T>> results)
 		{
-			bool newIsDirty = SetBaseValue(value, baseValue, finalValue, out float newFinalValue);
-
-			baseValue = value;
-
-			if (newIsDirty || finalValue != newFinalValue)
+			foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
 			{
-				isDirty |= newIsDirty;
-				finalValue = newFinalValue;
-				OnValueChanged?.Invoke();
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float GetFinalValue()
-		{
-			if (isDirty)
-			{
-				isDirty = false;
-
-				finalValue = baseValue;
-				foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
+				for (int i = 0; i < item.Value; i++)
 				{
-					for (int i = 0; i < item.Value; i++)
-					{
-						AddOperation(item.Key, baseValue, finalValue, out finalValue);
-					}
+					results.Add(item.Key);
 				}
 			}
-			return finalValue;
 		}
 	}
 }
