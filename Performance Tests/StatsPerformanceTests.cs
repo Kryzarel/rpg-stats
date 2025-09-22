@@ -21,8 +21,8 @@ namespace Kryz.RPG.StatsPerfTests
 		private void Awake()
 		{
 			int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
-			// int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
-			int modTypeCount = 3;
+			int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
+			// int modTypeCount = 3;
 
 			for (int i = 0; i < Length; i++)
 			{
@@ -57,10 +57,6 @@ namespace Kryz.RPG.StatsPerfTests
 				AddLegacy100();
 				RemoveLegacy100();
 
-				// AddLegacy1000();
-				// RemoveLegacy1000();
-
-				// AddLegacy1000();
 				AddLegacy100();
 				RemoveFromSourceLegacy();
 
@@ -71,68 +67,34 @@ namespace Kryz.RPG.StatsPerfTests
 				Add100();
 				Remove100();
 
-				// Add1000();
-				// Remove1000();
-
-				// Add1000();
 				Add100();
 				RemoveFromSource();
 			}
 		}
 
-		private float AddLegacy10()
+		private float AddLegacy(int count)
 		{
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < count; i++)
 			{
 				statLegacy.AddModifier(modifiersLegacy[i]);
 			}
 			return statLegacy.Value;
 		}
 
-		private float AddLegacy100()
+		private float RemoveLegacy(int count)
 		{
-			for (int i = 0; i < 100; i++)
-			{
-				statLegacy.AddModifier(modifiersLegacy[i]);
-			}
-			return statLegacy.Value;
-		}
-
-		private float AddLegacy1000()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				statLegacy.AddModifier(modifiersLegacy[i]);
-			}
-			return statLegacy.Value;
-		}
-
-		private float RemoveLegacy10()
-		{
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < count; i++)
 			{
 				statLegacy.RemoveModifier(modifiersLegacy[i]);
 			}
 			return statLegacy.Value;
 		}
 
-		private float RemoveLegacy100()
-		{
-			for (int i = 0; i < 100; i++)
-			{
-				statLegacy.RemoveModifier(modifiersLegacy[i]);
-			}
-			return statLegacy.Value;
-		}
+		private float AddLegacy10() => AddLegacy(10);
+		private float AddLegacy100() => AddLegacy(100);
 
-		private float RemoveLegacy1000()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				statLegacy.RemoveModifier(modifiersLegacy[i]);
-			}
-			return statLegacy.Value;
-		}
+		private float RemoveLegacy10() => RemoveLegacy(10);
+		private float RemoveLegacy100() => RemoveLegacy(100);
 
 		private float RemoveFromSourceLegacy()
 		{
@@ -141,59 +103,29 @@ namespace Kryz.RPG.StatsPerfTests
 			return statLegacy.Value;
 		}
 
-		private float Add10()
+		private float Add(int count)
 		{
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < count; i++)
 			{
 				stat.AddModifier(modifiers[i]);
 			}
 			return stat.FinalValue;
 		}
 
-		private float Add100()
+		private float Remove(int count)
 		{
-			for (int i = 0; i < 100; i++)
-			{
-				stat.AddModifier(modifiers[i]);
-			}
-			return stat.FinalValue;
-		}
-
-		private float Add1000()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				stat.AddModifier(modifiers[i]);
-			}
-			return stat.FinalValue;
-		}
-
-		private float Remove10()
-		{
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < count; i++)
 			{
 				stat.RemoveModifier(modifiers[i]);
 			}
 			return stat.FinalValue;
 		}
 
-		private float Remove100()
-		{
-			for (int i = 0; i < 100; i++)
-			{
-				stat.RemoveModifier(modifiers[i]);
-			}
-			return stat.FinalValue;
-		}
+		private float Add10() => Add(10);
+		private float Add100() => Add(100);
 
-		private float Remove1000()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				stat.RemoveModifier(modifiers[i]);
-			}
-			return stat.FinalValue;
-		}
+		private float Remove10() => Remove(10);
+		private float Remove100() => Remove(100);
 
 		private float RemoveFromSource()
 		{

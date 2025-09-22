@@ -19,7 +19,7 @@ namespace Kryz.RPG.Stats.Core
 			}
 		}
 
-		protected override float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier)
+		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
 		{
 			float value = 1 + modifier.Value;
 
@@ -32,10 +32,11 @@ namespace Kryz.RPG.Stats.Core
 				nonZeroValue *= value;
 			}
 
-			return zeroesCount > 0 ? 0 : nonZeroValue;
+			finalValue = zeroesCount > 0 ? 0 : nonZeroValue;
+			return false;
 		}
 
-		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
+		protected override bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
 		{
 			float value = 1 + modifier.Value;
 
@@ -48,10 +49,11 @@ namespace Kryz.RPG.Stats.Core
 				nonZeroValue /= value;
 			}
 
-			return zeroesCount > 0 ? 0 : nonZeroValue;
+			finalValue = zeroesCount > 0 ? 0 : nonZeroValue;
+			return false;
 		}
 
-		protected override float SetBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
+		protected override bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue)
 		{
 			if (oldBaseValue == 0)
 			{
@@ -71,7 +73,8 @@ namespace Kryz.RPG.Stats.Core
 				nonZeroValue *= newBaseValue;
 			}
 
-			return zeroesCount > 0 ? 0 : nonZeroValue;
+			finalValue = zeroesCount > 0 ? 0 : nonZeroValue;
+			return false;
 		}
 	}
 }

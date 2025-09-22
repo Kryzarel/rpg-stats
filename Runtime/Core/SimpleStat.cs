@@ -1,6 +1,7 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
-using Kryz.Utils;
+using System.Runtime.CompilerServices;
 
 namespace Kryz.RPG.Stats.Core
 {
@@ -8,13 +9,14 @@ namespace Kryz.RPG.Stats.Core
 	{
 		private readonly Dictionary<StatModifier<T>, int> modifiers = new();
 
+		private bool isDirty;
 		private float baseValue;
 		private float finalValue;
 
 		public event Action? OnValueChanged;
 
 		public float BaseValue { get => baseValue; set => SetBaseValue(value); }
-		public float FinalValue => finalValue;
+		public float FinalValue => GetFinalValue();
 
 		public IReadOnlyList<StatModifier<T>> Modifiers => Array.Empty<StatModifier<T>>();
 
@@ -29,13 +31,13 @@ namespace Kryz.RPG.Stats.Core
 			finalValue = baseValue;
 		}
 
-		protected virtual void Add(StatModifier<T> modifier)
+		private void Add(StatModifier<T> modifier)
 		{
 			modifiers.TryGetValue(modifier, out int count);
 			modifiers[modifier] = count + 1;
 		}
 
-		protected virtual bool Remove(StatModifier<T> modifier)
+		private bool Remove(StatModifier<T> modifier)
 		{
 			if (modifiers.TryGetValue(modifier, out int count))
 			{
@@ -49,43 +51,20 @@ namespace Kryz.RPG.Stats.Core
 			return false;
 		}
 
-		protected virtual int RemoveAll<TEquatable>(float baseValue, float currentValue, TEquatable match, out float finalValue) where TEquatable : IEquatable<StatModifier<T>>
-		{
-			using PooledList<StatModifier<T>> keys = PooledList<StatModifier<T>>.Rent(modifiers.Count);
-			keys.AddRange(modifiers.Keys);
-			int removedCount = 0;
-
-			for (int i = 0; i < keys.Count; i++)
-			{
-				StatModifier<T> mod = keys[i];
-				if (match.Equals(mod) && modifiers.Remove(mod, out int count))
-				{
-					removedCount += count;
-
-					for (int j = 0; j < count; j++)
-					{
-						currentValue = RemoveOperation(baseValue, currentValue, mod);
-					}
-				}
-			}
-
-			finalValue = currentValue;
-			return removedCount;
-		}
-
-		protected abstract float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier);
-		protected abstract float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier);
-		protected abstract float SetBaseValue(float oldBaseValue, float newBaseValue, float currentValue);
+		protected abstract bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
+		protected abstract bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
+		protected abstract bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue);
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
 			Add(modifier);
 
-			float previousValue = finalValue;
-			finalValue = AddOperation(baseValue, finalValue, modifier);
+			bool newIsDirty = AddOperation(modifier, baseValue, finalValue, out float newFinalValue);
 
-			if (finalValue != previousValue)
+			if (newIsDirty || finalValue != newFinalValue)
 			{
+				isDirty |= newIsDirty;
+				finalValue = newFinalValue;
 				OnValueChanged?.Invoke();
 			}
 		}
@@ -94,11 +73,12 @@ namespace Kryz.RPG.Stats.Core
 		{
 			if (Remove(modifier))
 			{
-				float previousValue = finalValue;
-				finalValue = RemoveOperation(baseValue, finalValue, modifier);
+				bool newIsDirty = RemoveOperation(modifier, baseValue, finalValue, out float newFinalValue);
 
-				if (finalValue != previousValue)
+				if (newIsDirty || finalValue != newFinalValue)
 				{
+					isDirty |= newIsDirty;
+					finalValue = newFinalValue;
 					OnValueChanged?.Invoke();
 				}
 				return true;
@@ -108,13 +88,35 @@ namespace Kryz.RPG.Stats.Core
 
 		public int RemoveAllModifiers<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
 		{
-			float previousValue = finalValue;
-			int removedCount = RemoveAll(baseValue, finalValue, match, out finalValue);
+			int removedCount = 0;
+			bool newIsDirty = false;
+			float newFinalValue = finalValue;
 
-			if (finalValue != previousValue)
+			int modifiersCount = modifiers.Count;
+			StatModifier<T>[] keys = ArrayPool<StatModifier<T>>.Shared.Rent(modifiersCount);
+			modifiers.Keys.CopyTo(keys, 0);
+
+			for (int i = 0; i < modifiersCount; i++)
 			{
+				StatModifier<T> modifier = keys[i];
+				if (match.Equals(modifier) && modifiers.Remove(modifier, out int count))
+				{
+					for (int j = 0; j < count; j++)
+					{
+						newIsDirty |= RemoveOperation(modifier, baseValue, newFinalValue, out newFinalValue);
+					}
+					removedCount += count;
+				}
+			}
+
+			if (newIsDirty || finalValue != newFinalValue)
+			{
+				isDirty |= newIsDirty;
+				finalValue = newFinalValue;
 				OnValueChanged?.Invoke();
 			}
+
+			ArrayPool<StatModifier<T>>.Shared.Return(keys, clearArray: true);
 			return removedCount;
 		}
 
@@ -122,27 +124,45 @@ namespace Kryz.RPG.Stats.Core
 		{
 			modifiers.Clear();
 
-			float previousValue = finalValue;
-			finalValue = baseValue;
-
-			if (finalValue != previousValue)
+			if (finalValue != baseValue)
 			{
+				finalValue = baseValue;
 				OnValueChanged?.Invoke();
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void SetBaseValue(float value)
 		{
-			float previousBaseValue = baseValue;
+			bool newIsDirty = SetBaseValue(value, baseValue, finalValue, out float newFinalValue);
+
 			baseValue = value;
 
-			float previousValue = finalValue;
-			finalValue = SetBaseValue(previousBaseValue, baseValue, finalValue);
-
-			if (finalValue != previousValue)
+			if (newIsDirty || finalValue != newFinalValue)
 			{
+				isDirty |= newIsDirty;
+				finalValue = newFinalValue;
 				OnValueChanged?.Invoke();
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private float GetFinalValue()
+		{
+			if (isDirty)
+			{
+				isDirty = false;
+
+				finalValue = baseValue;
+				foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
+				{
+					for (int i = 0; i < item.Value; i++)
+					{
+						AddOperation(item.Key, baseValue, finalValue, out finalValue);
+					}
+				}
+			}
+			return finalValue;
 		}
 	}
 }

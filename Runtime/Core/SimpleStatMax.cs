@@ -1,56 +1,25 @@
-using System;
-using Kryz.Utils;
-
 namespace Kryz.RPG.Stats.Core
 {
 	public class SimpleStatMax<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
-		private readonly PooledList<StatModifier<T>> modifiers = new();
-
 		public SimpleStatMax(float baseValue = 0) : base(baseValue) { }
 
-		protected override void Add(StatModifier<T> modifier)
+		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
 		{
-			// Improves performance by inserting the modifiers sorted
-			int index = modifiers.BinarySearch(modifier, StatModifierComparer<T>.Default);
-			if (index < 0) index = ~index;
-
-			modifiers.Insert(index, modifier);
+			finalValue = currentValue >= modifier.Value ? currentValue : modifier.Value;
+			return false;
 		}
 
-		protected override bool Remove(StatModifier<T> modifier)
-		{
-			int index = modifiers.BinarySearch(modifier, StatModifierComparer<T>.Default);
-			if (index < 0) return false;
-
-			modifiers.RemoveAt(index);
-			return true;
-		}
-
-		protected override int RemoveAll<TEquatable>(float baseValue, float currentValue, TEquatable match, out float finalValue)
+		protected override bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
 		{
 			finalValue = currentValue;
-			int removedCount = modifiers.RemoveAll(match);
-			if (removedCount > 0)
-			{
-				finalValue = modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
-			}
-			return removedCount;
+			return modifier.Value >= currentValue;
 		}
 
-		protected override float AddOperation(float baseValue, float currentValue, StatModifier<T> modifier)
+		protected override bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue)
 		{
-			return modifier.Value >= currentValue ? modifier.Value : currentValue;
-		}
-
-		protected override float RemoveOperation(float baseValue, float currentValue, StatModifier<T> modifier)
-		{
-			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, baseValue) : baseValue;
-		}
-
-		protected override float SetBaseValue(float oldBaseValue, float newBaseValue, float currentValue)
-		{
-			return modifiers.Count > 0 ? Math.Max(modifiers[^1].Value, newBaseValue) : newBaseValue;
+			finalValue = currentValue >= newBaseValue ? currentValue : newBaseValue;
+			return false;
 		}
 	}
 }
