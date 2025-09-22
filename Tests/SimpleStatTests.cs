@@ -212,6 +212,7 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			{
 				int index = Random.Range(0, modifiers.Count);
 				StatModifier<TestModifierData> modifier = modifiers[index];
+				modifiers.RemoveAt(index);
 
 				if (!stat.RemoveModifier(modifier))
 				{
