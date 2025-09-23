@@ -6,20 +6,32 @@ namespace Kryz.RPG.Stats.Core
 
 		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
 		{
-			finalValue = currentValue >= modifier.Value ? currentValue : modifier.Value;
+			finalValue = modifier.Value > currentValue ? modifier.Value : currentValue;
 			return false;
 		}
 
 		protected override bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
 		{
+			if (ModifiersCount == 0)
+			{
+				finalValue = modifier.Value;
+				return false;
+			}
+
 			finalValue = currentValue;
-			return modifier.Value >= currentValue;
+			return modifier.Value == currentValue;
 		}
 
 		protected override bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue)
 		{
-			finalValue = currentValue >= newBaseValue ? currentValue : newBaseValue;
-			return false;
+			if (ModifiersCount == 0)
+			{
+				finalValue = newBaseValue;
+				return false;
+			}
+
+			finalValue = newBaseValue > currentValue ? newBaseValue : currentValue;
+			return oldBaseValue == currentValue;
 		}
 	}
 }
