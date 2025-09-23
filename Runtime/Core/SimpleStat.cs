@@ -57,6 +57,9 @@ namespace Kryz.RPG.Stats.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void SetBaseValue(float value)
 		{
+			if (baseValue == value)
+				return;
+
 			bool newIsDirty = SetBaseValue(value, baseValue, finalValue, out float newFinalValue);
 
 			baseValue = value;
@@ -91,6 +94,8 @@ namespace Kryz.RPG.Stats.Core
 		protected abstract bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
 		protected abstract bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
 		protected abstract bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue);
+
+		protected virtual void OnClear(float baseValue) { }
 
 		public void AddModifier(StatModifier<T> modifier)
 		{
@@ -160,6 +165,7 @@ namespace Kryz.RPG.Stats.Core
 		public void Clear()
 		{
 			modifiers.Clear();
+			OnClear(baseValue);
 
 			if (finalValue != baseValue)
 			{

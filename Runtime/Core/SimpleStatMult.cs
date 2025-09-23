@@ -7,16 +7,7 @@ namespace Kryz.RPG.Stats.Core
 
 		public SimpleStatMult(float baseValue = 1) : base(baseValue)
 		{
-			if (baseValue == 0)
-			{
-				zeroesCount = 1;
-				nonZeroValue = 1;
-			}
-			else
-			{
-				zeroesCount = 0;
-				nonZeroValue = baseValue;
-			}
+			OnClear(baseValue);
 		}
 
 		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
@@ -75,6 +66,20 @@ namespace Kryz.RPG.Stats.Core
 
 			finalValue = zeroesCount > 0 ? 0 : nonZeroValue;
 			return false;
+		}
+
+		protected override void OnClear(float baseValue)
+		{
+			if (baseValue == 0)
+			{
+				zeroesCount = 1;
+				nonZeroValue = 1;
+			}
+			else
+			{
+				zeroesCount = 0;
+				nonZeroValue = baseValue;
+			}
 		}
 	}
 }
