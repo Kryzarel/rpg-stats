@@ -7,8 +7,10 @@ namespace Kryz.RPG.StatsPerfTests
 {
 	public class StatsPerformanceTests : MonoBehaviour
 	{
-		private readonly StatModifier[] modifiersLegacy = new StatModifier[100];
-		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[100];
+		private const int Length = 100;
+
+		private readonly StatModifier[] modifiersLegacy = new StatModifier[Length];
+		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[Length];
 
 		private readonly CharacterStat statLegacy = new(10);
 		private readonly Stat stat = new(10);
@@ -21,7 +23,7 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void Awake()
 		{
-			for (int i = 0; i < 1000; i++)
+			for (int i = 0; i < 100; i++)
 			{
 				statLegacy.AddModifier(new StatModifier(2, StatModType.Flat));
 				stat.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
@@ -106,9 +108,11 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private float AddLegacy10() => AddLegacy(10);
 		private float AddLegacy100() => AddLegacy(100);
+		private float AddLegacy1000() => AddLegacy(1000);
 
 		private float RemoveLegacy10() => RemoveLegacy(10);
 		private float RemoveLegacy100() => RemoveLegacy(100);
+		private float RemoveLegacy1000() => RemoveLegacy(1000);
 
 		private float RemoveFromSourceLegacy()
 		{
@@ -137,9 +141,11 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private float Add10() => Add(10);
 		private float Add100() => Add(100);
+		private float Add1000() => Add(1000);
 
 		private float Remove10() => Remove(10);
 		private float Remove100() => Remove(100);
+		private float Remove1000() => Remove(1000);
 
 		private float RemoveFromSource()
 		{
