@@ -7,10 +7,8 @@ namespace Kryz.RPG.StatsPerfTests
 {
 	public class StatsPerformanceTests : MonoBehaviour
 	{
-		private const int Length = 1000;
-
-		private readonly StatModifier[] modifiersLegacy = new StatModifier[Length];
-		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[Length];
+		private readonly StatModifier[] modifiersLegacy = new StatModifier[100];
+		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[100];
 
 		private readonly CharacterStat statLegacy = new(10);
 		private readonly Stat stat = new(10);
@@ -18,28 +16,12 @@ namespace Kryz.RPG.StatsPerfTests
 		private readonly object source1 = new();
 		private readonly object source2 = new();
 
+		private static readonly int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
+		private static readonly int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
+
 		private void Awake()
 		{
-			int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
-			int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
-			// int modTypeCount = 3;
-
-			for (int i = 0; i < Length; i++)
-			{
-				float value = i;
-				object source = i % 2 == 0 ? source1 : source2;
-
-				StatModType modTypeLegacy = (StatModType)(i % modTypeLegacyCount);
-				StatModifier modifierlegacy = new(value, modTypeLegacy, source);
-
-				StatModifierType modType = (StatModifierType)(i % modTypeCount);
-				StatModifier<StatModifierData> modifier = new(value, new(modType, source));
-
-				modifiersLegacy[i] = modifierlegacy;
-				modifiers[i] = modifier;
-			}
-
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < 1000; i++)
 			{
 				statLegacy.AddModifier(new StatModifier(2, StatModType.Flat));
 				stat.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
@@ -48,28 +30,60 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void Update()
 		{
+			GenerateLegacy();
+			GenerateNew();
+
 			for (int i = 0; i < 10; i++)
 			{
-				// Legacy
-				AddLegacy10();
-				RemoveLegacy10();
-
-				AddLegacy100();
-				RemoveLegacy100();
-
-				AddLegacy100();
-				RemoveFromSourceLegacy();
-
-				// New
-				Add10();
-				Remove10();
-
-				Add100();
-				Remove100();
-
-				Add100();
-				RemoveFromSource();
+				TestLegacy();
+				TestNew();
 			}
+		}
+
+		private void GenerateLegacy()
+		{
+			for (int i = 0; i < modifiersLegacy.Length; i++)
+			{
+				float value = Random.Range(0.1f, 3f);
+				object source = i % 2 == 0 ? source1 : source2;
+				StatModType modTypeLegacy = (StatModType)(i % modTypeLegacyCount);
+				modifiersLegacy[i] = new StatModifier(value, modTypeLegacy, source);
+			}
+		}
+
+		private void GenerateNew()
+		{
+			for (int i = 0; i < modifiers.Length; i++)
+			{
+				float value = Random.Range(0.1f, 3f);
+				object source = i % 2 == 0 ? source1 : source2;
+				StatModifierType modType = (StatModifierType)(i % modTypeCount);
+				modifiers[i] = new StatModifier<StatModifierData>(value, new(modType, source));
+			}
+		}
+
+		private void TestLegacy()
+		{
+			AddLegacy10();
+			RemoveLegacy10();
+
+			AddLegacy100();
+			RemoveLegacy100();
+
+			AddLegacy100();
+			RemoveFromSourceLegacy();
+		}
+
+		private void TestNew()
+		{
+			Add10();
+			Remove10();
+
+			Add100();
+			Remove100();
+
+			Add100();
+			RemoveFromSource();
 		}
 
 		private float AddLegacy(int count)
