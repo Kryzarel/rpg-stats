@@ -30,13 +30,16 @@ namespace Kryz.CharacterStats
 		protected readonly List<StatModifier> statModifiers;
 		public readonly ReadOnlyCollection<StatModifier> StatModifiers;
 
-		private readonly Comparison<StatModifier> comparer;
+		private readonly Comparison<StatModifier> comparison;
+		private readonly Predicate<StatModifier> predicate;
+		private object? sourceToRemove;
 
 		public CharacterStat()
 		{
 			statModifiers = new List<StatModifier>();
 			StatModifiers = statModifiers.AsReadOnly();
-			comparer = CompareModifierOrder;
+			comparison = CompareModifierOrder;
+			predicate = modifier => modifier.Source == sourceToRemove;
 		}
 
 		public CharacterStat(float baseValue) : this()
@@ -62,7 +65,9 @@ namespace Kryz.CharacterStats
 
 		public virtual bool RemoveAllModifiersFromSource(object source)
 		{
-			int numRemovals = statModifiers.RemoveAll(mod => mod.Source == source);
+			sourceToRemove = source;
+			int numRemovals = statModifiers.RemoveAll(predicate);
+			sourceToRemove = null;
 
 			if (numRemovals > 0)
 			{
@@ -86,7 +91,7 @@ namespace Kryz.CharacterStats
 			float finalValue = BaseValue;
 			float sumPercentAdd = 0;
 
-			statModifiers.Sort(comparer);
+			statModifiers.Sort(comparison);
 
 			for (int i = 0; i < statModifiers.Count; i++)
 			{
