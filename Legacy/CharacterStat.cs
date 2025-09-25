@@ -67,7 +67,7 @@ namespace Kryz.CharacterStats
 		{
 			sourceToRemove = source;
 			int numRemovals = statModifiers.RemoveAll(predicate);
-			sourceToRemove = null;
+			sourceToRemove = null; // Don't hang on to the object, so we don't prevent it from being GC'ed.
 
 			if (numRemovals > 0)
 			{
