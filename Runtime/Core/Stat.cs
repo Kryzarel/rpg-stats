@@ -10,7 +10,7 @@ namespace Kryz.RPG.Stats.Core
 
 		private bool isDirty;
 		private float baseValue;
-		private float finalValue;
+		private float currentValue;
 
 		public event Action? OnValueChanged;
 
@@ -26,10 +26,9 @@ namespace Kryz.RPG.Stats.Core
 
 		protected Stat(float baseValue = 0, params IStat<T>[] stats)
 		{
-			isDirty = false;
 			this.stats = stats;
 			this.baseValue = baseValue;
-			finalValue = CalculateFinalValue(baseValue);
+			currentValue = CalculateFinalValue(baseValue);
 
 			Action onChangedDelegate = OnChanged;
 
@@ -37,45 +36,6 @@ namespace Kryz.RPG.Stats.Core
 			{
 				stats[i].OnValueChanged += onChangedDelegate;
 			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void SetBaseValue(float value)
-		{
-			if (baseValue != value)
-			{
-				isDirty = true;
-				baseValue = value;
-				OnValueChanged?.Invoke();
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private float GetFinalValue()
-		{
-			if (isDirty)
-			{
-				isDirty = false;
-				finalValue = CalculateFinalValue(baseValue);
-			}
-			return finalValue;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetModifiersCount()
-		{
-			int count = 0;
-			for (int i = 0; i < stats.Length; i++)
-			{
-				count += stats[i].ModifiersCount;
-			}
-			return count;
-		}
-
-		private void OnChanged()
-		{
-			isDirty = true;
-			OnValueChanged?.Invoke();
 		}
 
 		public abstract void AddModifier(StatModifier<T> modifier);
@@ -106,6 +66,45 @@ namespace Kryz.RPG.Stats.Core
 			{
 				stats[i].GetModifiers(results);
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void SetBaseValue(float value)
+		{
+			if (baseValue != value)
+			{
+				isDirty = true;
+				baseValue = value;
+				OnValueChanged?.Invoke();
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private float GetFinalValue()
+		{
+			if (isDirty)
+			{
+				isDirty = false;
+				currentValue = CalculateFinalValue(baseValue);
+			}
+			return currentValue;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int GetModifiersCount()
+		{
+			int count = 0;
+			for (int i = 0; i < stats.Length; i++)
+			{
+				count += stats[i].ModifiersCount;
+			}
+			return count;
+		}
+
+		private void OnChanged()
+		{
+			isDirty = true;
+			OnValueChanged?.Invoke();
 		}
 	}
 }

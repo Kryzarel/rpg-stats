@@ -11,7 +11,7 @@ namespace Kryz.RPG.Stats.Core
 
 		private bool isDirty;
 		private float baseValue;
-		private float finalValue;
+		private float currentValue;
 		private int modifiersCount;
 
 		public event Action? OnValueChanged;
@@ -28,8 +28,82 @@ namespace Kryz.RPG.Stats.Core
 		protected SimpleStat(float baseValue = 0)
 		{
 			this.baseValue = baseValue;
-			finalValue = baseValue;
+			currentValue = baseValue;
 		}
+
+		public void AddModifier(StatModifier<T> modifier)
+		{
+			Add(modifier);
+			bool newIsDirty = AddOperation(modifier, baseValue, currentValue, out float newValue);
+			CheckValueChanged(newIsDirty, newValue);
+		}
+
+		public bool RemoveModifier(StatModifier<T> modifier)
+		{
+			if (Remove(modifier))
+			{
+				bool newIsDirty = RemoveOperation(modifier, baseValue, currentValue, out float newValue);
+				CheckValueChanged(newIsDirty, newValue);
+				return true;
+			}
+			return false;
+		}
+
+		public int RemoveAllModifiers<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
+		{
+			int removedCount = 0;
+			bool newIsDirty = false;
+			float newValue = currentValue;
+
+			int keysCount = modifiers.Count;
+			StatModifier<T>[] keys = ArrayPool<StatModifier<T>>.Shared.Rent(keysCount);
+			modifiers.Keys.CopyTo(keys, 0);
+
+			for (int i = 0; i < keysCount; i++)
+			{
+				StatModifier<T> modifier = keys[i];
+				if (match.Equals(modifier) && modifiers.Remove(modifier, out int count))
+				{
+					for (int j = 0; j < count; j++)
+					{
+						newIsDirty |= RemoveOperation(modifier, baseValue, newValue, out newValue);
+					}
+					removedCount += count;
+				}
+			}
+
+			modifiersCount -= removedCount;
+			Array.Clear(keys, 0, keysCount); // Clear only the used portion of the array
+			ArrayPool<StatModifier<T>>.Shared.Return(keys);
+
+			CheckValueChanged(newIsDirty, newValue);
+			return removedCount;
+		}
+
+		public void Clear()
+		{
+			modifiers.Clear();
+			modifiersCount = 0;
+			OnClear(baseValue);
+			CheckValueChanged(false, baseValue);
+		}
+
+		public void GetModifiers(IList<StatModifier<T>> results)
+		{
+			foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
+			{
+				for (int i = 0; i < item.Value; i++)
+				{
+					results.Add(item.Key);
+				}
+			}
+		}
+
+		protected abstract bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue);
+		protected abstract bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue);
+		protected abstract bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float newValue);
+
+		protected virtual void OnClear(float baseValue) { }
 
 		private void Add(StatModifier<T> modifier)
 		{
@@ -57,18 +131,11 @@ namespace Kryz.RPG.Stats.Core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void SetBaseValue(float value)
 		{
-			if (baseValue == value)
-				return;
-
-			bool newIsDirty = SetBaseValue(value, baseValue, finalValue, out float newFinalValue);
-
-			baseValue = value;
-
-			if (newIsDirty || finalValue != newFinalValue)
+			if (baseValue != value)
 			{
-				isDirty |= newIsDirty;
-				finalValue = newFinalValue;
-				OnValueChanged?.Invoke();
+				bool newIsDirty = SetBaseValue(value, baseValue, currentValue, out float newValue);
+				baseValue = value;
+				CheckValueChanged(newIsDirty, newValue);
 			}
 		}
 
@@ -78,110 +145,28 @@ namespace Kryz.RPG.Stats.Core
 			if (isDirty)
 			{
 				isDirty = false;
+				currentValue = baseValue;
+				OnClear(baseValue);
 
-				finalValue = baseValue;
 				foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
 				{
 					for (int i = 0; i < item.Value; i++)
 					{
-						AddOperation(item.Key, baseValue, finalValue, out finalValue);
+						AddOperation(item.Key, baseValue, currentValue, out currentValue);
 					}
 				}
 			}
-			return finalValue;
+			return currentValue;
 		}
 
-		protected abstract bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
-		protected abstract bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue);
-		protected abstract bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue);
-
-		protected virtual void OnClear(float baseValue) { }
-
-		public void AddModifier(StatModifier<T> modifier)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void CheckValueChanged(bool newIsDirty, float newValue)
 		{
-			Add(modifier);
-
-			bool newIsDirty = AddOperation(modifier, baseValue, finalValue, out float newFinalValue);
-
-			if (newIsDirty || finalValue != newFinalValue)
+			if (newIsDirty || currentValue != newValue)
 			{
 				isDirty |= newIsDirty;
-				finalValue = newFinalValue;
+				currentValue = newValue;
 				OnValueChanged?.Invoke();
-			}
-		}
-
-		public bool RemoveModifier(StatModifier<T> modifier)
-		{
-			if (Remove(modifier))
-			{
-				bool newIsDirty = RemoveOperation(modifier, baseValue, finalValue, out float newFinalValue);
-
-				if (newIsDirty || finalValue != newFinalValue)
-				{
-					isDirty |= newIsDirty;
-					finalValue = newFinalValue;
-					OnValueChanged?.Invoke();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		public int RemoveAllModifiers<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
-		{
-			int removedCount = 0;
-			bool newIsDirty = false;
-			float newFinalValue = finalValue;
-
-			int modifiersCount = modifiers.Count;
-			StatModifier<T>[] keys = ArrayPool<StatModifier<T>>.Shared.Rent(modifiersCount);
-			modifiers.Keys.CopyTo(keys, 0);
-
-			for (int i = 0; i < modifiersCount; i++)
-			{
-				StatModifier<T> modifier = keys[i];
-				if (match.Equals(modifier) && modifiers.Remove(modifier, out int count))
-				{
-					for (int j = 0; j < count; j++)
-					{
-						newIsDirty |= RemoveOperation(modifier, baseValue, newFinalValue, out newFinalValue);
-					}
-					removedCount += count;
-				}
-			}
-
-			if (newIsDirty || finalValue != newFinalValue)
-			{
-				isDirty |= newIsDirty;
-				finalValue = newFinalValue;
-				OnValueChanged?.Invoke();
-			}
-
-			ArrayPool<StatModifier<T>>.Shared.Return(keys, clearArray: true);
-			return removedCount;
-		}
-
-		public void Clear()
-		{
-			modifiers.Clear();
-			OnClear(baseValue);
-
-			if (finalValue != baseValue)
-			{
-				finalValue = baseValue;
-				OnValueChanged?.Invoke();
-			}
-		}
-
-		public void GetModifiers(IList<StatModifier<T>> results)
-		{
-			foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
-			{
-				for (int i = 0; i < item.Value; i++)
-				{
-					results.Add(item.Key);
-				}
 			}
 		}
 	}

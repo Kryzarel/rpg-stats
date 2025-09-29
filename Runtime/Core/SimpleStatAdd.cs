@@ -4,21 +4,21 @@ namespace Kryz.RPG.Stats.Core
 	{
 		public SimpleStatAdd(float baseValue = 0) : base(baseValue) { }
 
-		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
+		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue)
 		{
-			finalValue = currentValue + modifier.Value;
+			newValue = currentValue + modifier.Value;
 			return false;
 		}
 
-		protected override bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float finalValue)
+		protected override bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue)
 		{
-			finalValue = currentValue - modifier.Value;
+			newValue = currentValue - modifier.Value;
 			return false;
 		}
 
-		protected override bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float finalValue)
+		protected override bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float newValue)
 		{
-			finalValue = currentValue - oldBaseValue + newBaseValue;
+			newValue = currentValue - oldBaseValue + newBaseValue;
 			return false;
 		}
 	}
