@@ -33,12 +33,13 @@ namespace Kryz.RPG.Stats.Default
 			return finalValue;
 		}
 
-		private static SimpleStat<StatModifierData>[] GetInnerStats()
-		{
-			StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
-			SimpleStat<StatModifierData>[] stats = new SimpleStat<StatModifierData>[modifierTypes.Length];
+		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
 
-			for (int i = 0; i < modifierTypes.Length; i++)
+		private static IStat<StatModifierData>[] GetInnerStats()
+		{
+			IStat<StatModifierData>[] stats = new IStat<StatModifierData>[modifierTypes.Length];
+
+			for (int i = 0; i < stats.Length; i++)
 			{
 				stats[i] = modifierTypes[i] switch
 				{
