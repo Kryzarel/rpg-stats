@@ -40,39 +40,43 @@ namespace Kryz.RPG.Stats.Tests.Editor
 		private const float delta = 0.00001f;
 		private const string valuesSource = nameof(values);
 		private const string matchesSource = nameof(matches);
+		private const string modifierTypesSource = nameof(modifierTypes);
+		private const string modifierSourcesSource = nameof(modifierSources);
 
-		private static readonly float[] values = { -10f, -5f, -2f, -1f, -0.5f, -0.1f, 0f, 0.1f, 0.5f, 1f, 2f, 5f, 10f, };
-		private static readonly IEquatable<StatModifier<StatModifierData>>[] matches = { new MatchLessThanOrEqual(5), new MatchGreaterThanOrEqual(-5), new MatchSource(null), new MatchType(StatModifierType.Add), new MatchType(StatModifierType.Mult) };
+		private static readonly float[] values = { -5f, -1f, -0.5f, -0.1f, 0f, 0.1f, 0.5f, 1f, 5f, };
+		private static readonly IEquatable<StatModifier<StatModifierData>>[] matches = { new MatchLessThanOrEqual(2), new MatchGreaterThanOrEqual(-2), new MatchSource(null), new MatchType(StatModifierType.Add) };
+		private static readonly StatModifierType[] modifierTypes = { StatModifierType.Add, StatModifierType.Mult };
+		private static readonly object?[] modifierSources = { null, new() };
 
 		// ADD
 		[Test]
-		public void SimpleStatAdd_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatAdd_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatAdd<StatModifierData>>(baseValue1, baseValue2, modifierValue, Add);
+			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatAdd<StatModifierData>>(baseValue1, baseValue2, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Add);
 		}
 
 		[Test]
-		public void SimpleStatAdd_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2)
+		public void SimpleStatAdd_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatAdd<StatModifierData>>(baseValue1, baseValue2, Add);
+			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatAdd<StatModifierData>>(baseValue1, baseValue2, type, source, Add);
 		}
 
 		[Test]
-		public void SimpleStatAdd_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
+		public void SimpleStatAdd_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
 		{
-			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatAdd<StatModifierData>>(baseValue1, match, Add);
+			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatAdd<StatModifierData>>(baseValue1, type, source, match, Add);
 		}
 
 		[Test]
-		public void SimpleStatAdd_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatAdd_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddRemoveModifier<SimpleStatAdd<StatModifierData>>(baseValue1, modifierValue, Add);
+			SimpleStat_AddRemoveModifier<SimpleStatAdd<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Add);
 		}
 
 		[Test]
-		public void SimpleStatAdd_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatAdd_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_RemoveModifier<SimpleStatAdd<StatModifierData>>(baseValue1, modifierValue, Add);
+			SimpleStat_RemoveModifier<SimpleStatAdd<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Add);
 		}
 
 		[Test]
@@ -83,33 +87,33 @@ namespace Kryz.RPG.Stats.Tests.Editor
 
 		// MULT
 		[Test]
-		public void SimpleStatMult_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMult_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatMult<StatModifierData>>(baseValue1, baseValue2, modifierValue, Mul);
+			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatMult<StatModifierData>>(baseValue1, baseValue2, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Mul);
 		}
 
 		[Test]
-		public void SimpleStatMult_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2)
+		public void SimpleStatMult_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatMult<StatModifierData>>(baseValue1, baseValue2, Mul);
+			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatMult<StatModifierData>>(baseValue1, baseValue2, type, source, Mul);
 		}
 
 		[Test]
-		public void SimpleStatMult_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
+		public void SimpleStatMult_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
 		{
-			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatMult<StatModifierData>>(baseValue1, match, Mul);
+			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatMult<StatModifierData>>(baseValue1, type, source, match, Mul);
 		}
 
 		[Test]
-		public void SimpleStatMult_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMult_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddRemoveModifier<SimpleStatMult<StatModifierData>>(baseValue1, modifierValue, Mul);
+			SimpleStat_AddRemoveModifier<SimpleStatMult<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Mul);
 		}
 
 		[Test]
-		public void SimpleStatMult_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMult_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_RemoveModifier<SimpleStatMult<StatModifierData>>(baseValue1, modifierValue, Mul);
+			SimpleStat_RemoveModifier<SimpleStatMult<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Mul);
 		}
 
 		[Test]
@@ -120,33 +124,33 @@ namespace Kryz.RPG.Stats.Tests.Editor
 
 		// MIN
 		[Test]
-		public void SimpleStatMin_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMin_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatMin<StatModifierData>>(baseValue1, baseValue2, modifierValue, Min);
+			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatMin<StatModifierData>>(baseValue1, baseValue2, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Min);
 		}
 
 		[Test]
-		public void SimpleStatMin_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2)
+		public void SimpleStatMin_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatMin<StatModifierData>>(baseValue1, baseValue2, Min);
+			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatMin<StatModifierData>>(baseValue1, baseValue2, type, source, Min);
 		}
 
 		[Test]
-		public void SimpleStatMin_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
+		public void SimpleStatMin_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
 		{
-			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatMin<StatModifierData>>(baseValue1, match, Min);
+			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatMin<StatModifierData>>(baseValue1, type, source, match, Min);
 		}
 
 		[Test]
-		public void SimpleStatMin_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMin_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddRemoveModifier<SimpleStatMin<StatModifierData>>(baseValue1, modifierValue, Min);
+			SimpleStat_AddRemoveModifier<SimpleStatMin<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Min);
 		}
 
 		[Test]
-		public void SimpleStatMin_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMin_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_RemoveModifier<SimpleStatMin<StatModifierData>>(baseValue1, modifierValue, Min);
+			SimpleStat_RemoveModifier<SimpleStatMin<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Min);
 		}
 
 		[Test]
@@ -157,33 +161,33 @@ namespace Kryz.RPG.Stats.Tests.Editor
 
 		// MAX
 		[Test]
-		public void SimpleStatMax_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMax_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatMax<StatModifierData>>(baseValue1, baseValue2, modifierValue, Max);
+			SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<SimpleStatMax<StatModifierData>>(baseValue1, baseValue2, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Max);
 		}
 
 		[Test]
-		public void SimpleStatMax_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2)
+		public void SimpleStatMax_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatMax<StatModifierData>>(baseValue1, baseValue2, Max);
+			SimpleStat_AddMultipleModifiers_ChangeBaseValue<SimpleStatMax<StatModifierData>>(baseValue1, baseValue2, type, source, Max);
 		}
 
 		[Test]
-		public void SimpleStatMax_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
+		public void SimpleStatMax_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
 		{
-			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatMax<StatModifierData>>(baseValue1, match, Max);
+			SimpleStat_AddMultipleModifiers_RemoveAll<SimpleStatMax<StatModifierData>>(baseValue1, type, source, match, Max);
 		}
 
 		[Test]
-		public void SimpleStatMax_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMax_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_AddRemoveModifier<SimpleStatMax<StatModifierData>>(baseValue1, modifierValue, Max);
+			SimpleStat_AddRemoveModifier<SimpleStatMax<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Max);
 		}
 
 		[Test]
-		public void SimpleStatMax_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue)
+		public void SimpleStatMax_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			SimpleStat_RemoveModifier<SimpleStatMax<StatModifierData>>(baseValue1, modifierValue, Max);
+			SimpleStat_RemoveModifier<SimpleStatMax<StatModifierData>>(baseValue1, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)), Max);
 		}
 
 		[Test]
@@ -192,49 +196,49 @@ namespace Kryz.RPG.Stats.Tests.Editor
 			SimpleStat_ChangeBaseValue<SimpleStatMax<StatModifierData>>(baseValue1, baseValue2, Max);
 		}
 
-		private static void SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<T>(float baseValue1, float baseValue2, float modifierValue, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
+		private static void SimpleStat_AddModifier_ChangeBaseValue_RemoveModifier<T>(float baseValue1, float baseValue2, StatModifier<StatModifierData> modifier, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
 		{
 			T stat = CreateSimpleStat<T>(baseValue1);
-			SimpleStat_AddModifier(stat, new StatModifier<StatModifierData>(modifierValue, default), operation);
+			SimpleStat_AddModifier(stat, modifier, operation);
 			SimpleStat_ChangeBaseValue(stat, baseValue2, operation);
-			SimpleStat_RemoveModifier(stat, new StatModifier<StatModifierData>(modifierValue, default), operation);
+			SimpleStat_RemoveModifier(stat, modifier, operation);
 		}
 
-		private static void SimpleStat_AddMultipleModifiers_ChangeBaseValue<T>(float baseValue1, float baseValue2, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
+		private static void SimpleStat_AddMultipleModifiers_ChangeBaseValue<T>(float baseValue1, float baseValue2, StatModifierType type, object? source, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
 		{
 			T stat = CreateSimpleStat<T>(baseValue1);
 
 			for (int i = 0; i < values.Length; i++)
 			{
-				SimpleStat_AddModifier(stat, new StatModifier<StatModifierData>(values[i], default), operation);
+				SimpleStat_AddModifier(stat, new StatModifier<StatModifierData>(values[i], new StatModifierData(type, source)), operation);
 			}
 
 			SimpleStat_ChangeBaseValue(stat, baseValue2, operation);
 		}
 
-		private static void SimpleStat_AddMultipleModifiers_RemoveAll<T>(float baseValue1, IEquatable<StatModifier<StatModifierData>> match, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
+		private static void SimpleStat_AddMultipleModifiers_RemoveAll<T>(float baseValue1, StatModifierType type, object? source, IEquatable<StatModifier<StatModifierData>> match, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
 		{
 			T stat = CreateSimpleStat<T>(baseValue1);
 
 			for (int i = 0; i < values.Length; i++)
 			{
-				SimpleStat_AddModifier(stat, new StatModifier<StatModifierData>(values[i], default), operation);
+				SimpleStat_AddModifier(stat, new StatModifier<StatModifierData>(values[i], new StatModifierData(type, source)), operation);
 			}
 
 			SimpleStat_RemoveAllModifiers(stat, match, operation);
 		}
 
-		private static void SimpleStat_AddRemoveModifier<T>(float baseValue1, float modifierValue, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
+		private static void SimpleStat_AddRemoveModifier<T>(float baseValue1, StatModifier<StatModifierData> modifier, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
 		{
 			T stat = CreateSimpleStat<T>(baseValue1);
-			SimpleStat_AddModifier(stat, new StatModifier<StatModifierData>(modifierValue, default), operation);
-			SimpleStat_RemoveModifier(stat, new StatModifier<StatModifierData>(modifierValue, default), operation);
+			SimpleStat_AddModifier(stat, modifier, operation);
+			SimpleStat_RemoveModifier(stat, modifier, operation);
 		}
 
-		private static void SimpleStat_RemoveModifier<T>(float baseValue1, float modifierValue, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
+		private static void SimpleStat_RemoveModifier<T>(float baseValue1, StatModifier<StatModifierData> modifier, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
 		{
 			T stat = CreateSimpleStat<T>(baseValue1);
-			SimpleStat_RemoveModifier(stat, new StatModifier<StatModifierData>(modifierValue, default), operation);
+			SimpleStat_RemoveModifier(stat, modifier, operation);
 		}
 
 		private static void SimpleStat_ChangeBaseValue<T>(float baseValue1, float baseValue2, Func<float, float, float> operation) where T : SimpleStat<StatModifierData>
