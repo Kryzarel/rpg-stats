@@ -2,7 +2,7 @@ namespace Kryz.RPG.Stats.Core
 {
 	public class SimpleStatMax<T> : SimpleStat<T> where T : struct, IStatModifierData<T>
 	{
-		public SimpleStatMax(float baseValue = 0) : base(baseValue) { }
+		public SimpleStatMax(float baseValue = float.MinValue) : base(baseValue) { }
 
 		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue)
 		{

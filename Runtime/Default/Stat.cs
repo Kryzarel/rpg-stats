@@ -46,7 +46,7 @@ namespace Kryz.RPG.Stats.Default
 					StatModifierType.Add => new SimpleStatAdd<StatModifierData>(0),
 					StatModifierType.Mult => new SimpleStatAdd<StatModifierData>(1),
 					StatModifierType.MultTotal => new SimpleStatMult<StatModifierData>(1),
-					StatModifierType.Max => new SimpleStatMax<StatModifierData>(0),
+					StatModifierType.Max => new SimpleStatMax<StatModifierData>(float.MinValue),
 					StatModifierType.Min => new SimpleStatMin<StatModifierData>(float.MaxValue),
 					_ => throw new NotImplementedException(),
 				};

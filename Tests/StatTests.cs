@@ -3,216 +3,225 @@ using System.Collections.Generic;
 using Kryz.RPG.Stats.Core;
 using Kryz.RPG.Stats.Default;
 using NUnit.Framework;
-using Random = UnityEngine.Random;
 
 namespace Kryz.RPG.Stats.Tests.Editor
 {
 	public class StatTests
 	{
-		private const string vals = nameof(baseValues);
-		private const float delta = 0.01f;
+		private class MatchLessThanOrEqual : IEquatable<StatModifier<StatModifierData>>
+		{
+			public readonly float Value;
+			public MatchLessThanOrEqual(float value) => Value = value;
+			public bool Equals(StatModifier<StatModifierData> other) => other.Value <= Value;
+		}
 
-		private static readonly float[] baseValues = { 0, 0.3f, 2.5f, 5 };
+		private class MatchGreaterThanOrEqual : IEquatable<StatModifier<StatModifierData>>
+		{
+			public readonly float Value;
+			public MatchGreaterThanOrEqual(float value) => Value = value;
+			public bool Equals(StatModifier<StatModifierData> other) => other.Value >= Value;
+		}
+
+		private class MatchSource : IEquatable<StatModifier<StatModifierData>>
+		{
+			public readonly object? Source;
+			public MatchSource(object? source) => Source = source;
+			public bool Equals(StatModifier<StatModifierData> other) => other.Data.Source == Source;
+		}
+
+		private class MatchType : IEquatable<StatModifier<StatModifierData>>
+		{
+			public readonly StatModifierType Type;
+			public MatchType(StatModifierType type) => Type = type;
+			public bool Equals(StatModifier<StatModifierData> other) => other.Data.Type == Type;
+		}
+
+		private const float delta = 0.00001f;
+		private const string valuesSource = nameof(values);
+		private const string matchesSource = nameof(matches);
+		private const string modifierTypesSource = nameof(modifierTypes);
+		private const string modifierSourcesSource = nameof(modifierSources);
+
+		private static readonly float[] values = { -5f, -1f, -0.5f, -0.1f, 0f, 0.1f, 0.5f, 1f, 5f, };
+		private static readonly IEquatable<StatModifier<StatModifierData>>[] matches = { new MatchLessThanOrEqual(2), new MatchGreaterThanOrEqual(-2), new MatchSource(null), new MatchType(StatModifierType.Add) };
 		private static readonly StatModifierType[] modifierTypes = (StatModifierType[])Enum.GetValues(typeof(StatModifierType));
+		private static readonly object?[] modifierSources = { null, new() };
 
-		private readonly List<StatModifier<StatModifierData>> modifiers = new();
-
+		// ADD
 		[Test]
-		public void Stat_NoModifiers_FinalEqualsBase([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2)
+		public void Stat_AddModifier_ChangeBaseValue_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			Stat stat = new(baseValue);
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue, stat.FinalValue, delta);
-
-			stat.BaseValue = baseValue2;
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue2, stat.FinalValue, delta);
+			Stat stat = CreateStat(baseValue1);
+			Stat_AddModifier(stat, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)));
+			Stat_ChangeBaseValue(stat, baseValue2);
+			Stat_RemoveModifier(stat, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)));
 		}
 
 		[Test]
-		public void Stat_ModifierAdd_FinalEqualsSum([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
+		public void Stat_AddMultipleModifiers_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
 		{
-			// Arrange
-			Stat stat = new(baseValue);
+			Stat stat = CreateStat(baseValue1);
 
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Add)));
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue + modifierValue, stat.FinalValue, delta);
-
-			// Act
-			stat.BaseValue = baseValue2;
-
-			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue2 + modifierValue, stat.FinalValue, delta);
-		}
-
-		[Test]
-		public void Stat_ModifierMult_FinalEqualsMult([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
-		{
-			// Arrange
-			Stat stat = new(baseValue);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Mult)));
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta);
-
-			// Act
-			stat.BaseValue = baseValue2;
-
-			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta);
-		}
-
-		[Test]
-		public void Stat_ModifierMultTotal_FinalEqualsMult([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
-		{
-			// Arrange
-			Stat stat = new(baseValue);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.MultTotal)));
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue * (1 + modifierValue), stat.FinalValue, delta);
-
-			// Act
-			stat.BaseValue = baseValue2;
-
-			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
-			Assert.AreEqual(baseValue2 * (1 + modifierValue), stat.FinalValue, delta);
-		}
-
-		[Test]
-		public void Stat_ModifierMax_FinalEqualsMax([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
-		{
-			// Arrange
-			Stat stat = new(baseValue);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Max)));
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(Math.Max(baseValue, modifierValue), stat.FinalValue, delta);
-
-			// Act
-			stat.BaseValue = baseValue2;
-
-			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
-			Assert.AreEqual(Math.Max(baseValue2, modifierValue), stat.FinalValue, delta);
-		}
-
-		[Test]
-		public void Stat_ModifierMin_FinalEqualsMin([ValueSource(vals)] float baseValue, [ValueSource(vals)] float baseValue2, [ValueSource(vals)] float modifierValue)
-		{
-			// Arrange
-			Stat stat = new(baseValue);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(StatModifierType.Min)));
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(Math.Min(baseValue, modifierValue), stat.FinalValue, delta);
-
-			// Act
-			stat.BaseValue = baseValue2;
-
-			// Assert
-			Assert.AreEqual(baseValue2, stat.BaseValue, delta);
-			Assert.AreEqual(Math.Min(baseValue2, modifierValue), stat.FinalValue, delta);
-		}
-
-		[Test]
-		public void Stat_AllModifiers_CorrectCalc([ValueSource(vals)] float baseValue, [ValueSource(vals)] float modifierAdd, [ValueSource(vals)] float modifierMult, [ValueSource(vals)] float modifierMultTotal, [ValueSource(vals)] float modifierMax, [ValueSource(vals)] float modifierMin)
-		{
-			// Arrange
-			Stat stat = new(baseValue);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierAdd, new StatModifierData(StatModifierType.Add)));
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierMult, new StatModifierData(StatModifierType.Mult)));
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierMultTotal, new StatModifierData(StatModifierType.MultTotal)));
-			float expected = (baseValue + modifierAdd) * (1 + modifierMult) * (1 + modifierMultTotal);
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(expected, stat.FinalValue, delta);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierMax, new StatModifierData(StatModifierType.Max)));
-			expected = Math.Max(expected, modifierMax);
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(expected, stat.FinalValue, delta);
-
-			// Act
-			stat.AddModifier(new StatModifier<StatModifierData>(modifierMin, new StatModifierData(StatModifierType.Min)));
-			expected = Math.Min(expected, modifierMin);
-
-			// Assert
-			Assert.AreEqual(baseValue, stat.BaseValue, delta);
-			Assert.AreEqual(expected, stat.FinalValue, delta);
-		}
-
-		[Test]
-		public void StatAdd_RandomModifiers_CorrectCalc([ValueSource(vals)] float baseValue)
-		{
-			// Arrange
-			const int numIterations = 1_000;
-			Stat stat = new(baseValue);
-			IReadOnlyList<IStat<StatModifierData>> innerStats = stat.Stats;
-
-			// Act
-			for (int i = 0; i < numIterations; i++)
+			for (int i = 0; i < values.Length; i++)
 			{
-				float modifierValue = Random.Range(-10f, 10f);
-				StatModifierType modifierType = modifierTypes[Random.Range(0, modifierTypes.Length)];
-				stat.AddModifier(new StatModifier<StatModifierData>(modifierValue, new StatModifierData(modifierType)));
-
-				float expected = (baseValue + innerStats[0].FinalValue) * innerStats[1].FinalValue * innerStats[2].FinalValue;
-				expected = Math.Max(expected, innerStats[3].FinalValue);
-				expected = Math.Min(expected, innerStats[4].FinalValue);
-
-				// Assert
-				Assert.AreEqual(baseValue, stat.BaseValue, delta);
-				Assert.AreEqual(expected, stat.FinalValue, delta);
+				Stat_AddModifier(stat, new StatModifier<StatModifierData>(values[i], new StatModifierData(type, source)));
 			}
 
-			// Act
-			for (int i = 0; i < innerStats.Count; i++)
+			Stat_ChangeBaseValue(stat, baseValue2);
+		}
+
+		[Test]
+		public void Stat_AddMultipleModifiers_RemoveAll([ValueSource(valuesSource)] float baseValue1, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source, [ValueSource(matchesSource)] IEquatable<StatModifier<StatModifierData>> match)
+		{
+			Stat stat = CreateStat(baseValue1);
+
+			for (int i = 0; i < values.Length; i++)
 			{
-				IStat<StatModifierData> s = innerStats[i];
+				Stat_AddModifier(stat, new StatModifier<StatModifierData>(values[i], new StatModifierData(type, source)));
+			}
 
-				modifiers.Clear();
-				s.GetModifiers(modifiers);
+			Stat_RemoveAllModifiers(stat, match);
+		}
 
-				for (int j = 0; j < modifiers.Count; j++)
+		[Test]
+		public void Stat_AddRemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
+		{
+			Stat stat = CreateStat(baseValue1);
+			Stat_AddModifier(stat, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)));
+			Stat_RemoveModifier(stat, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)));
+		}
+
+		[Test]
+		public void Stat_RemoveModifier([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float modifierValue, [ValueSource(modifierTypesSource)] StatModifierType type, [ValueSource(modifierSourcesSource)] object? source)
+		{
+			Stat stat = CreateStat(baseValue1);
+			Stat_RemoveModifier(stat, new StatModifier<StatModifierData>(modifierValue, new StatModifierData(type, source)));
+		}
+
+		[Test]
+		public void Stat_ChangeBaseValue([ValueSource(valuesSource)] float baseValue1, [ValueSource(valuesSource)] float baseValue2)
+		{
+			Stat stat = CreateStat(baseValue1);
+			Stat_ChangeBaseValue(stat, baseValue2);
+		}
+
+		private static Stat CreateStat(float baseValue)
+		{
+			Stat stat = new(baseValue);
+
+			Assert.AreEqual(stat.BaseValue, baseValue, 0);
+			Assert.AreEqual(stat.FinalValue, baseValue, 0);
+			Assert.AreEqual(stat.ModifiersCount, 0, 0);
+			Assert.AreEqual(stat.Stats.Count, modifierTypes.Length, 0);
+
+			List<StatModifier<StatModifierData>> modifiersList = new();
+
+			stat.GetModifiers(modifiersList);
+			Assert.AreEqual(modifiersList.Count, 0, 0);
+
+			return stat;
+		}
+
+		private static void Stat_AddModifier(Stat stat, StatModifier<StatModifierData> modifier)
+		{
+			int count = stat.ModifiersCount;
+			int innerModifierCount = stat.Stats[(int)modifier.Data.Type].ModifiersCount;
+			List<StatModifier<StatModifierData>> modifiersList = new();
+
+			stat.GetModifiers(modifiersList);
+			int listCount = modifiersList.Count;
+			int modifiersCount = CountModifiersEqualTo(modifiersList, modifier);
+
+			stat.AddModifier(modifier);
+
+			modifiersList.Clear();
+			stat.GetModifiers(modifiersList);
+			Assert.AreEqual(stat.ModifiersCount, count + 1, 0);
+			Assert.AreEqual(stat.Stats[(int)modifier.Data.Type].ModifiersCount, innerModifierCount + 1, 0);
+			Assert.IsTrue(modifiersList.Contains(modifier));
+			Assert.AreEqual(modifiersList.Count, listCount + 1, 0);
+			Assert.AreEqual(CountModifiersEqualTo(modifiersList, modifier), modifiersCount + 1, 0);
+			Assert.AreEqual(stat.FinalValue, GetExpectedValue(stat), delta);
+		}
+
+		private static void Stat_RemoveModifier(Stat stat, StatModifier<StatModifierData> modifier)
+		{
+			int count = stat.ModifiersCount;
+			int innerModifierCount = stat.Stats[(int)modifier.Data.Type].ModifiersCount;
+			List<StatModifier<StatModifierData>> modifiersList = new();
+
+			stat.GetModifiers(modifiersList);
+			int listCount = modifiersList.Count;
+			int modifiersCount = CountModifiersEqualTo(modifiersList, modifier);
+
+			int removed = stat.RemoveModifier(modifier) ? 1 : 0;
+
+			modifiersList.Clear();
+			stat.GetModifiers(modifiersList);
+			Assert.AreEqual(stat.ModifiersCount, count - removed, 0);
+			Assert.AreEqual(stat.Stats[(int)modifier.Data.Type].ModifiersCount, innerModifierCount - removed, 0);
+			Assert.AreEqual(modifiersList.Count, listCount - removed, 0);
+			Assert.AreEqual(CountModifiersEqualTo(modifiersList, modifier), modifiersCount - removed, 0);
+			Assert.AreEqual(stat.FinalValue, GetExpectedValue(stat), delta);
+		}
+
+		private static void Stat_RemoveAllModifiers<T>(Stat stat, T match) where T : IEquatable<StatModifier<StatModifierData>>
+		{
+			int count = stat.ModifiersCount;
+			List<StatModifier<StatModifierData>> modifiersList = new();
+
+			stat.GetModifiers(modifiersList);
+			int listCount = modifiersList.Count;
+
+			int removed = stat.RemoveAllModifiers(match);
+
+			modifiersList.Clear();
+			stat.GetModifiers(modifiersList);
+			Assert.AreEqual(stat.ModifiersCount, count - removed, 0);
+			Assert.AreEqual(modifiersList.Count, listCount - removed, 0);
+			Assert.AreEqual(stat.FinalValue, GetExpectedValue(stat), delta);
+		}
+
+		private static void Stat_ChangeBaseValue(Stat stat, float baseValue)
+		{
+			int count = stat.ModifiersCount;
+			List<StatModifier<StatModifierData>> modifiersList = new();
+
+			stat.GetModifiers(modifiersList);
+			int listCount = modifiersList.Count;
+
+			stat.BaseValue = baseValue;
+
+			modifiersList.Clear();
+			stat.GetModifiers(modifiersList);
+			Assert.AreEqual(stat.BaseValue, baseValue, 0);
+			Assert.AreEqual(stat.ModifiersCount, count, 0);
+			Assert.AreEqual(modifiersList.Count, listCount, 0);
+			Assert.AreEqual(stat.FinalValue, GetExpectedValue(stat), delta);
+		}
+
+		private static float GetExpectedValue(Stat stat)
+		{
+			float finalValue = stat.BaseValue;
+			finalValue += stat.Stats[(int)StatModifierType.Add].FinalValue;
+			finalValue *= stat.Stats[(int)StatModifierType.Mult].FinalValue;
+			finalValue *= stat.Stats[(int)StatModifierType.MultTotal].FinalValue;
+			finalValue = Math.Max(finalValue, stat.Stats[(int)StatModifierType.Max].FinalValue);
+			finalValue = Math.Min(finalValue, stat.Stats[(int)StatModifierType.Min].FinalValue);
+			return finalValue;
+		}
+
+		private static int CountModifiersEqualTo(IReadOnlyList<StatModifier<StatModifierData>> modifiers, StatModifier<StatModifierData> modifier)
+		{
+			int count = 0;
+			for (int i = 0; i < modifiers.Count; i++)
+			{
+				if (modifiers[i] == modifier)
 				{
-					StatModifier<StatModifierData> modifier = modifiers[j];
-					stat.RemoveModifier(modifier);
-
-					float expected = (baseValue + innerStats[0].FinalValue) * innerStats[1].FinalValue * innerStats[2].FinalValue;
-					expected = Math.Max(expected, innerStats[3].FinalValue);
-					expected = Math.Min(expected, innerStats[4].FinalValue);
-
-					// Assert
-					Assert.AreEqual(baseValue, stat.BaseValue, delta);
-					Assert.AreEqual(expected, stat.FinalValue, delta);
+					count++;
 				}
 			}
+			return count;
 		}
 	}
 }
