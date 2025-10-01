@@ -2,7 +2,6 @@
     "name": "Kryz.RPG.StatsPerfTests",
     "rootNamespace": "Kryz.RPG.StatsPerfTests",
     "references": [
-        "Kryz.RPG.StatsLegacy",
         "Kryz.RPG.Stats",
         "Kryz.CharacterStats"
     ],
