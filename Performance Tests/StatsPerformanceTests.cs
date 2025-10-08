@@ -8,150 +8,147 @@ namespace Kryz.RPG.StatsPerfTests
 	public class StatsPerformanceTests : MonoBehaviour
 	{
 		private const int Length = 100;
+		private const int StartingStats = 100;
 
-		private readonly StatModifier[] modifiersLegacy = new StatModifier[Length];
-		private readonly StatModifier<StatModifierData>[] modifiers = new StatModifier<StatModifierData>[Length];
+		private readonly StatModifier[] modifiersCharacter = new StatModifier[Length];
+		private readonly StatModifier<StatModifierData>[] modifiersRPG = new StatModifier<StatModifierData>[Length];
 
-		private readonly CharacterStat statLegacy = new(10);
-		private readonly Stat stat = new(10);
+		private readonly CharacterStat statCharacter = new(10);
+		private readonly Stat statRPG = new(10);
 
 		private readonly object source1 = new();
 		private readonly object source2 = new();
 
-		private static readonly int modTypeLegacyCount = System.Enum.GetValues(typeof(StatModType)).Length;
-		private static readonly int modTypeCount = System.Enum.GetValues(typeof(StatModifierType)).Length;
+		private static readonly int modTypeCountCharacter = System.Enum.GetValues(typeof(StatModType)).Length;
+		private static readonly int modTypeCountRPG = System.Enum.GetValues(typeof(StatModifierType)).Length;
 
 		private void Awake()
 		{
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < StartingStats; i++)
 			{
-				statLegacy.AddModifier(new StatModifier(2, StatModType.Flat));
-				stat.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
+				statCharacter.AddModifier(new StatModifier(2, StatModType.Flat));
+				statRPG.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
 			}
 		}
 
 		private void Update()
 		{
-			GenerateLegacy();
-			GenerateNew();
+			GenerateModifiersCharacter();
+			GenerateModifiersRPG();
 
 			for (int i = 0; i < 10; i++)
 			{
-				TestLegacy();
-				TestNew();
+				TestStatsCharacter();
+				TestStatsRPG();
 			}
 		}
 
-		private void GenerateLegacy()
+		private void GenerateModifiersCharacter()
 		{
-			for (int i = 0; i < modifiersLegacy.Length; i++)
+			for (int i = 0; i < modifiersCharacter.Length; i++)
 			{
 				float value = Random.Range(0.1f, 3f);
 				object source = i % 2 == 0 ? source1 : source2;
-				StatModType modTypeLegacy = (StatModType)(i % modTypeLegacyCount);
-				modifiersLegacy[i] = new StatModifier(value, modTypeLegacy, source);
+				StatModType modTypeCharacter = (StatModType)(i % modTypeCountCharacter);
+				modifiersCharacter[i] = new StatModifier(value, modTypeCharacter, source);
 			}
 		}
 
-		private void GenerateNew()
+		private void GenerateModifiersRPG()
 		{
-			for (int i = 0; i < modifiers.Length; i++)
+			for (int i = 0; i < modifiersRPG.Length; i++)
 			{
 				float value = Random.Range(0.1f, 3f);
 				object source = i % 2 == 0 ? source1 : source2;
-				StatModifierType modType = (StatModifierType)(i % modTypeCount);
-				modifiers[i] = new StatModifier<StatModifierData>(value, new(modType, source));
+				StatModifierType modType = (StatModifierType)(i % modTypeCountRPG);
+				modifiersRPG[i] = new StatModifier<StatModifierData>(value, new(modType, source));
 			}
 		}
 
-		private void TestLegacy()
+		private void TestStatsCharacter()
 		{
-			AddLegacy10();
-			RemoveLegacy10();
+			Add10Character();
+			Remove10Character();
 
-			AddLegacy100();
-			RemoveLegacy100();
+			Add100Character();
+			Remove100Character();
 
-			AddLegacy100();
-			RemoveFromSourceLegacy();
+			Add100Character();
+			RemoveFromSourceCharacter();
 		}
 
-		private void TestNew()
+		private void TestStatsRPG()
 		{
-			Add10();
-			Remove10();
+			Add10RPG();
+			Remove10RPG();
 
-			Add100();
-			Remove100();
+			Add100RPG();
+			Remove100RPG();
 
-			Add100();
-			RemoveFromSource();
+			Add100RPG();
+			RemoveFromSourceRPG();
 		}
 
-		private float AddLegacy(int count)
+		private float AddCharacter(int count)
 		{
 			for (int i = 0; i < count; i++)
 			{
-				statLegacy.AddModifier(modifiersLegacy[i]);
+				statCharacter.AddModifier(modifiersCharacter[i]);
 			}
-			return statLegacy.Value;
+			return statCharacter.Value;
 		}
 
-		private float RemoveLegacy(int count)
+		private float RemoveCharacter(int count)
 		{
 			for (int i = 0; i < count; i++)
 			{
-				statLegacy.RemoveModifier(modifiersLegacy[i]);
+				statCharacter.RemoveModifier(modifiersCharacter[i]);
 			}
-			return statLegacy.Value;
+			return statCharacter.Value;
 		}
 
-		private float AddLegacy10() => AddLegacy(10);
-		private float AddLegacy100() => AddLegacy(100);
-		private float AddLegacy1000() => AddLegacy(1000);
+		private float Add10Character() => AddCharacter(10);
+		private float Add100Character() => AddCharacter(100);
 
-		private float RemoveLegacy10() => RemoveLegacy(10);
-		private float RemoveLegacy100() => RemoveLegacy(100);
-		private float RemoveLegacy1000() => RemoveLegacy(1000);
+		private float Remove10Character() => RemoveCharacter(10);
+		private float Remove100Character() => RemoveCharacter(100);
 
-		private float RemoveFromSourceLegacy()
+		private float RemoveFromSourceCharacter()
 		{
-			statLegacy.RemoveAllModifiersFromSource(source1);
-			statLegacy.RemoveAllModifiersFromSource(source2);
-			return statLegacy.Value;
+			statCharacter.RemoveAllModifiersFromSource(source1);
+			statCharacter.RemoveAllModifiersFromSource(source2);
+			return statCharacter.Value;
 		}
 
-		private float Add(int count)
+		private float AddRPG(int count)
 		{
 			for (int i = 0; i < count; i++)
 			{
-				stat.AddModifier(modifiers[i]);
+				statRPG.AddModifier(modifiersRPG[i]);
 			}
-			return stat.FinalValue;
+			return statRPG.FinalValue;
 		}
 
-		private float Remove(int count)
+		private float RemoveRPG(int count)
 		{
 			for (int i = 0; i < count; i++)
 			{
-				stat.RemoveModifier(modifiers[i]);
+				statRPG.RemoveModifier(modifiersRPG[i]);
 			}
-			return stat.FinalValue;
+			return statRPG.FinalValue;
 		}
 
-		private float Add10() => Add(10);
-		private float Add100() => Add(100);
-		private float Add1000() => Add(1000);
+		private float Add10RPG() => AddRPG(10);
+		private float Add100RPG() => AddRPG(100);
 
-		private float Remove10() => Remove(10);
-		private float Remove100() => Remove(100);
-		private float Remove1000() => Remove(1000);
+		private float Remove10RPG() => RemoveRPG(10);
+		private float Remove100RPG() => RemoveRPG(100);
 
-		private float RemoveFromSource()
+		private float RemoveFromSourceRPG()
 		{
-			stat.RemoveModifiersFromSource(source1);
-			stat.RemoveModifiersFromSource(source2);
-			return stat.FinalValue;
+			statRPG.RemoveModifiersFromSource(source1);
+			statRPG.RemoveModifiersFromSource(source2);
+			return statRPG.FinalValue;
 		}
 	}
 }
