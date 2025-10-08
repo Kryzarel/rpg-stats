@@ -8,7 +8,7 @@ namespace Kryz.RPG.StatsPerfTests
 	public class StatsPerformanceTests : MonoBehaviour
 	{
 		private const int Length = 100;
-		private const int StartingStats = 100;
+		private const int StartingStats = 0;
 
 		private readonly StatModifier[] modifiersCharacter = new StatModifier[Length];
 		private readonly StatModifier<StatModifierData>[] modifiersRPG = new StatModifier<StatModifierData>[Length];
@@ -75,6 +75,9 @@ namespace Kryz.RPG.StatsPerfTests
 
 			Add100Character();
 			RemoveFromSourceCharacter();
+
+			AddGetValue10Character();
+			RemoveGetValue10Character();
 		}
 
 		private void TestStatsRPG()
@@ -87,6 +90,9 @@ namespace Kryz.RPG.StatsPerfTests
 
 			Add100RPG();
 			RemoveFromSourceRPG();
+
+			AddGetValue10RPG();
+			RemoveGetValue10RPG();
 		}
 
 		private float AddCharacter(int count)
@@ -107,11 +113,32 @@ namespace Kryz.RPG.StatsPerfTests
 			return statCharacter.Value;
 		}
 
+		private void AddGetValueCharacter(int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				statCharacter.AddModifier(modifiersCharacter[i]);
+				float value = statCharacter.Value;
+			}
+		}
+
+		private void RemoveGetValueCharacter(int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				statCharacter.RemoveModifier(modifiersCharacter[i]);
+				float value = statCharacter.Value;
+			}
+		}
+
 		private float Add10Character() => AddCharacter(10);
 		private float Add100Character() => AddCharacter(100);
 
 		private float Remove10Character() => RemoveCharacter(10);
 		private float Remove100Character() => RemoveCharacter(100);
+
+		private void AddGetValue10Character() => AddGetValueCharacter(10);
+		private void RemoveGetValue10Character() => RemoveGetValueCharacter(10);
 
 		private float RemoveFromSourceCharacter()
 		{
@@ -138,11 +165,32 @@ namespace Kryz.RPG.StatsPerfTests
 			return statRPG.FinalValue;
 		}
 
+		private void AddGetValueRPG(int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				statRPG.AddModifier(modifiersRPG[i]);
+				float value = statRPG.FinalValue;
+			}
+		}
+
+		private void RemoveGetValueRPG(int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				statRPG.RemoveModifier(modifiersRPG[i]);
+				float value = statRPG.FinalValue;
+			}
+		}
+
 		private float Add10RPG() => AddRPG(10);
 		private float Add100RPG() => AddRPG(100);
 
 		private float Remove10RPG() => RemoveRPG(10);
 		private float Remove100RPG() => RemoveRPG(100);
+
+		private void AddGetValue10RPG() => AddGetValueRPG(10);
+		private void RemoveGetValue10RPG() => RemoveGetValueRPG(10);
 
 		private float RemoveFromSourceRPG()
 		{
