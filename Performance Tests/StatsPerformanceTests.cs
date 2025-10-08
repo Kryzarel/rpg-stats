@@ -8,7 +8,7 @@ namespace Kryz.RPG.StatsPerfTests
 	public class StatsPerformanceTests : MonoBehaviour
 	{
 		private const int Length = 100;
-		private const int StartingStats = 0;
+		private const int StartingModifiers = 10;
 
 		private readonly StatModifier[] modifiersCharacter = new StatModifier[Length];
 		private readonly StatModifier<StatModifierData>[] modifiersRPG = new StatModifier<StatModifierData>[Length];
@@ -24,7 +24,7 @@ namespace Kryz.RPG.StatsPerfTests
 
 		private void Awake()
 		{
-			for (int i = 0; i < StartingStats; i++)
+			for (int i = 0; i < StartingModifiers; i++)
 			{
 				statCharacter.AddModifier(new StatModifier(2, StatModType.Flat));
 				statRPG.AddModifier(new StatModifier<StatModifierData>(2, new StatModifierData(StatModifierType.Add)));
@@ -76,8 +76,8 @@ namespace Kryz.RPG.StatsPerfTests
 			Add100Character();
 			RemoveFromSourceCharacter();
 
-			AddGetValue10Character();
-			RemoveGetValue10Character();
+			AddGetValue30Character();
+			RemoveGetValue30Character();
 		}
 
 		private void TestStatsRPG()
@@ -91,8 +91,8 @@ namespace Kryz.RPG.StatsPerfTests
 			Add100RPG();
 			RemoveFromSourceRPG();
 
-			AddGetValue10RPG();
-			RemoveGetValue10RPG();
+			AddGetValue30RPG();
+			RemoveGetValue30RPG();
 		}
 
 		private float AddCharacter(int count)
@@ -137,8 +137,8 @@ namespace Kryz.RPG.StatsPerfTests
 		private float Remove10Character() => RemoveCharacter(10);
 		private float Remove100Character() => RemoveCharacter(100);
 
-		private void AddGetValue10Character() => AddGetValueCharacter(10);
-		private void RemoveGetValue10Character() => RemoveGetValueCharacter(10);
+		private void AddGetValue30Character() => AddGetValueCharacter(30);
+		private void RemoveGetValue30Character() => RemoveGetValueCharacter(30);
 
 		private float RemoveFromSourceCharacter()
 		{
@@ -189,8 +189,8 @@ namespace Kryz.RPG.StatsPerfTests
 		private float Remove10RPG() => RemoveRPG(10);
 		private float Remove100RPG() => RemoveRPG(100);
 
-		private void AddGetValue10RPG() => AddGetValueRPG(10);
-		private void RemoveGetValue10RPG() => RemoveGetValueRPG(10);
+		private void AddGetValue30RPG() => AddGetValueRPG(30);
+		private void RemoveGetValue30RPG() => RemoveGetValueRPG(30);
 
 		private float RemoveFromSourceRPG()
 		{
