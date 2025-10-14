@@ -84,7 +84,7 @@ namespace Kryz.RPG.Stats.Core
 		{
 			modifiers.Clear();
 			modifiersCount = 0;
-			OnClear(baseValue);
+			ClearCachedValues(baseValue);
 			CheckValueChanged(false, baseValue);
 		}
 
@@ -103,7 +103,7 @@ namespace Kryz.RPG.Stats.Core
 		protected abstract bool RemoveOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue);
 		protected abstract bool SetBaseValue(float newBaseValue, float oldBaseValue, float currentValue, out float newValue);
 
-		protected virtual void OnClear(float baseValue) { }
+		protected virtual void ClearCachedValues(float baseValue) { }
 
 		private void Add(StatModifier<T> modifier)
 		{
@@ -146,7 +146,7 @@ namespace Kryz.RPG.Stats.Core
 			{
 				isDirty = false;
 				currentValue = baseValue;
-				OnClear(baseValue);
+				ClearCachedValues(baseValue);
 
 				foreach (KeyValuePair<StatModifier<T>, int> item in modifiers)
 				{

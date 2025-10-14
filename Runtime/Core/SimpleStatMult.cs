@@ -7,7 +7,7 @@ namespace Kryz.RPG.Stats.Core
 
 		public SimpleStatMult(float baseValue = 1) : base(baseValue)
 		{
-			OnClear(baseValue);
+			ClearCachedValues(baseValue);
 		}
 
 		protected override bool AddOperation(StatModifier<T> modifier, float baseValue, float currentValue, out float newValue)
@@ -68,7 +68,7 @@ namespace Kryz.RPG.Stats.Core
 			return false;
 		}
 
-		protected override void OnClear(float baseValue)
+		protected override void ClearCachedValues(float baseValue)
 		{
 			if (baseValue == 0)
 			{
