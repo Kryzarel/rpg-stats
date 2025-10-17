@@ -34,16 +34,16 @@ namespace Kryz.RPG.Stats.Core
 		public void AddModifier(StatModifier<T> modifier)
 		{
 			Add(modifier);
-			bool newIsDirty = AddOperation(modifier, baseValue, currentValue, out float newValue);
-			CheckValueChanged(newIsDirty, newValue);
+			bool isDirty = AddOperation(modifier, baseValue, currentValue, out float newValue);
+			CheckValueChanged(isDirty, newValue);
 		}
 
 		public bool RemoveModifier(StatModifier<T> modifier)
 		{
 			if (Remove(modifier))
 			{
-				bool newIsDirty = RemoveOperation(modifier, baseValue, currentValue, out float newValue);
-				CheckValueChanged(newIsDirty, newValue);
+				bool isDirty = RemoveOperation(modifier, baseValue, currentValue, out float newValue);
+				CheckValueChanged(isDirty, newValue);
 				return true;
 			}
 			return false;
@@ -52,10 +52,10 @@ namespace Kryz.RPG.Stats.Core
 		public int RemoveAllModifiers<TEquatable>(TEquatable match) where TEquatable : IEquatable<StatModifier<T>>
 		{
 			int removedCount = 0;
-			bool newIsDirty = false;
+			bool isDirty = false;
 			float newValue = currentValue;
-
 			int keysCount = modifiers.Count;
+
 			StatModifier<T>[] keys = ArrayPool<StatModifier<T>>.Shared.Rent(keysCount);
 			modifiers.Keys.CopyTo(keys, 0);
 
@@ -66,17 +66,17 @@ namespace Kryz.RPG.Stats.Core
 				{
 					for (int j = 0; j < count; j++)
 					{
-						newIsDirty |= RemoveOperation(modifier, baseValue, newValue, out newValue);
+						isDirty |= RemoveOperation(modifier, baseValue, newValue, out newValue);
 					}
 					removedCount += count;
 				}
 			}
 
-			modifiersCount -= removedCount;
 			Array.Clear(keys, 0, keysCount); // Clear only the used portion of the array
 			ArrayPool<StatModifier<T>>.Shared.Return(keys);
 
-			CheckValueChanged(newIsDirty, newValue);
+			modifiersCount -= removedCount;
+			CheckValueChanged(isDirty, newValue);
 			return removedCount;
 		}
 
@@ -133,9 +133,9 @@ namespace Kryz.RPG.Stats.Core
 		{
 			if (baseValue != value)
 			{
-				bool newIsDirty = SetBaseValue(value, baseValue, currentValue, out float newValue);
+				bool isDirty = SetBaseValue(value, baseValue, currentValue, out float newValue);
 				baseValue = value;
-				CheckValueChanged(newIsDirty, newValue);
+				CheckValueChanged(isDirty, newValue);
 			}
 		}
 
