@@ -33,14 +33,14 @@ Stat<StatModifierData> strength = new(10);
 
 Declare Stat Modifiers:
 ```csharp
-StatModifier<StatModifierData> addModifier = new StatModifier(5, new StatModifierData(StatModifierType.Add));
-StatModifier<StatModifierData> multModifier = new StatModifier(0.2f, new StatModifierData(StatModifierType.Mult));
+StatModifier<StatModifierData> modifierAdd = new(5, new StatModifierData(StatModifierType.Add));
+StatModifier<StatModifierData> modifierMult = new(0.2f, new StatModifierData(StatModifierType.Mult));
 ```
 
 Add Modifiers to the Stat:
 ```csharp
-strength.AddModifier(addModifier);
-strength.AddModifier(multModifier);
+strength.AddModifier(modifierAdd);
+strength.AddModifier(modifierMult);
 ```
 
 Get the Stat's final value, taking into account the base value and all the modifiers ((10 + 5) * 1.2 = 18)
