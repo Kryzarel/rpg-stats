@@ -39,7 +39,7 @@ namespace Experimental
 
 		public void AddModifier(Modifier modifier, int stat)
 		{
-			ref List<Modifier> mods = ref modifiers[(int)modifier.Type * StatCount + stat];
+			ref List<Modifier> mods = ref modifiers[GetTypeOffset(modifier.Type) + stat];
 
 			mods ??= new List<Modifier>();
 
@@ -50,7 +50,7 @@ namespace Experimental
 
 		public bool RemoveModifier(Modifier modifier, int stat)
 		{
-			List<Modifier> mods = modifiers[(int)modifier.Type * StatCount + stat];
+			List<Modifier> mods = modifiers[GetTypeOffset(modifier.Type) + stat];
 
 			if (mods != null && mods.Remove(modifier))
 			{
@@ -158,31 +158,31 @@ namespace Experimental
 		{
 			if ((dirty & ModifierTypeMask.Flat) != 0)
 			{
-				List<Modifier> mods = modifiers[(int)ModifierType.Flat * StatCount + stat];
+				List<Modifier> mods = modifiers[flatOffset + stat];
 				accumulators[flatOffset + stat] = Add(0, mods);
 			}
 
 			if ((dirty & ModifierTypeMask.PercentAdd) != 0)
 			{
-				List<Modifier> mods = modifiers[(int)ModifierType.PercentAdd * StatCount + stat];
+				List<Modifier> mods = modifiers[percentAddOffset + stat];
 				accumulators[percentAddOffset + stat] = Add(1, mods);
 			}
 
 			if ((dirty & ModifierTypeMask.PercentMul) != 0)
 			{
-				List<Modifier> mods = modifiers[(int)ModifierType.PercentMul * StatCount + stat];
+				List<Modifier> mods = modifiers[percentMulOffset + stat];
 				accumulators[percentMulOffset + stat] = Multiply(1, mods);
 			}
 
 			if ((dirty & ModifierTypeMask.Min) != 0)
 			{
-				List<Modifier> mods = modifiers[(int)ModifierType.Min * StatCount + stat];
+				List<Modifier> mods = modifiers[minOffset + stat];
 				accumulators[minOffset + stat] = Min(float.PositiveInfinity, mods);
 			}
 
 			if ((dirty & ModifierTypeMask.Max) != 0)
 			{
-				List<Modifier> mods = modifiers[(int)ModifierType.Max * StatCount + stat];
+				List<Modifier> mods = modifiers[maxOffset + stat];
 				accumulators[maxOffset + stat] = Max(float.NegativeInfinity, mods);
 			}
 		}
