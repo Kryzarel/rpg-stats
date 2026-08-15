@@ -28,19 +28,19 @@ namespace Experimental
 
 		public override void Recalculate()
 		{
-			for (int i = 0; i < StatCount; i++)
+			for (int stat = 0; stat < StatCount; stat++)
 			{
-				if (dirtyStats[i])
+				if (dirtyStats[stat])
 				{
-					float value = baseStats[i];
-					value += accumulators[flatOffset + i];
-					value *= 1 + accumulators[percentAddOffset + i];
-					value *= accumulators[percentMulOffset + i];
-					value = Math.Max(value, accumulators[minOffset + i]);
-					value = Math.Min(value, accumulators[maxOffset + i]);
+					float value = baseStats[stat];
+					value += accumulators[flatOffset + stat];
+					value *= accumulators[percentAddOffset + stat];
+					value *= accumulators[percentMulOffset + stat];
+					value = Math.Max(value, accumulators[minOffset + stat]);
+					value = Math.Min(value, accumulators[maxOffset + stat]);
 
-					finalStats[i] = value;
-					dirtyStats[i] = false;
+					finalStats[stat] = value;
+					dirtyStats[stat] = false;
 				}
 			}
 		}
@@ -72,14 +72,14 @@ namespace Experimental
 		{
 			for (int stat = 0; stat < StatCount; stat++)
 			{
-				if (!IsDirty(stat))
+				if (!dirtyStats[stat])
 					continue;
 
 				modifiers.TryGetValue((ModifierType.Flat, stat), out List<Modifier> mods);
 				accumulators[flatOffset + stat] = Add(0, mods);
 
 				modifiers.TryGetValue((ModifierType.PercentAdd, stat), out mods);
-				accumulators[percentAddOffset + stat] = Add(0, mods);
+				accumulators[percentAddOffset + stat] = Add(1, mods);
 
 				modifiers.TryGetValue((ModifierType.PercentMul, stat), out mods);
 				accumulators[percentMulOffset + stat] = Multiply(1, mods);
@@ -109,7 +109,7 @@ namespace Experimental
 
 			for (int i = 0, count = modifiers.Count; i < count; i++)
 			{
-				value += modifiers[i].Value;
+				value *= 1 + modifiers[i].Value;
 			}
 			return value;
 		}
