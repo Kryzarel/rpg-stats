@@ -1,3 +1,5 @@
+using System;
+
 namespace Experimental
 {
 	public abstract class BaseStatCollection
@@ -19,13 +21,30 @@ namespace Experimental
 			finalStats = new float[statCount];
 			accumulators = new float[statCount * modifierTypeCount];
 			dirtyStats = new bool[statCount];
+
+			Array.Fill(dirtyStats, true);
 		}
 
-		public float GetValue(int stat) => finalStats[stat];
-		public float GetBaseValue(int stat) => baseStats[stat];
-		public bool IsDirty(int stat) => dirtyStats[stat];
-		public void SetDirty(int stat) => dirtyStats[stat] = true;
+		public float GetValue(int stat)
+		{
+			if (dirtyStats[stat])
+			{
+				Recalculate(stat);
+			}
+			return finalStats[stat];
+		}
 
-		public abstract void Recalculate();
+		public float GetBaseValue(int stat) => baseStats[stat];
+
+		public void SetBaseValue(int stat, float value)
+		{
+			if (baseStats[stat] != value)
+			{
+				baseStats[stat] = value;
+				dirtyStats[stat] = true;
+			}
+		}
+
+		protected abstract void Recalculate(int stat);
 	}
 }

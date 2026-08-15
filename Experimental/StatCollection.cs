@@ -6,6 +6,7 @@ namespace Experimental
 	public class StatCollection : EnumStatCollection<ModifierType>
 	{
 		private readonly Dictionary<(ModifierType, int), List<Modifier>> modifiers;
+		private readonly ModifierTypeMask[] dirtyAccumulators;
 
 		private readonly int flatOffset;
 		private readonly int percentAddOffset;
@@ -15,35 +16,26 @@ namespace Experimental
 
 		public StatCollection(int statCount) : base(statCount)
 		{
-			modifiers = new(ModifierTypeCount * StatCount);
+			modifiers = new(ModifierTypeCount * statCount);
+			dirtyAccumulators = new ModifierTypeMask[statCount];
 
 			flatOffset = GetTypeOffset(ModifierType.Flat);
 			percentAddOffset = GetTypeOffset(ModifierType.PercentAdd);
 			percentMulOffset = GetTypeOffset(ModifierType.PercentMul);
 			minOffset = GetTypeOffset(ModifierType.Min);
 			maxOffset = GetTypeOffset(ModifierType.Max);
+
+			for (int stat = 0; stat < statCount; stat++)
+			{
+				accumulators[flatOffset + stat] = 0;
+				accumulators[percentAddOffset + stat] = 1;
+				accumulators[percentMulOffset + stat] = 1;
+				accumulators[minOffset + stat] = float.PositiveInfinity;
+				accumulators[maxOffset + stat] = float.NegativeInfinity;
+			}
 		}
 
 		public override int GetTypeOffset(ModifierType modifierType) => (int)modifierType * StatCount;
-
-		public override void Recalculate()
-		{
-			for (int stat = 0; stat < StatCount; stat++)
-			{
-				if (dirtyStats[stat])
-				{
-					float value = baseStats[stat];
-					value += accumulators[flatOffset + stat];
-					value *= accumulators[percentAddOffset + stat];
-					value *= accumulators[percentMulOffset + stat];
-					value = Math.Max(value, accumulators[minOffset + stat]);
-					value = Math.Min(value, accumulators[maxOffset + stat]);
-
-					finalStats[stat] = value;
-					dirtyStats[stat] = false;
-				}
-			}
-		}
 
 		public void AddModifier(Modifier modifier, int stat)
 		{
@@ -54,7 +46,8 @@ namespace Experimental
 			}
 
 			mods.Add(modifier);
-			SetDirty(stat);
+			HandleAdd(modifier, stat);
+			dirtyStats[stat] = true;
 		}
 
 		public bool RemoveModifier(Modifier modifier, int stat)
@@ -62,33 +55,132 @@ namespace Experimental
 			(ModifierType Type, int stat) key = (modifier.Type, stat);
 			if (modifiers.TryGetValue(key, out List<Modifier> mods) && mods.Remove(modifier))
 			{
-				SetDirty(stat);
+				HandleRemove(modifier, stat);
+				dirtyStats[stat] = true;
 				return true;
 			}
 			return false;
 		}
 
-		public void RecalculateAccumulators()
+		protected override void Recalculate(int stat)
 		{
-			for (int stat = 0; stat < StatCount; stat++)
-			{
-				if (!dirtyStats[stat])
-					continue;
+			ModifierTypeMask dirty = dirtyAccumulators[stat];
 
+			if (dirty != ModifierTypeMask.None)
+			{
+				RecalculateAccumulators(stat, dirty);
+				dirtyAccumulators[stat] = ModifierTypeMask.None;
+			}
+
+			finalStats[stat] = RecalculateStat(stat);
+			dirtyStats[stat] = false;
+		}
+
+		private void HandleAdd(Modifier modifier, int stat)
+		{
+			switch (modifier.Type)
+			{
+				case ModifierType.Flat:
+					accumulators[flatOffset + stat] += modifier.Value;
+					break;
+
+				case ModifierType.PercentAdd:
+					accumulators[percentAddOffset + stat] += modifier.Value;
+					break;
+
+				case ModifierType.PercentMul:
+					accumulators[percentMulOffset + stat] *= 1f + modifier.Value;
+					break;
+
+				case ModifierType.Min:
+					float current = accumulators[minOffset + stat];
+					accumulators[minOffset + stat] = Math.Min(current, modifier.Value);
+					break;
+
+				case ModifierType.Max:
+					current = accumulators[maxOffset + stat];
+					accumulators[maxOffset + stat] = Math.Max(current, modifier.Value);
+					break;
+			}
+		}
+
+		private void HandleRemove(Modifier modifier, int stat)
+		{
+			switch (modifier.Type)
+			{
+				case ModifierType.Flat:
+					accumulators[flatOffset + stat] -= modifier.Value;
+					break;
+
+				case ModifierType.PercentAdd:
+					accumulators[percentAddOffset + stat] -= modifier.Value;
+					break;
+
+				case ModifierType.PercentMul:
+					float value = 1f + modifier.Value;
+					if (value != 0)
+						accumulators[percentMulOffset + stat] /= value;
+					else
+						goto default;
+					break;
+
+				case ModifierType.Min:
+					if (accumulators[minOffset + stat] == modifier.Value)
+						goto default;
+					break;
+
+				case ModifierType.Max:
+					if (accumulators[maxOffset + stat] == modifier.Value)
+						goto default;
+					break;
+
+				default:
+					dirtyAccumulators[stat] |= (ModifierTypeMask)(1 << (int)modifier.Type);
+					break;
+			}
+		}
+
+		private float RecalculateStat(int stat)
+		{
+			float value = baseStats[stat];
+			value += accumulators[flatOffset + stat];
+			value *= accumulators[percentAddOffset + stat];
+			value *= accumulators[percentMulOffset + stat];
+			value = Math.Max(value, accumulators[minOffset + stat]);
+			value = Math.Min(value, accumulators[maxOffset + stat]);
+			return value;
+		}
+
+		private void RecalculateAccumulators(int stat, ModifierTypeMask dirty)
+		{
+			if ((dirty & ModifierTypeMask.Flat) != 0)
+			{
 				modifiers.TryGetValue((ModifierType.Flat, stat), out List<Modifier> mods);
 				accumulators[flatOffset + stat] = Add(0, mods);
+			}
 
-				modifiers.TryGetValue((ModifierType.PercentAdd, stat), out mods);
+			if ((dirty & ModifierTypeMask.PercentAdd) != 0)
+			{
+				modifiers.TryGetValue((ModifierType.PercentAdd, stat), out List<Modifier> mods);
 				accumulators[percentAddOffset + stat] = Add(1, mods);
+			}
 
-				modifiers.TryGetValue((ModifierType.PercentMul, stat), out mods);
+			if ((dirty & ModifierTypeMask.PercentMul) != 0)
+			{
+				modifiers.TryGetValue((ModifierType.PercentMul, stat), out List<Modifier> mods);
 				accumulators[percentMulOffset + stat] = Multiply(1, mods);
+			}
 
-				modifiers.TryGetValue((ModifierType.Min, stat), out mods);
-				accumulators[minOffset + stat] = Min(float.MinValue, mods);
+			if ((dirty & ModifierTypeMask.Min) != 0)
+			{
+				modifiers.TryGetValue((ModifierType.Min, stat), out List<Modifier> mods);
+				accumulators[minOffset + stat] = Min(float.PositiveInfinity, mods);
+			}
 
-				modifiers.TryGetValue((ModifierType.Max, stat), out mods);
-				accumulators[maxOffset + stat] = Max(float.MaxValue, mods);
+			if ((dirty & ModifierTypeMask.Max) != 0)
+			{
+				modifiers.TryGetValue((ModifierType.Max, stat), out List<Modifier> mods);
+				accumulators[maxOffset + stat] = Max(float.NegativeInfinity, mods);
 			}
 		}
 
