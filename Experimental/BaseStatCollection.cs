@@ -45,6 +45,17 @@ namespace Experimental
 			}
 		}
 
+		public void RecalculateAll()
+		{
+			for (int stat = 0; stat < StatCount; stat++)
+			{
+				if (dirtyStats[stat])
+				{
+					Recalculate(stat);
+				}
+			}
+		}
+
 		protected abstract void Recalculate(int stat);
 	}
 }
